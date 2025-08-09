@@ -5,9 +5,9 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
+// Investment tipinden user_id'yi kaldırdık.
 export type Investment = {
   id: string;
-  user_id: string;
   type: 'gold' | 'usd' | 'eur';
   amount: number;
   purchase_price: number;

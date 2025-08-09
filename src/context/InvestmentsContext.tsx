@@ -1,22 +1,38 @@
-import { useState, useEffect, useCallback } from 'react';
+import React,
+{
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  ReactNode
+} from 'react';
 import { supabase, Investment } from '../lib/supabase';
-// useAuth import'u tamamen kaldırıldı.
 
-export function useInvestments() {
+// Context'in tutacağı verilerin tipini tanımlıyoruz
+interface IInvestmentsContext {
+  investments: Investment[];
+  loading: boolean;
+  addInvestment: (investment: Omit<Investment, 'id' | 'created_at' | 'updated_at'>) => Promise<{ data: any; error: any; }>;
+  deleteInvestment: (id: string) => Promise<{ error: any; }>;
+  refetch: () => void;
+}
+
+// Context'i oluşturuyoruz
+const InvestmentsContext = createContext<IInvestmentsContext | undefined>(undefined);
+
+// Uygulamamızı sarmalayacak olan Provider component'i
+export const InvestmentsProvider = ({ children }: { children: ReactNode }) => {
   const [investments, setInvestments] = useState<Investment[]>([]);
   const [loading, setLoading] = useState(false);
-  // user değişkeni tamamen kaldırıldı.
 
   const fetchInvestments = useCallback(async () => {
     setLoading(true);
     try {
-      // Sorgudan .eq('user_id', user.id) filtresi kaldırıldı.
-      // Artık tablodaki TÜM yatırımları getirir.
       const { data, error } = await supabase
         .from('investments')
         .select('*')
         .order('purchase_date', { ascending: false });
-
       if (error) throw error;
       setInvestments(data || []);
     } catch (error) {
@@ -27,18 +43,13 @@ export function useInvestments() {
   }, []);
 
   const addInvestment = async (investment: Omit<Investment, 'id' | 'created_at' | 'updated_at'>) => {
-    // user kontrolü kaldırıldı.
     try {
-      // Eklenen nesneden user_id kaldırıldı.
       const { data, error } = await supabase
         .from('investments')
-        .insert([investment]) // Nesne doğrudan ekleniyor
+        .insert([investment])
         .select()
         .single();
-
       if (error) throw error;
-      
-      // Yeni eklenen yatırımı listenin başına ekliyoruz.
       setInvestments(prev => [data, ...prev]);
       return { data, error: null };
     } catch (error) {
@@ -49,13 +60,8 @@ export function useInvestments() {
 
   const deleteInvestment = async (id: string) => {
     try {
-      const { error } = await supabase
-        .from('investments')
-        .delete()
-        .eq('id', id);
-
+      const { error } = await supabase.from('investments').delete().eq('id', id);
       if (error) throw error;
-      
       setInvestments(prev => prev.filter(inv => inv.id !== id));
       return { error: null };
     } catch (error) {
@@ -65,15 +71,29 @@ export function useInvestments() {
   };
 
   useEffect(() => {
-    // Component ilk yüklendiğinde yatırımları getir.
     fetchInvestments();
   }, [fetchInvestments]);
 
-  return {
+  const value = {
     investments,
     loading,
     addInvestment,
     deleteInvestment,
     refetch: fetchInvestments,
   };
-}
+
+  return (
+    <InvestmentsContext.Provider value={value}>
+      {children}
+    </InvestmentsContext.Provider>
+  );
+};
+
+// Bu custom hook, component'lerden context'e kolayca erişmemizi sağlayacak
+export const useInvestmentsContext = () => {
+  const context = useContext(InvestmentsContext);
+  if (context === undefined) {
+    throw new Error('useInvestmentsContext must be used within a InvestmentsProvider');
+  }
+  return context;
+};

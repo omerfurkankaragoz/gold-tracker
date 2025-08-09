@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { X, Plus, DollarSign, Euro, Coins } from 'lucide-react';
-import { useInvestments } from '../hooks/useInvestments';
+import { useInvestmentsContext } from '../context/InvestmentsContext';
 import { usePrices } from '../hooks/usePrices';
 
 interface AddInvestmentModalProps {
@@ -20,8 +20,8 @@ export function AddInvestmentModal({ isOpen, onClose }: AddInvestmentModalProps)
   const [purchasePrice, setPurchasePrice] = useState('');
   const [purchaseDate, setPurchaseDate] = useState(new Date().toISOString().split('T')[0]);
   const [loading, setLoading] = useState(false);
-  
-  const { addInvestment } = useInvestments();
+
+  const { addInvestment } = useInvestmentsContext();
   const { prices } = usePrices();
 
   const selectedInvestment = investmentTypes.find(inv => inv.id === selectedType)!;

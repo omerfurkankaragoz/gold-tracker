@@ -1,29 +1,14 @@
 import React, { useState } from 'react';
-import { Auth } from './components/Auth';
 import { Dashboard } from './components/Dashboard';
 import { Holdings } from './components/Holdings';
 import { AITools } from './components/AITools';
 import { Navigation } from './components/Navigation';
-import { useAuth } from './hooks/useAuth';
 
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
-  const { user, loading } = useAuth();
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <div className="flex flex-col items-center space-y-4">
-          <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-gray-600">Yükleniyor...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return <Auth />;
-  }
+  // useAuth ve ona bağlı tüm kontrol mantığı kaldırıldı.
+  // Artık Auth component'i de import edilmiyor.
 
   const renderContent = () => {
     switch (activeTab) {

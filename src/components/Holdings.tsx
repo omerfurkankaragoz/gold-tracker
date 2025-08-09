@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Plus, Trash2, TrendingUp, TrendingDown, DollarSign, Euro, Coins } from 'lucide-react';
-import { useInvestments } from '../hooks/useInvestments';
+import { useInvestmentsContext } from '../context/InvestmentsContext';
 import { usePrices } from '../hooks/usePrices';
 import { AddInvestmentModal } from './AddInvestmentModal';
 import { format } from 'date-fns';
@@ -14,7 +14,7 @@ const typeIcons = {
 
 const typeNames = {
   gold: 'Gram Altın',
-  usd: 'Amerikan Doları', 
+  usd: 'Amerikan Doları',
   eur: 'Euro',
 };
 
@@ -26,7 +26,7 @@ const typeUnits = {
 
 export function Holdings() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { investments, deleteInvestment } = useInvestments();
+  const { investments, deleteInvestment } = useInvestmentsContext();
   const { prices } = usePrices();
 
   const handleDelete = async (id: string) => {
@@ -146,7 +146,7 @@ export function Holdings() {
         </div>
       )}
 
-      <AddInvestmentModal 
+      <AddInvestmentModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
       />

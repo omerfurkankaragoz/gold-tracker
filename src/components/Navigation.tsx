@@ -1,6 +1,6 @@
 import React from 'react';
-import { Home, Wallet, Sparkles, LogOut } from 'lucide-react';
-import { useAuth } from '../hooks/useAuth';
+import { Home, Wallet, Sparkles } from 'lucide-react';
+// LogOut ve useAuth import'ları kaldırıldı.
 
 interface NavigationProps {
   activeTab: string;
@@ -14,25 +14,13 @@ const tabs = [
 ];
 
 export function Navigation({ activeTab, onTabChange }: NavigationProps) {
-  const { signOut } = useAuth();
-
-  const handleSignOut = async () => {
-    if (window.confirm('Çıkış yapmak istediğinizden emin misiniz?')) {
-      await signOut();
-    }
-  };
+  // signOut ve handleSignOut fonksiyonları kaldırıldı.
 
   return (
     <>
-      {/* Top bar for logout */}
-      <div className="bg-white shadow-sm border-b border-gray-200 px-4 py-3 flex justify-end">
-        <button
-          onClick={handleSignOut}
-          className="text-gray-600 hover:text-red-600 flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-red-50 transition-colors"
-        >
-          <LogOut className="h-4 w-4" />
-          <span className="text-sm">Çıkış</span>
-        </button>
+      {/* Üst bar artık boş, isterseniz bu bölümü tamamen silebilirsiniz */}
+      <div className="bg-white shadow-sm border-b border-gray-200 px-4 py-3 h-[57px]">
+        {/* Çıkış butonu kaldırıldı */}
       </div>
 
       {/* Bottom navigation */}
