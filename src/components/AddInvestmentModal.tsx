@@ -34,7 +34,8 @@ export function AddInvestmentModal({ isOpen, onClose }: AddInvestmentModalProps)
     setLoading(true);
     try {
       const { error } = await addInvestment({
-        type: selectedType,
+        asset_type: selectedType,
+        asset_name: selectedInvestment.name,
         amount: parseFloat(amount),
         purchase_price: parseFloat(purchasePrice),
         purchase_date: new Date(purchaseDate).toISOString(),
