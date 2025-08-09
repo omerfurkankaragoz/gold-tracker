@@ -7,9 +7,6 @@ import { Navigation } from './components/Navigation';
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
 
-  // useAuth ve ona bağlı tüm kontrol mantığı kaldırıldı.
-  // Artık Auth component'i de import edilmiyor.
-
   const renderContent = () => {
     switch (activeTab) {
       case 'holdings':
@@ -22,12 +19,19 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
-      
-      <main className="px-4 py-6 pb-20 max-w-4xl mx-auto">
+    <div className="h-screen flex flex-col bg-gray-100">
+      {/* 1. Sabit Üst Bilgi (Header) */}
+      <header className="bg-white shadow-sm border-b border-gray-200 px-4 py-3 h-[57px] flex-shrink-0">
+        {/* Gelecekte buraya sayfa başlığı gibi içerikler eklenebilir */}
+      </header>
+
+      {/* 2. Kaydırılabilir Ana İçerik Alanı */}
+      <main className="flex-grow overflow-y-auto w-full max-w-4xl mx-auto px-4 py-6 pb-28">
         {renderContent()}
       </main>
+
+      {/* 3. Sabit Alt Navigasyon */}
+      <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
     </div>
   );
 }
