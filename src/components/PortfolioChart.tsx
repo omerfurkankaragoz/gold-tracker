@@ -1,104 +1,94 @@
-import React, { useState } from 'react';
-import { LineChart, Line, XAxis, YAxis, ResponsiveContainer } from 'recharts';
-import { TrendingUp } from 'lucide-react';
+import React from 'react';
+import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts';
+import { TrendingUp, PieChart as PieChartIcon } from 'lucide-react';
+import { useInvestmentsContext } from '../context/InvestmentsContext';
+import { usePrices } from '../hooks/usePrices';
 
-const periods = ['Günlük', 'Aylık', 'Yıllık'] as const;
-type Period = typeof periods[number];
+const COLORS = {
+  gold: '#FFC300',
+  usd: '#28A745',
+  eur: '#007BFF',
+};
 
-// Sample data - in real app this would come from your backend
-const generateSampleData = (period: Period) => {
-  const dataPoints = period === 'Günlük' ? 24 : period === 'Aylık' ? 30 : 12;
-  const baseValue = 45000;
-  
-  return Array.from({ length: dataPoints }, (_, i) => {
-    const variation = (Math.random() - 0.5) * 0.1;
-    const value = baseValue + (baseValue * variation) + (i * 100);
-    
-    let label = '';
-    if (period === 'Günlük') {
-      label = `${i.toString().padStart(2, '0')}:00`;
-    } else if (period === 'Aylık') {
-      label = `${i + 1}`;
-    } else {
-      const months = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 
-                     'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
-      label = months[i];
-    }
-    
-    return {
-      time: label,
-      value: Math.round(value),
-    };
-  });
+const typeNames = {
+  gold: 'Gram Altın',
+  usd: 'Dolar',
+  eur: 'Euro',
 };
 
 export function PortfolioChart() {
-  const [selectedPeriod, setSelectedPeriod] = useState<Period>('Aylık');
-  const data = generateSampleData(selectedPeriod);
-  const currentValue = data[data.length - 1]?.value || 0;
-  const previousValue = data[data.length - 2]?.value || 0;
-  const change = currentValue - previousValue;
-  const changePercent = (change / previousValue) * 100;
-  
+  const { investments } = useInvestmentsContext();
+  const { prices } = usePrices();
+
+  // Portföydeki varlıkları anlık değerlerine göre gruplayıp hesaplıyoruz
+  const chartData = Object.entries(
+    investments.reduce((acc, investment) => {
+      const { type, amount } = investment;
+      const currentPrice = prices[type]?.price || 0;
+      const currentValue = amount * currentPrice;
+      
+      if (!acc[type]) {
+        acc[type] = { name: typeNames[type], value: 0 };
+      }
+      acc[type].value += currentValue;
+      return acc;
+    }, {} as Record<string, { name: string; value: number }>)
+  ).map(([key, data]) => ({ ...data, type: key as keyof typeof COLORS }));
+
+  const totalPortfolioValue = chartData.reduce((sum, item) => sum + item.value, 0);
+
+  // Özel Tooltip Component'i
+  const CustomTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      const percentage = ((data.value / totalPortfolioValue) * 100).toFixed(2);
+      return (
+        <div className="bg-white p-3 rounded-lg shadow-lg border border-gray-200">
+          <p className="font-semibold">{data.name}</p>
+          <p className="text-gray-700">Değer: ₺{data.value.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</p>
+          <p className="text-sm text-gray-500">Portföydeki Payı: %{percentage}</p>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center space-x-2">
-          <TrendingUp className="h-5 w-5 text-blue-600" />
-          <h2 className="text-lg font-semibold text-gray-900">Portföy Değer Grafiği</h2>
-        </div>
-        
-        <div className="flex space-x-1 bg-gray-100 rounded-lg p-1">
-          {periods.map((period) => (
-            <button
-              key={period}
-              onClick={() => setSelectedPeriod(period)}
-              className={`px-3 py-1 rounded-md text-sm font-medium transition-all ${
-                selectedPeriod === period
-                  ? 'bg-white text-blue-600 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              {period}
-            </button>
-          ))}
-        </div>
+      <div className="flex items-center space-x-2 mb-4">
+        <PieChartIcon className="h-5 w-5 text-blue-600" />
+        <h2 className="text-lg font-semibold text-gray-900">Portföy Dağılımı</h2>
       </div>
-      
-      <div className="mb-6">
-        <div className="text-3xl font-bold text-gray-900 mb-2">
-          ₺{currentValue.toLocaleString('tr-TR')}
+
+      {investments.length === 0 ? (
+        <div className="h-64 flex flex-col items-center justify-center text-center">
+          <TrendingUp className="h-12 w-12 text-gray-300 mb-4" />
+          <h3 className="font-semibold text-gray-700">Grafik için veri yok</h3>
+          <p className="text-sm text-gray-500">Portföy dağılımınızı görmek için varlık ekleyin.</p>
         </div>
-        <div className={`flex items-center space-x-1 text-sm font-medium ${
-          change >= 0 ? 'text-green-600' : 'text-red-600'
-        }`}>
-          <TrendingUp className={`h-4 w-4 ${change < 0 ? 'rotate-180' : ''}`} />
-          <span>{change >= 0 ? '+' : ''}₺{Math.abs(change).toLocaleString('tr-TR')}</span>
-          <span>({change >= 0 ? '+' : ''}{changePercent.toFixed(2)}%)</span>
+      ) : (
+        <div className="h-64">
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie
+                data={chartData}
+                cx="50%"
+                cy="50%"
+                labelLine={false}
+                outerRadius={100}
+                fill="#8884d8"
+                dataKey="value"
+                nameKey="name"
+              >
+                {chartData.map((entry) => (
+                  <Cell key={`cell-${entry.name}`} fill={COLORS[entry.type]} />
+                ))}
+              </Pie>
+              <Tooltip content={<CustomTooltip />} />
+            </PieChart>
+          </ResponsiveContainer>
         </div>
-      </div>
-      
-      <div className="h-64">
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
-            <XAxis 
-              dataKey="time" 
-              axisLine={false}
-              tickLine={false}
-              tick={{ fontSize: 12, fill: '#9CA3AF' }}
-            />
-            <YAxis hide />
-            <Line
-              type="monotone"
-              dataKey="value"
-              stroke="#3B82F6"
-              strokeWidth={2}
-              dot={false}
-              activeDot={{ r: 4, stroke: '#3B82F6', strokeWidth: 2, fill: 'white' }}
-            />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
+      )}
     </div>
   );
 }

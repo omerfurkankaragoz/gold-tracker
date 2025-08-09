@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 export type Price = {
   symbol: string;
@@ -8,58 +8,69 @@ export type Price = {
   changePercent: number;
 };
 
+// Başlangıç verilerine Altın'ı geri ekliyoruz
+const initialPrices: Record<string, Price> = {
+  gold: { symbol: 'XAU', name: 'Gram Altın', price: 0, change: 0, changePercent: 0 },
+  usd: { symbol: 'USD', name: 'Amerikan Doları', price: 0, change: 0, changePercent: 0 },
+  eur: { symbol: 'EUR', name: 'Euro', price: 0, change: 0, changePercent: 0 },
+};
+
 export function usePrices() {
-  const [prices, setPrices] = useState<Record<string, Price>>({
-    gold: {
-      symbol: 'XAU',
-      name: 'Gram Altın',
-      price: 2493.99,
-      change: 45.30,
-      changePercent: 1.85,
-    },
-    usd: {
-      symbol: 'USD',
-      name: 'Amerikan Doları',
-      price: 33.34,
-      change: -0.12,
-      changePercent: -0.36,
-    },
-    eur: {
-      symbol: 'EUR',
-      name: 'Euro',
-      price: 36.20,
-      change: 0.25,
-      changePercent: 0.70,
-    },
-  });
-  const [loading, setLoading] = useState(false);
+  const [prices, setPrices] = useState<Record<string, Price>>(initialPrices);
+  const [loading, setLoading] = useState(true);
 
-  // Simulated price updates (in real app, this would fetch from actual APIs)
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setPrices(prevPrices => {
-        const newPrices = { ...prevPrices };
-        
-        Object.keys(newPrices).forEach(key => {
-          const variation = (Math.random() - 0.5) * 0.02; // ±1% variation
-          const newPrice = newPrices[key].price * (1 + variation);
-          const change = newPrice - newPrices[key].price;
-          const changePercent = (change / newPrices[key].price) * 100;
-          
-          newPrices[key] = {
-            ...newPrices[key],
-            price: Number(newPrice.toFixed(2)),
-            change: Number(change.toFixed(2)),
-            changePercent: Number(changePercent.toFixed(2)),
+  const fetchPrices = useCallback(async () => {
+    setLoading(true);
+    try {
+      // Promise.all ile iki API isteğini aynı anda yapıyoruz
+      const [currencyResponse, goldResponse] = await Promise.all([
+        fetch('/api_currency/latest?from=TRY&to=USD,EUR'),
+        fetch('/api_gold/today.json')
+      ]);
+
+      const newPrices = { ...initialPrices };
+
+      // Döviz verilerini işle
+      if (currencyResponse.ok) {
+        const currencyData = await currencyResponse.json();
+        const rates = currencyData.rates;
+        if (rates.USD) newPrices.usd = { ...newPrices.usd, price: 1 / rates.USD };
+        if (rates.EUR) newPrices.eur = { ...newPrices.eur, price: 1 / rates.EUR };
+      } else {
+        console.error('Döviz API isteği başarısız');
+      }
+
+      // Altın verilerini işle
+      if (goldResponse.ok) {
+        const goldData = await goldResponse.json();
+        // Sizin gönderdiğiniz JSON'a göre doğru anahtarları kullanıyoruz: gram_altin ve Selling
+        const gramAltinData = goldData.gram_altin;
+        if (gramAltinData && gramAltinData.Selling) {
+          // Bu API değişim oranı vermediği için change değerlerini 0 olarak bırakıyoruz
+          newPrices.gold = {
+            ...newPrices.gold,
+            price: parseFloat(gramAltinData.Selling.replace(',', '.'))
           };
-        });
-        
-        return newPrices;
-      });
-    }, 30000); // Update every 30 seconds
+        }
+      } else {
+         console.error('Altın API isteği başarısız');
+      }
+      
+      setPrices(newPrices);
 
-    return () => clearInterval(interval);
+    } catch (error) {
+      console.error('Fiyatları çekerken hata:', error);
+      setPrices(initialPrices);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchPrices();
+    const interval = setInterval(fetchPrices, 300000);
+    return () => clearInterval(interval);
+  }, [fetchPrices]);
 
   return { prices, loading };
 }

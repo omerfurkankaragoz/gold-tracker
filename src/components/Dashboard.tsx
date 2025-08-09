@@ -17,7 +17,7 @@ export function Dashboard() {
   };
 
   const portfolioValue = calculatePortfolioValue();
-  const totalInvested = investments.reduce((total, inv) =>
+  const totalInvested = investments.reduce((total, inv) => 
     total + (inv.amount * inv.purchase_price), 0
   );
   const totalGain = portfolioValue - totalInvested;
@@ -44,21 +44,25 @@ export function Dashboard() {
           </div>
         </div>
       </div>
+
+      {/* Altın kartını geri ekledik */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <PriceCard
-          price={prices.gold}
+        <PriceCard 
+          price={prices.gold} 
           icon={<Coins className="h-5 w-5" />}
         />
-        <PriceCard
+        <PriceCard 
           price={prices.usd}
           icon={<DollarSign className="h-5 w-5" />}
         />
-        <PriceCard
+        <PriceCard 
           price={prices.eur}
           icon={<Euro className="h-5 w-5" />}
         />
       </div>
+
       <PortfolioChart />
+
       <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
         <div className="flex items-center space-x-2 mb-4">
           <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
@@ -68,9 +72,6 @@ export function Dashboard() {
         </div>
         <div className="bg-gray-50 rounded-xl p-4">
           <p className="text-gray-700 leading-relaxed">
-            Bugün altın fiyatları %{Math.abs(prices.gold.changePercent).toFixed(2)}
-            {prices.gold.change >= 0 ? ' yükseldi' : ' düştü'}.
-            Dolar/TL paritesi ise güncel seviyesini koruyor.
             Portföyünüzde toplam ₺{portfolioValue.toLocaleString('tr-TR')} değerinde yatırımınız bulunuyor.
           </p>
         </div>
