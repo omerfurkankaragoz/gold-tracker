@@ -5,17 +5,19 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      // Döviz API'si için proxy (Frankfurter)
+      // Döviz API'si için proxy
       '/api_currency': {
         target: 'https://api.frankfurter.app',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api_currency/, ''),
       },
-      // Altın API'si için proxy (Truncgil)
+      // Altın API'si için KESİN DÜZELTME
       '/api_gold': {
-        target: 'https://finans.truncgil.com/v4/today.json',
+        target: 'https://finance.truncgil.com',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api_gold/, ''),
+        // /api_gold ile başlayan bir isteği /api olarak değiştirir.
+        // Örn: /api_gold/today -> /api/today
+        rewrite: (path) => path.replace(/^\/api_gold/, '/api'),
       },
     }
   }

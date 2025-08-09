@@ -13,7 +13,7 @@ import { supabase, Investment } from '../lib/supabase';
 interface IInvestmentsContext {
   investments: Investment[];
   loading: boolean;
-  addInvestment: (investment: Omit<Investment, 'id' | 'created_at' | 'updated_at'>) => Promise<{ data: any; error: any; }>;
+  addInvestment: (investment: Omit<Investment, 'id' | 'created_at' | 'updated_at'>) => Promise<{ data: Investment | null; error: any; }>;
   deleteInvestment: (id: string) => Promise<{ error: any; }>;
   refetch: () => void;
 }
@@ -24,19 +24,28 @@ const InvestmentsContext = createContext<IInvestmentsContext | undefined>(undefi
 // Uygulamamızı sarmalayacak olan Provider component'i
 export const InvestmentsProvider = ({ children }: { children: ReactNode }) => {
   const [investments, setInvestments] = useState<Investment[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const fetchInvestments = useCallback(async () => {
     setLoading(true);
     try {
+      // Filtreleme olmadan tüm yatırımları çekiyoruz.
+      // Bu, kullanıcı girişi olmayan senaryolar için uygundur.
       const { data, error } = await supabase
         .from('investments')
         .select('*')
         .order('purchase_date', { ascending: false });
-      if (error) throw error;
+
+      if (error) {
+        // Hata varsa konsola yazdırıyoruz ama uygulamayı kesintiye uğratmıyoruz.
+        console.error('Error fetching investments:', error);
+        throw error;
+      }
+      
       setInvestments(data || []);
     } catch (error) {
-      console.error('Error fetching investments:', error);
+      // Hata durumunda listeyi boşaltarak tutarsız veri gösterimini engelliyoruz.
+      setInvestments([]);
     } finally {
       setLoading(false);
     }
@@ -44,16 +53,25 @@ export const InvestmentsProvider = ({ children }: { children: ReactNode }) => {
 
   const addInvestment = async (investment: Omit<Investment, 'id' | 'created_at' | 'updated_at'>) => {
     try {
+      // Veritabanına yeni yatırımı ekliyoruz
       const { data, error } = await supabase
         .from('investments')
         .insert([investment])
         .select()
-        .single();
-      if (error) throw error;
-      setInvestments(prev => [data, ...prev]);
+        .single(); // Eklenen tek bir kaydı geri döndürmesini sağlıyoruz
+
+      if (error) {
+        console.error('Error adding investment:', error);
+        throw error;
+      }
+      
+      // Ekleme başarılı olursa, state'i güncelleyerek arayüzün anında yenilenmesini sağlıyoruz.
+      if (data) {
+        setInvestments(prev => [data, ...prev]);
+      }
+      
       return { data, error: null };
     } catch (error) {
-      console.error('Error adding investment:', error);
       return { data: null, error };
     }
   };
@@ -61,16 +79,20 @@ export const InvestmentsProvider = ({ children }: { children: ReactNode }) => {
   const deleteInvestment = async (id: string) => {
     try {
       const { error } = await supabase.from('investments').delete().eq('id', id);
-      if (error) throw error;
+      if (error) {
+        console.error('Error deleting investment:', error);
+        throw error;
+      }
+      // Silme başarılı olursa, state'den ilgili yatırımı çıkarıyoruz.
       setInvestments(prev => prev.filter(inv => inv.id !== id));
       return { error: null };
     } catch (error) {
-      console.error('Error deleting investment:', error);
       return { error };
     }
   };
 
   useEffect(() => {
+    // Component ilk yüklendiğinde yatırımları getiriyoruz.
     fetchInvestments();
   }, [fetchInvestments]);
 

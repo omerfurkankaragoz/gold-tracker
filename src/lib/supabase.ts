@@ -5,10 +5,10 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-// Investment tipinden user_id'yi kaldırdık.
+// Investment tipine yeni altın türlerini ekliyoruz.
 export type Investment = {
   id: string;
-  type: 'gold' | 'usd' | 'eur';
+  type: 'gold' | 'usd' | 'eur' | 'quarter_gold' | 'half_gold' | 'full_gold';
   amount: number;
   purchase_price: number;
   purchase_date: string;

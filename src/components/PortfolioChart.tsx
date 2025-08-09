@@ -3,17 +3,16 @@ import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts';
 import { TrendingUp, PieChart as PieChartIcon } from 'lucide-react';
 import { useInvestmentsContext } from '../context/InvestmentsContext';
 import { usePrices } from '../hooks/usePrices';
+import { Investment } from '../lib/supabase'; // Tipi import ediyoruz
 
-const COLORS = {
-  gold: '#FFC300',
-  usd: '#28A745',
-  eur: '#007BFF',
-};
-
-const typeNames = {
-  gold: 'Gram Altın',
-  usd: 'Dolar',
-  eur: 'Euro',
+// Tüm yatırım türleri için isim ve renk tanımlamaları yapıyoruz.
+const typeDetails: Record<Investment['type'], { name: string; color: string }> = {
+    gold: { name: 'Gram Altın', color: '#FFC300' },
+    quarter_gold: { name: 'Çeyrek Altın', color: '#F7B600' },
+    half_gold: { name: 'Yarım Altın', color: '#EAA700' },
+    full_gold: { name: 'Tam Altın', color: '#D69800' },
+    usd: { name: 'Dolar', color: '#28A745' },
+    eur: { name: 'Euro', color: '#007BFF' },
 };
 
 export function PortfolioChart() {
@@ -26,22 +25,23 @@ export function PortfolioChart() {
       const { type, amount } = investment;
       const currentPrice = prices[type]?.price || 0;
       const currentValue = amount * currentPrice;
-      
+      const details = typeDetails[type];
+
       if (!acc[type]) {
-        acc[type] = { name: typeNames[type], value: 0 };
+        // İsimleri artık typeDetails'ten alıyoruz.
+        acc[type] = { name: details?.name || type, value: 0 };
       }
       acc[type].value += currentValue;
       return acc;
     }, {} as Record<string, { name: string; value: number }>)
-  ).map(([key, data]) => ({ ...data, type: key as keyof typeof COLORS }));
+  ).map(([key, data]) => ({ ...data, type: key as Investment['type'] }));
 
   const totalPortfolioValue = chartData.reduce((sum, item) => sum + item.value, 0);
 
-  // Özel Tooltip Component'i
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
-      const percentage = ((data.value / totalPortfolioValue) * 100).toFixed(2);
+      const percentage = totalPortfolioValue > 0 ? ((data.value / totalPortfolioValue) * 100).toFixed(2) : 0;
       return (
         <div className="bg-white p-3 rounded-lg shadow-lg border border-gray-200">
           <p className="font-semibold">{data.name}</p>
@@ -81,7 +81,8 @@ export function PortfolioChart() {
                 nameKey="name"
               >
                 {chartData.map((entry) => (
-                  <Cell key={`cell-${entry.name}`} fill={COLORS[entry.type]} />
+                  // Renkleri artık typeDetails'ten alıyoruz.
+                  <Cell key={`cell-${entry.name}`} fill={typeDetails[entry.type]?.color || '#8884d8'} />
                 ))}
               </Pie>
               <Tooltip content={<CustomTooltip />} />

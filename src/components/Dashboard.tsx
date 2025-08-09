@@ -23,6 +23,17 @@ export function Dashboard() {
   const totalGain = portfolioValue - totalInvested;
   const totalGainPercent = totalInvested > 0 ? (totalGain / totalInvested) * 100 : 0;
 
+  // Gösterilecek fiyat kartlarını bir listede topluyoruz.
+  // Fiyatı sıfırdan büyük olanlar gösterilecek.
+  const priceCardsToShow = [
+    prices.gold,
+    prices.quarter_gold,
+    prices.half_gold,
+    prices.full_gold,
+    prices.usd,
+    prices.eur,
+  ].filter(p => p && p.price > 0);
+
   return (
     <div className="space-y-6">
       <div className="bg-gradient-to-r from-blue-600 to-teal-600 rounded-2xl p-6 text-white">
@@ -38,27 +49,20 @@ export function Dashboard() {
           <div className={`flex items-center space-x-1 text-sm ${
             totalGain >= 0 ? 'text-green-200' : 'text-red-200'
           }`}>
-            <TrendingUp className={`h-4 w-4 ${totalGain < 0 ? 'rotate-180' : ''}`} />
+            <TrendingUp className={`h-4 w-4 ${totalGain < 0 ? 'transform rotate-180' : ''}`} />
             <span>{totalGain >= 0 ? '+' : ''}₺{Math.abs(totalGain).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</span>
             <span>({totalGain >= 0 ? '+' : ''}{totalGainPercent.toFixed(2)}%)</span>
           </div>
         </div>
       </div>
 
-      {/* Altın kartını geri ekledik */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <PriceCard 
-          price={prices.gold} 
-          icon={<Coins className="h-5 w-5" />}
-        />
-        <PriceCard 
-          price={prices.usd}
-          icon={<DollarSign className="h-5 w-5" />}
-        />
-        <PriceCard 
-          price={prices.eur}
-          icon={<Euro className="h-5 w-5" />}
-        />
+      {/* Fiyat kartlarını dinamik olarak oluşturuyoruz */}
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        {priceCardsToShow.map(price => {
+          const isGold = ['GA', 'C', 'Y', 'T'].includes(price.symbol);
+          const Icon = isGold ? Coins : (price.symbol === 'USD' ? DollarSign : Euro);
+          return <PriceCard key={price.symbol} price={price} icon={<Icon className="h-5 w-5" />} />
+        })}
       </div>
 
       <PortfolioChart />
@@ -72,7 +76,7 @@ export function Dashboard() {
         </div>
         <div className="bg-gray-50 rounded-xl p-4">
           <p className="text-gray-700 leading-relaxed">
-            Portföyünüzde toplam ₺{portfolioValue.toLocaleString('tr-TR')} değerinde yatırımınız bulunuyor.
+            Portföyünüzde toplam ₺{portfolioValue.toLocaleString('tr-TR', { minimumFractionDigits: 2 })} değerinde yatırımınız bulunuyor.
           </p>
         </div>
       </div>

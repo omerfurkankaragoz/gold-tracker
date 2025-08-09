@@ -2,20 +2,27 @@ import React, { useState } from 'react';
 import { X, Plus, DollarSign, Euro, Coins } from 'lucide-react';
 import { useInvestmentsContext } from '../context/InvestmentsContext';
 import { usePrices } from '../hooks/usePrices';
+import { Investment } from '../lib/supabase';
 
 interface AddInvestmentModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
+// Yatırım türlerini yeni altın çeşitleriyle güncelliyoruz
 const investmentTypes = [
   { id: 'gold', name: 'Gram Altın', icon: Coins, unit: 'gr' },
-  { id: 'usd', name: 'Amerikan Doları', icon: DollarSign, unit: '$' },
+  { id: 'quarter_gold', name: 'Çeyrek Altın', icon: Coins, unit: 'adet' },
+  { id: 'half_gold', name: 'Yarım Altın', icon: Coins, unit: 'adet' },
+  { id: 'full_gold', name: 'Tam Altın', icon: Coins, unit: 'adet' },
+  { id: 'usd', name: 'Dolar', icon: DollarSign, unit: '$' },
   { id: 'eur', name: 'Euro', icon: Euro, unit: '€' },
 ] as const;
 
+type InvestmentType = typeof investmentTypes[number]['id'];
+
 export function AddInvestmentModal({ isOpen, onClose }: AddInvestmentModalProps) {
-  const [selectedType, setSelectedType] = useState<'gold' | 'usd' | 'eur'>('gold');
+  const [selectedType, setSelectedType] = useState<InvestmentType>('gold');
   const [amount, setAmount] = useState('');
   const [purchasePrice, setPurchasePrice] = useState('');
   const [purchaseDate, setPurchaseDate] = useState(new Date().toISOString().split('T')[0]);
@@ -33,21 +40,21 @@ export function AddInvestmentModal({ isOpen, onClose }: AddInvestmentModalProps)
 
     setLoading(true);
     try {
-      const { error } = await addInvestment({
+      await addInvestment({
         type: selectedType,
         amount: parseFloat(amount),
         purchase_price: parseFloat(purchasePrice),
         purchase_date: new Date(purchaseDate).toISOString(),
-      });
+      } as Omit<Investment, 'id' | 'created_at' | 'updated_at'>);
 
-      if (!error) {
-        setAmount('');
-        setPurchasePrice('');
-        setPurchaseDate(new Date().toISOString().split('T')[0]);
-        onClose();
-      }
+      // Formu temizle ve modalı kapat
+      setAmount('');
+      setPurchasePrice('');
+      setSelectedType('gold');
+      setPurchaseDate(new Date().toISOString().split('T')[0]);
+      onClose();
     } catch (error) {
-      console.error('Error adding investment:', error);
+      console.error('Yatırım eklenirken hata:', error);
     } finally {
       setLoading(false);
     }
@@ -81,14 +88,14 @@ export function AddInvestmentModal({ isOpen, onClose }: AddInvestmentModalProps)
                     key={type.id}
                     type="button"
                     onClick={() => setSelectedType(type.id)}
-                    className={`p-4 border-2 rounded-xl flex flex-col items-center space-y-2 transition-all ${
+                    className={`p-3 border-2 rounded-xl flex flex-col items-center justify-center space-y-2 transition-all ${
                       selectedType === type.id
                         ? 'border-blue-500 bg-blue-50 text-blue-700'
                         : 'border-gray-200 hover:border-gray-300 text-gray-700'
                     }`}
                   >
                     <Icon className="h-6 w-6" />
-                    <span className="text-sm font-medium">{type.name}</span>
+                    <span className="text-xs font-medium text-center">{type.name}</span>
                   </button>
                 );
               })}
@@ -105,24 +112,24 @@ export function AddInvestmentModal({ isOpen, onClose }: AddInvestmentModalProps)
               onChange={(e) => setAmount(e.target.value)}
               className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="Miktar girin"
-              step="0.01"
-              min="0.01"
+              step="any"
+              min="0.00001"
               required
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Alış Fiyatı (₺)
+              Birim Alış Fiyatı (₺)
             </label>
             <input
               type="number"
               value={purchasePrice}
               onChange={(e) => setPurchasePrice(e.target.value)}
               className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder={`Mevcut: ₺${currentPrice.toFixed(2)}`}
-              step="0.01"
-              min="0.01"
+              placeholder={`Mevcut Fiyat: ₺${currentPrice.toLocaleString('tr-TR', {minimumFractionDigits: 2})}`}
+              step="any"
+              min="0.00001"
               required
             />
           </div>

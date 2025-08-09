@@ -5,24 +5,18 @@ import { usePrices } from '../hooks/usePrices';
 import { AddInvestmentModal } from './AddInvestmentModal';
 import { format } from 'date-fns';
 import { tr } from 'date-fns/locale';
+import { Investment } from '../lib/supabase';
 
-const typeIcons = {
-  gold: Coins,
-  usd: DollarSign,
-  eur: Euro,
+// İkonları, isimleri ve birimleri yeni altın türlerini içerecek şekilde güncelliyoruz.
+const typeDetails: Record<Investment['type'], { icon: React.ElementType; name: string; unit: string }> = {
+  gold: { icon: Coins, name: 'Gram Altın', unit: 'gr' },
+  quarter_gold: { icon: Coins, name: 'Çeyrek Altın', unit: 'adet' },
+  half_gold: { icon: Coins, name: 'Yarım Altın', unit: 'adet' },
+  full_gold: { icon: Coins, name: 'Tam Altın', unit: 'adet' },
+  usd: { icon: DollarSign, name: 'Amerikan Doları', unit: '$' },
+  eur: { icon: Euro, name: 'Euro', unit: '€' },
 };
 
-const typeNames = {
-  gold: 'Gram Altın',
-  usd: 'Amerikan Doları',
-  eur: 'Euro',
-};
-
-const typeUnits = {
-  gold: 'gr',
-  usd: '$',
-  eur: '€',
-};
 
 export function Holdings() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -76,12 +70,13 @@ export function Holdings() {
 
           <div className="divide-y divide-gray-200">
             {investments.map((investment) => {
-              const Icon = typeIcons[investment.type];
+              const details = typeDetails[investment.type];
+              const Icon = details.icon;
               const currentPrice = prices[investment.type]?.price || 0;
               const currentValue = investment.amount * currentPrice;
               const purchaseValue = investment.amount * investment.purchase_price;
               const gain = currentValue - purchaseValue;
-              const gainPercent = (gain / purchaseValue) * 100;
+              const gainPercent = purchaseValue > 0 ? (gain / purchaseValue) * 100 : 0;
 
               return (
                 <div key={investment.id} className="p-6 hover:bg-gray-50 transition-colors">
@@ -92,10 +87,10 @@ export function Holdings() {
                       </div>
                       <div>
                         <div className="font-semibold text-gray-900">
-                          {typeNames[investment.type]}
+                          {details.name}
                         </div>
                         <div className="text-sm text-gray-500">
-                          {investment.amount} {typeUnits[investment.type]}
+                          {investment.amount} {details.unit}
                         </div>
                         <div className="text-xs text-gray-400">
                           {format(new Date(investment.purchase_date), 'dd MMM yyyy', { locale: tr })}
@@ -108,7 +103,7 @@ export function Holdings() {
                         ₺{currentValue.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
                       </div>
                       <div className="text-sm text-gray-500">
-                        ₺{currentPrice.toFixed(2)} / {typeUnits[investment.type]}
+                        ₺{currentPrice.toLocaleString('tr-TR', { minimumFractionDigits: 2 })} / {details.unit}
                       </div>
                     </div>
 
