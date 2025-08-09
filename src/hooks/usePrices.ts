@@ -9,20 +9,32 @@ export type Price = {
 };
 
 const initialPrices: Record<string, Price> = {
+  usd: { symbol: 'USD', name: 'Amerikan Doları', price: 0, change: 0, changePercent: 0 },
+  eur: { symbol: 'EUR', name: 'Euro', price: 0, change: 0, changePercent: 0 },
+  tl: { symbol: 'TRY', name: 'Türk Lirası', price: 1, change: 0, changePercent: 0 }, // TL eklendi
   gold: { symbol: 'GA', name: 'Gram Altın', price: 0, change: 0, changePercent: 0 },
   quarter_gold: { symbol: 'C', name: 'Çeyrek Altın', price: 0, change: 0, changePercent: 0 },
   half_gold: { symbol: 'Y', name: 'Yarım Altın', price: 0, change: 0, changePercent: 0 },
   full_gold: { symbol: 'T', name: 'Tam Altın', price: 0, change: 0, changePercent: 0 },
-  usd: { symbol: 'USD', name: 'Amerikan Doları', price: 0, change: 0, changePercent: 0 },
-  eur: { symbol: 'EUR', name: 'Euro', price: 0, change: 0, changePercent: 0 },
+  cumhuriyet_gold: { symbol: 'CUM', name: 'Cumhuriyet Altını', price: 0, change: 0, changePercent: 0 },
+  ata_gold: { symbol: 'ATA', name: 'Ata Altın', price: 0, change: 0, changePercent: 0 },
+  ayar_14_gold: { symbol: '14A', name: '14 Ayar Altın', price: 0, change: 0, changePercent: 0 },
+  ayar_18_gold: { symbol: '18A', name: '18 Ayar Altın', price: 0, change: 0, changePercent: 0 },
+  ayar_22_bilezik: { symbol: '22A', name: '22 Ayar Bilezik', price: 0, change: 0, changePercent: 0 },
 };
+
 
 // API'nin "GRA", "CEY" gibi kısaltmalarını bizim tiplerimizle eşleştiriyoruz.
 const goldApiMap: { [key: string]: keyof typeof initialPrices } = {
-  'GRA': 'gold',
-  'CEY': 'quarter_gold',
-  'YAR': 'half_gold',
-  'TAM': 'full_gold',
+    'GRA': 'gold',
+    'CEYREKALTIN': 'quarter_gold',
+    'YARIMALTIN': 'half_gold',
+    'TAMALTIN': 'full_gold',
+    'CUMHURIYETALTINI': 'cumhuriyet_gold',
+    'ATAALTIN': 'ata_gold',
+    '14AYARALTIN': 'ayar_14_gold',
+    '18AYARALTIN': 'ayar_18_gold',
+    '22AYARBILEZIK': 'ayar_22_bilezik',
 };
 
 // API'den gelen değeri güvenli bir şekilde sayıya çeviren yardımcı fonksiyon.

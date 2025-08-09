@@ -7,14 +7,20 @@ import { format } from 'date-fns';
 import { tr } from 'date-fns/locale';
 import { Investment } from '../lib/supabase';
 
-// İkonları, isimleri ve birimleri yeni altın türlerini içerecek şekilde güncelliyoruz.
+// Tüm yeni altın türleri için ikon, isim ve birim bilgisi ekliyoruz.
 const typeDetails: Record<Investment['type'], { icon: React.ElementType; name: string; unit: string }> = {
+  usd: { icon: DollarSign, name: 'Amerikan Doları', unit: '$' },
+  eur: { icon: Euro, name: 'Euro', unit: '€' },
+  tl: { icon: () => <span className="font-bold">₺</span>, name: 'Türk Lirası', unit: '₺' }, // TL eklendi
   gold: { icon: Coins, name: 'Gram Altın', unit: 'gr' },
   quarter_gold: { icon: Coins, name: 'Çeyrek Altın', unit: 'adet' },
   half_gold: { icon: Coins, name: 'Yarım Altın', unit: 'adet' },
   full_gold: { icon: Coins, name: 'Tam Altın', unit: 'adet' },
-  usd: { icon: DollarSign, name: 'Amerikan Doları', unit: '$' },
-  eur: { icon: Euro, name: 'Euro', unit: '€' },
+  cumhuriyet_gold: { icon: Coins, name: 'Cumhuriyet A.', unit: 'adet' },
+  ata_gold: { icon: Coins, name: 'Ata Altın', unit: 'adet' },
+  ayar_14_gold: { icon: Coins, name: '14 Ayar Altın', unit: 'gr' },
+  ayar_18_gold: { icon: Coins, name: '18 Ayar Altın', unit: 'gr' },
+  ayar_22_bilezik: { icon: Coins, name: '22 Ayar Bilezik', unit: 'gr' },
 };
 
 

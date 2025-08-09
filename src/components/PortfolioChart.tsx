@@ -13,6 +13,8 @@ const typeDetails: Record<Investment['type'], { name: string; color: string }> =
     full_gold: { name: 'Tam Altın', color: '#D69800' },
     usd: { name: 'Dolar', color: '#28A745' },
     eur: { name: 'Euro', color: '#007BFF' },
+    tl: { name: 'Türk Lirası', color: '#6F42C1' }, // TL eklendi (mor renk)
+
 };
 
 export function PortfolioChart() {
