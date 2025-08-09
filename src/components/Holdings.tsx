@@ -78,8 +78,6 @@ export function Holdings() {
             {investments.map((investment) => {
               const Icon = typeIcons[investment.type];
               const currentPrice = prices[investment.type]?.price || 0;
-              const Icon = typeIcons[investment.asset_type];
-              const currentPrice = prices[investment.asset_type]?.price || 0;
               const currentValue = investment.amount * currentPrice;
               const purchaseValue = investment.amount * investment.purchase_price;
               const gain = currentValue - purchaseValue;
@@ -94,10 +92,10 @@ export function Holdings() {
                       </div>
                       <div>
                         <div className="font-semibold text-gray-900">
-                          {typeNames[investment.asset_type]}
+                          {typeNames[investment.type]}
                         </div>
                         <div className="text-sm text-gray-500">
-                          {investment.amount} {typeUnits[investment.asset_type]}
+                          {investment.amount} {typeUnits[investment.type]}
                         </div>
                         <div className="text-xs text-gray-400">
                           {format(new Date(investment.purchase_date), 'dd MMM yyyy', { locale: tr })}
@@ -110,7 +108,7 @@ export function Holdings() {
                         ₺{currentValue.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
                       </div>
                       <div className="text-sm text-gray-500">
-                        ₺{currentPrice.toFixed(2)} / {typeUnits[investment.asset_type]}
+                        ₺{currentPrice.toFixed(2)} / {typeUnits[investment.type]}
                       </div>
                     </div>
 

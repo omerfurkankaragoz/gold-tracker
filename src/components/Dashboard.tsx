@@ -12,7 +12,7 @@ export function Dashboard() {
   // Calculate total portfolio value
   const calculatePortfolioValue = () => {
     return investments.reduce((total, investment) => {
-      const currentPrice = prices[investment.asset_type]?.price || 0;
+      const currentPrice = prices[investment.type]?.price || 0;
       return total + (investment.amount * currentPrice);
     }, 0);
   };
