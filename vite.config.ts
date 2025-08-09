@@ -1,6 +1,5 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-// EKSİK OLAN SATIR BURAYA EKLENDİ
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
@@ -38,19 +37,19 @@ export default defineConfig({
       }
     })
   ],
-
-  // MEVCUT PROXY AYARLARINIZ KORUNDU
   server: {
     proxy: {
-      '/api_currency': {
+      // /api/currency isteğini https://api.frankfurter.app/latest... adresine yönlendirir
+      '/api/currency': {
         target: 'https://api.frankfurter.app',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api_currency/, ''),
+        rewrite: (path) => path.replace(/^\/api\/currency/, '/latest?from=TRY&to=USD,EUR'),
       },
-      '/api_gold': {
+      // /api/gold isteğini https://finance.truncgil.com/api/today.json adresine yönlendirir
+      '/api/gold': {
         target: 'https://finance.truncgil.com',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api_gold/, '/api'),
+        rewrite: (path) => path.replace(/^\/api\/gold/, '/api/today.json'),
       },
     }
   }
