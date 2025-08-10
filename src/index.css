@@ -1,3 +1,21 @@
+/* Bu 3 satır Tailwind'in çalışması için zorunludur. ASLA SİLMEYİN. */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Aşağıdaki blok, Tailwind'in temel katmanına (base layer)
+  kendi özel stillerimizi eklememizi sağlar. 
+  Bu, global stilleri eklemenin doğru yoludur.
+*/
+@layer base {
+  #root {
+    /* Uygulamanızın tamamını kaplamasını ve 
+       içeriğin güvenli alanda kalmasını sağlar. */
+    width: 100%;
+    min-height: 100vh;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+}
