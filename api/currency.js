@@ -8,7 +8,7 @@ export default async function handler(req, res) {
 
     const data = await response.json();
 
-    res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate');
+    res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate');
     res.status(200).json(data);
   } catch (error) {
     console.error('Error fetching currency data:', error.message);
