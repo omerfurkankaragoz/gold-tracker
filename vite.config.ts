@@ -11,7 +11,7 @@ export default defineConfig({
         name: 'Birikim',
         short_name: 'Birikim',
         description: 'Kişisel yatırım ve birikim takibi uygulaması.',
-        theme_color: '#3B82F6',
+        theme_color: '#ffffff',
         background_color: '#ffffff',
         display: 'standalone',
         scope: '/',
