@@ -3,20 +3,27 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Aşağıdaki blok, Tailwind'in temel katmanına (base layer)
-  kendi özel stillerimizi eklememizi sağlar. 
-  Bu, global stilleri eklemenin doğru yoludur.
-*/
+/* Tailwind'in temel katmanına (base layer) kendi genel kurallarımızı ekliyoruz */
 @layer base {
-  #root {
-    /* Uygulamanızın tamamını kaplamasını ve 
-       içeriğin güvenli alanda kalmasını sağlar. */
+  /* html ve body elementlerinin tüm ekranı kaplamasını ve kaydırılamaz olmasını sağlıyoruz */
+  html, body {
+    height: 100%;
     width: 100%;
-    min-height: 100vh;
-    /* padding-top: env(safe-area-inset-top); */
+    overflow: hidden; /* Bu komut kaydırmayı engeller */
+    position: fixed;   /* Sayfanın pozisyonunu sabitler */
+  }
+
+  #root {
+    /* #root elementinin de bu alanı tamamen doldurmasını sağlıyoruz */
+    width: 100%;
+    height: 100%;
+    
+    /* Güvenli alan boşlukları, içeriğin sistem çubuklarının altına girmemesi için kalmalı */
     padding-bottom: env(safe-area-inset-bottom);
     padding-left: env(safe-area-inset-left);
     padding-right: env(safe-area-inset-right);
+
+    /* ÖNEMLİ: Daha önceki adımdaki padding-top ayarını #root'tan kaldırıp
+       header bileşenine taşıdığımız için burada olmamalı. */
   }
 }
-
