@@ -1,3 +1,5 @@
+// Konum: src/components/AddInvestmentModal.tsx
+
 import React, { useState, useMemo, useEffect } from 'react';
 import { X, Plus, DollarSign, Euro, Coins, Search, Calendar } from 'lucide-react';
 import { useInvestmentsContext } from '../context/InvestmentsContext';
@@ -12,9 +14,8 @@ interface AddInvestmentModalProps {
 }
 
 const investmentTypes = [
-  { id: 'usd', name: 'Dolar', symbol: 'USD', icon: DollarSign, unit: '$' },
-  { id: 'eur', name: 'Euro', symbol: 'EUR', icon: Euro, unit: '€' },
-  { id: 'tl', name: 'Türk Lirası', symbol: 'TRY', icon: () => <>₺</>, unit: '₺' },
+
+
   { id: 'gold', name: 'Gram Altın', symbol: 'GA', icon: Coins, unit: 'gr' },
   { id: 'quarter_gold', name: 'Çeyrek Altın', symbol: 'CE-K', icon: Coins, unit: 'adet' },
   { id: 'half_gold', name: 'Yarım Altın', symbol: 'YA-K', icon: Coins, unit: 'adet' },
@@ -24,18 +25,18 @@ const investmentTypes = [
   { id: 'ayar_14_gold', name: '14 Ayar Altın', symbol: '14-K', icon: Coins, unit: 'gr' },
   { id: 'ayar_18_gold', name: '18 Ayar Altın', symbol: '18-K', icon: Coins, unit: 'gr' },
   { id: 'ayar_22_bilezik', name: '22 Ayar Bilezik', symbol: '22-K', icon: Coins, unit: 'gr' },
+  { id: 'usd', name: 'Dolar', symbol: 'USD', icon: DollarSign, unit: '$' },
+  { id: 'eur', name: 'Euro', symbol: 'EUR', icon: Euro, unit: '€' },
+  { id: 'tl', name: 'Türk Lirası', symbol: 'TRY', icon: () => <>₺</>, unit: '₺' },
 ];
 
 export function AddInvestmentModal({ isOpen, onClose, initialSelectedType, isDirectAdd = false }: AddInvestmentModalProps) {
-  const [selectedType, setSelectedType] = useState<Investment['type']>('gold');
+  const [selectedType, setSelectedType] = useState<Investment['type']>(initialSelectedType || 'gold');
   const [searchQuery, setSearchQuery] = useState('');
   const [amount, setAmount] = useState('');
   const [purchasePrice, setPurchasePrice] = useState('');
   const [loading, setLoading] = useState(false);
   
-  // ==================================================================
-  // DEĞİŞİKLİK 1: Tarih için state ekliyoruz
-  // ==================================================================
   const today = new Date().toISOString().split('T')[0];
   const [purchaseDate, setPurchaseDate] = useState(today);
 
@@ -46,9 +47,11 @@ export function AddInvestmentModal({ isOpen, onClose, initialSelectedType, isDir
     return type === 'usd' || type === 'eur' ? 2 : 4;
   };
 
-  const currentPriceInfo = useMemo(() => prices[selectedType], [prices, selectedType]);
-
   const updatePurchasePrice = (type: Investment['type']) => {
+    if (type === 'tl') {
+        setPurchasePrice('1');
+        return;
+    }
     const price = prices[type]?.sellingPrice;
     if (price && price > 0) {
       setPurchasePrice(price.toFixed(getFractionDigits(type)));
@@ -57,47 +60,37 @@ export function AddInvestmentModal({ isOpen, onClose, initialSelectedType, isDir
     }
   };
 
-  // Modal açıldığında tüm state'leri sıfırla
   useEffect(() => {
     if (isOpen) {
       const startType = initialSelectedType || 'gold';
       setSelectedType(startType);
       setAmount('');
       setSearchQuery('');
-      setPurchaseDate(today); // Tarihi bugüne ayarla
-      updatePurchasePrice(startType); // Fiyatı anlık fiyatla doldur
+      setPurchaseDate(today);
+      updatePurchasePrice(startType);
     }
   }, [isOpen, initialSelectedType, prices]);
 
-  // Varlık türü seçimi değiştiğinde fiyatı güncelle
+  // Varlık türü seçimi değiştiğinde fiyatı ve tarihi güncelle
   useEffect(() => {
-    if (isOpen && !isDirectAdd) {
+    if (isOpen) {
       setPurchaseDate(today); // Tarihi bugüne sıfırla
       updatePurchasePrice(selectedType);
     }
   }, [selectedType]);
 
   // ==================================================================
-  // DEĞİŞİKLİK 2: Tarih değiştiğinde fiyat alanını yönet
+  // DEĞİŞİKLİK 1: Tarih seçildiğinde fiyatı silen 'useEffect' kaldırıldı.
+  // Bu hook, sorunun ana kaynağıydı. Artık tarih ve fiyat birbirinden bağımsız.
   // ==================================================================
-  useEffect(() => {
-    // Eğer geçmiş bir tarih seçilirse, anlık fiyatı temizle ki kullanıcı manuel girsin
-    if (purchaseDate !== today) {
-      setPurchasePrice('');
-    } 
-    // Eğer tarih tekrar bugüne getirilirse, anlık fiyatla tekrar doldur
-    else if (purchaseDate === today) {
-      updatePurchasePrice(selectedType);
-    }
-  }, [purchaseDate]);
+  // useEffect(() => { ... }, [purchaseDate]); // Bu blok tamamen silindi.
 
 
   const selectedInvestment = investmentTypes.find(inv => inv.id === selectedType);
 
   const filteredInvestmentTypes = useMemo(() => {
-    if (!searchQuery) return investmentTypes.filter(type => type.id !== 'tl');
+    if (!searchQuery) return investmentTypes;
     return investmentTypes.filter(type =>
-      type.id !== 'tl' &&
       (type.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       type.symbol.toLowerCase().includes(searchQuery.toLowerCase()))
     );
@@ -112,7 +105,6 @@ export function AddInvestmentModal({ isOpen, onClose, initialSelectedType, isDir
         type: selectedType,
         amount: parseFloat(amount),
         purchase_price: parseFloat(purchasePrice.replace(',', '.')),
-        // DEĞİŞİKLİK 3: State'teki tarihi veritabanına gönder
         purchase_date: new Date(purchaseDate).toISOString(),
       } as Omit<Investment, 'id' | 'created_at' | 'updated_at'>);
       onClose();
@@ -156,6 +148,10 @@ export function AddInvestmentModal({ isOpen, onClose, initialSelectedType, isDir
                   const priceInfo = prices[type.id as Investment['type']];
                   const isSelected = selectedType === type.id;
                   const Icon = type.icon;
+                  const displayPrice = type.id === 'tl' 
+                    ? 1 
+                    : priceInfo?.sellingPrice;
+
                   return (
                     <button
                       key={type.id}
@@ -165,8 +161,8 @@ export function AddInvestmentModal({ isOpen, onClose, initialSelectedType, isDir
                         isSelected ? 'bg-blue-600 text-white shadow-md' : 'hover:bg-gray-100'
                       }`}
                     >
-                      <div className={`w-7 h-7 flex-shrink-0 rounded-full flex items-center justify-center mr-3 ${isSelected ? 'bg-white' : 'bg-gray-100'}`}>
-                          <Icon className={`w-4 h-4 ${isSelected ? 'text-blue-600' : 'text-gray-600'}`} />
+                      <div className={`w-7 h-7 flex-shrink-0 rounded-full flex items-center justify-center mr-3 ${isSelected ? 'bg-white bg-opacity-20' : 'bg-gray-100'}`}>
+                          <Icon className={`w-4 h-4 ${isSelected ? 'text-white' : 'text-gray-600'}`} />
                       </div>
                       <div className="flex-grow">
                           <p className={`font-semibold text-xs ${isSelected ? 'text-white' : 'text-gray-800'}`}>{type.name}</p>
@@ -174,7 +170,7 @@ export function AddInvestmentModal({ isOpen, onClose, initialSelectedType, isDir
                       </div>
                       <div className="text-right">
                           <p className={`font-bold text-xs ${isSelected ? 'text-white' : 'text-gray-900'}`}>
-                          ₺{priceInfo?.sellingPrice.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: getFractionDigits(type.id as Investment['type']) }) || '...'}
+                          ₺{displayPrice?.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: getFractionDigits(type.id as Investment['type']) }) || '...'}
                           </p>
                       </div>
                     </button>
@@ -183,11 +179,16 @@ export function AddInvestmentModal({ isOpen, onClose, initialSelectedType, isDir
               </div>
             </div>
           )}
-
-          <form onSubmit={handleSubmit} className="p-4 bg-gray-50 border-t border-gray-200 space-y-3">
-            <div className="grid grid-cols-2 gap-3">
+          
+          {/* ================================================================== */}
+          {/* DEĞİŞİKLİK 2: Form yapısı üst üste binmeyi engelleyecek şekilde güncellendi. */}
+          {/* Tüm inputlar tek bir grid yapısı içine alındı. */}
+          {/* ================================================================== */}
+          <form onSubmit={handleSubmit} className="p-4 bg-gray-50 border-t border-gray-200">
+            <div className="grid grid-cols-2 gap-4">
+              {/* Miktar */}
               <div>
-                <label htmlFor="amountInput" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="amountInput" className="block text-sm font-medium text-gray-700 mb-1.5">
                   Miktar ({selectedInvestment?.unit})
                 </label>
                 <input 
@@ -196,13 +197,15 @@ export function AddInvestmentModal({ isOpen, onClose, initialSelectedType, isDir
                   inputMode="decimal"
                   value={amount} 
                   onChange={(e) => setAmount(e.target.value)} 
-                  className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg" 
-                  placeholder="Örn: 100" 
+                  className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg shadow-sm" 
+                  placeholder="Örn: 10" 
                   required 
                 />
               </div>
+              
+              {/* Birim Alış Fiyatı */}
               <div>
-                <label htmlFor="priceInput" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="priceInput" className="block text-sm font-medium text-gray-700 mb-1.5">
                   Birim Alış Fiyatı (₺)
                 </label>
                 <input 
@@ -210,36 +213,37 @@ export function AddInvestmentModal({ isOpen, onClose, initialSelectedType, isDir
                   type="tel" 
                   inputMode="decimal"
                   value={purchasePrice} 
-                  onChange={(e) => setPurchasePrice(e.target.value)} 
-                  className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg" 
+                  onChange={(e) => setPurchasePrice(e.target.value)}
+                  disabled={selectedType === 'tl'}
+                  className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg shadow-sm disabled:bg-gray-100" 
                   placeholder="Fiyatı girin" 
+                  required 
+                />
+              </div>
+
+              {/* Alış Tarihi (Tam genişlik) */}
+              <div className="col-span-2">
+                <label htmlFor="dateInput" className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Alış Tarihi
+                </label>
+                <input 
+                  id="dateInput"
+                  type="date"
+                  value={purchaseDate}
+                  onChange={(e) => setPurchaseDate(e.target.value)}
+                  max={today}
+                  className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg shadow-sm" 
                   required 
                 />
               </div>
             </div>
 
-            {/* DEĞİŞİKLİK 4: Tarih seçici input'u eklendi */}
-            <div>
-              <label htmlFor="dateInput" className="block text-sm font-medium text-gray-700 mb-1">
-                Alış Tarihi
-              </label>
-              <input 
-                id="dateInput"
-                type="date"
-                value={purchaseDate}
-                onChange={(e) => setPurchaseDate(e.target.value)}
-                // Gelecekteki bir tarihin seçilmesini engelle
-                max={today}
-                className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg" 
-                required 
-              />
-            </div>
-
-            <div className="pt-2">
+            {/* Ekle Butonu */}
+            <div className="pt-4">
               <button 
                 type="submit" 
                 disabled={loading || !amount || !purchasePrice} 
-                className="w-full px-4 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center space-x-2"
+                className="w-full px-4 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center space-x-2 shadow-md"
               >
                 {loading ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <><Plus className="h-5 w-5" /><span>Ekle</span></>}
               </button>

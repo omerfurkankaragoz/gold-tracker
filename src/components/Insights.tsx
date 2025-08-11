@@ -1,9 +1,13 @@
+// Konum: src/components/Insights.tsx
+
 import React, { useState, useEffect, useMemo } from 'react';
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
+import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { TrendingUp, Loader, BarChart2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useInvestmentsContext } from '../context/InvestmentsContext';
-import { PortfolioChart } from './PortfolioChart'; // PortfolioChart'ı buraya import ediyoruz
+import { PortfolioChart } from './PortfolioChart';
+import { usePrices } from '../hooks/usePrices';
+import { AssetSummaryCard, SummaryData } from './AssetSummaryCard';
 
 // Grafik verisinin tipini tanımlıyoruz
 type ChartDataPoint = {
@@ -12,7 +16,8 @@ type ChartDataPoint = {
 };
 
 export function Insights() {
-  const { totalPortfolioValue, loading: contextLoading } = useInvestmentsContext();
+  const { investments, totalPortfolioValue, loading: contextLoading } = useInvestmentsContext();
+  const { prices, loading: pricesLoading } = usePrices();
   
   const [historyData, setHistoryData] = useState<ChartDataPoint[]>([]);
   const [initialLoading, setInitialLoading] = useState(true);
@@ -52,6 +57,29 @@ export function Insights() {
     initializeChart();
   }, []);
 
+  // Varlık özeti için hesaplama bölümü artık TÜM türleri kapsıyor.
+  const assetSummary = useMemo<SummaryData>(() => {
+    const summary: SummaryData = {};
+
+    // Artık 'if' kontrolü yok, her yatırımı döngüye alıyoruz.
+    investments.forEach(investment => {
+        // Fiyatı al (TL için fiyat varsayılan olarak 1'dir)
+        const price = prices[investment.type]?.sellingPrice || 1;
+        
+        // Eğer bu türde bir varlık daha önce eklenmemişse, objeyi başlat
+        if (!summary[investment.type]) {
+            summary[investment.type] = { totalAmount: 0, totalValue: 0 };
+        }
+
+        const summaryItem = summary[investment.type]!;
+        summaryItem.totalAmount += investment.amount;
+        summaryItem.totalValue += investment.amount * price;
+    });
+
+    return summary;
+  }, [investments, prices]);
+
+
   const chartData = useMemo(() => {
     const finalData = [...historyData];
 
@@ -64,7 +92,9 @@ export function Insights() {
     return finalData;
   }, [historyData, totalPortfolioValue]);
 
-  if (initialLoading || contextLoading) {
+  const isLoading = initialLoading || contextLoading || pricesLoading;
+
+  if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center h-64 text-center">
         <Loader className="animate-spin text-blue-600 h-8 w-8" />
@@ -153,9 +183,10 @@ export function Insights() {
         </ResponsiveContainer>
       </div>
       
-      {/* ================================================================== */}
+      {/* Varlık Özeti Kartını Portföy Dağılımının ÜSTÜNE ekliyoruz */}
+      <AssetSummaryCard summary={assetSummary} loading={isLoading} />
+      
       {/* Portföy Dağılımı Grafiğini Buraya EKLİYORUZ */}
-      {/* ================================================================== */}
       <PortfolioChart />
       
     </div>
