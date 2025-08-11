@@ -2,7 +2,8 @@
 
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabase';
-import { Chrome, Loader } from 'lucide-react'; // Google ve Yüklenme ikonu için
+import { Loader } from 'lucide-react';
+import { GoogleIcon } from './GoogleIcon'; // Chrome yerine yeni GoogleIcon'u import ediyoruz
 
 export function Auth() {
   const [loadingGoogle, setLoadingGoogle] = useState(false);
@@ -52,7 +53,10 @@ export function Auth() {
                 <Loader className="animate-spin h-5 w-5" />
               ) : (
                 <>
-                  <Chrome className="h-5 w-5" />
+                  {/* ================================================================== */}
+                  {/* DEĞİŞİKLİK: Chrome ikonu yerine GoogleIcon kullanılıyor */}
+                  {/* ================================================================== */}
+                  <GoogleIcon className="h-5 w-5" />
                   <span>Google ile Giriş Yap</span>
                 </>
               )}
