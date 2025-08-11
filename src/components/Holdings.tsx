@@ -4,16 +4,15 @@ import React, { useState, useMemo } from 'react';
 import { Plus, Trash2, TrendingUp, TrendingDown, DollarSign, Euro, Coins, ChevronsUpDown, ChevronDown, ChevronUp } from 'lucide-react';
 import { useInvestmentsContext } from '../context/InvestmentsContext';
 import { usePrices } from '../hooks/usePrices';
-import { AddInvestmentModal } from './AddInvestmentModal';
+// AddInvestmentModal import'u kaldırıldı.
 import { format } from 'date-fns';
 import { tr } from 'date-fns/locale';
 import { Investment } from '../lib/supabase';
 
-// YENİ: Bu objeyi dışa aktarıyoruz ki diğer component'ler de kullanabilsin.
 export const typeDetails: Record<string, { icon: React.ElementType; name: string; unit: string }> = {
   usd: { icon: DollarSign, name: 'Dolar', unit: '$' },
   eur: { icon: Euro, name: 'Euro', unit: '€' },
-  tl: { icon: () => <span className="font-bold">₺</span>, name: 'Türk Lirası', unit: '₺' },
+  tl: { icon: () => <>₺</>, name: 'Türk Lirası', unit: '₺' },
   gold: { icon: Coins, name: 'Gram Altın', unit: 'gr' },
   quarter_gold: { icon: Coins, name: 'Çeyrek Altın', unit: 'adet' },
   half_gold: { icon: Coins, name: 'Yarım Altın', unit: 'adet' },
@@ -27,13 +26,13 @@ export const typeDetails: Record<string, { icon: React.ElementType; name: string
 
 type SortKey = 'purchase_date' | 'name' | 'currentValue';
 
-// YENİ: Component'in alacağı yeni prop'u tanımlıyoruz
 interface HoldingsProps {
   onSelectInvestment: (id: string) => void;
+  onAddInvestment: () => void; // YENİ: Ekleme sayfasını açacak fonksiyon prop'u
 }
 
-export function Holdings({ onSelectInvestment }: HoldingsProps) {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+export function Holdings({ onSelectInvestment, onAddInvestment }: HoldingsProps) {
+  // isModalOpen state'i kaldırıldı.
   const { investments, deleteInvestment } = useInvestmentsContext();
   const { prices } = usePrices();
 
@@ -80,7 +79,7 @@ export function Holdings({ onSelectInvestment }: HoldingsProps) {
   };
 
   const handleDelete = async (e: React.MouseEvent, id: string) => {
-    e.stopPropagation(); // YENİ: Silme butonuna basınca detay sayfasına gitmesini engelle
+    e.stopPropagation();
     if (window.confirm('Bu yatırımı silmek istediğinizden emin misiniz?')) {
       await deleteInvestment(id);
     }
@@ -111,8 +110,9 @@ export function Holdings({ onSelectInvestment }: HoldingsProps) {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">Varlıklarım</h1>
+        {/* YENİ: Buton artık onAddInvestment prop'unu çağırıyor */}
         <button
-          onClick={() => setIsModalOpen(true)}
+          onClick={onAddInvestment}
           className="bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700 transition-colors flex items-center space-x-2"
         >
           <Plus className="h-5 w-5" />
@@ -147,7 +147,6 @@ export function Holdings({ onSelectInvestment }: HoldingsProps) {
                 const gainPercent = purchaseValue > 0 ? (gain / purchaseValue) * 100 : 0;
 
                 return (
-                  // YENİ: Tüm kartı tıklanabilir bir butona çeviriyoruz
                   <button
                     key={investment.id}
                     onClick={() => onSelectInvestment(investment.id)}
@@ -169,7 +168,7 @@ export function Holdings({ onSelectInvestment }: HoldingsProps) {
                         </div>
                       </div>
                       <button
-                        onClick={(e) => handleDelete(e, investment.id)} // YENİ: Event'i de alıyor
+                        onClick={(e) => handleDelete(e, investment.id)}
                         className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors flex-shrink-0 ml-2 z-10 relative"
                       >
                         <Trash2 className="h-4 w-4" />
@@ -205,10 +204,7 @@ export function Holdings({ onSelectInvestment }: HoldingsProps) {
         </>
       )}
 
-      <AddInvestmentModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-      />
+      {/* AddInvestmentModal tamamen kaldırıldı */}
     </div>
   );
 }

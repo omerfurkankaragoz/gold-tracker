@@ -1,29 +1,27 @@
-import React, { useState } from 'react';
+// Konum: src/components/Dashboard.tsx
+
+import React from 'react';
 import { DollarSign, Euro, Coins, TrendingUp } from 'lucide-react';
 import { PriceCard } from './PriceCard';
 import { usePrices } from '../hooks/usePrices';
 import { useInvestmentsContext } from '../context/InvestmentsContext';
-import { AddInvestmentModal } from './AddInvestmentModal';
 import { Investment } from '../lib/supabase';
 import { Price } from '../hooks/usePrices';
 
 interface DashboardProps {
   onNavigate: (tab: string) => void;
+  onAddInvestment: (type: Investment['type']) => void; // YENİ: Prop tanımı güncellendi
 }
 
-export function Dashboard({ onNavigate }: DashboardProps) {
-  // ==================================================================
-  // DEĞİŞİKLİK: 'lastUpdated' bilgisini de alıyoruz
-  // ==================================================================
+export function Dashboard({ onNavigate, onAddInvestment }: DashboardProps) {
   const { prices, lastUpdated } = usePrices();
   const { investments, totalPortfolioValue } = useInvestmentsContext();
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedTypeForModal, setSelectedTypeForModal] = useState<Investment['type'] | undefined>(undefined);
+  // Modal ile ilgili tüm state'ler kaldırıldı.
 
   const handleCardClick = (type: Investment['type']) => {
-    setSelectedTypeForModal(type);
-    setIsModalOpen(true);
+    // Artık state güncellemek yerine App'e gönderilen fonksiyonu çağırıyoruz.
+    onAddInvestment(type);
   };
 
   const totalInvested = investments.reduce((total, inv) =>
@@ -64,9 +62,6 @@ export function Dashboard({ onNavigate }: DashboardProps) {
       </button>
 
       <div>
-        {/* ================================================================== */}
-        {/* DEĞİŞİKLİK: Yeni başlık ve zaman bilgisi bölümü */}
-        {/* ================================================================== */}
         <div className="flex items-baseline justify-between mb-2 px-1">
             <h2 className="text-xl font-bold text-gray-800">Canlı Piyasa Verileri</h2>
             {lastUpdated && (
@@ -90,12 +85,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
         </div>
       </div>
 
-      <AddInvestmentModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        initialSelectedType={selectedTypeForModal}
-        isDirectAdd={true}
-      />
+      {/* AddInvestmentModal component'i buradan tamamen kaldırıldı. */}
     </div>
   );
 }
