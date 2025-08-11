@@ -1,19 +1,16 @@
 import React from 'react';
-import { Home, Wallet, Sparkles, AreaChart } from 'lucide-react'; // AreaChart ikonunu ekliyoruz
+import { Home, Wallet, AreaChart, User } from 'lucide-react'; // User ikonunu ekliyoruz
 
 interface NavigationProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
 }
 
-// ==================================================================
-// DEĞİŞİKLİK: 'Panelim' sekmesi ekleniyor
-// ==================================================================
 const tabs = [
   { id: 'dashboard', name: 'Anasayfa', icon: Home },
   { id: 'holdings', name: 'Varlıklar', icon: Wallet },
-  { id: 'insights', name: 'Panelim', icon: AreaChart }, // Yeni sekme
-  { id: 'ai-tools', name: 'Yapay Zeka', icon: Sparkles },
+  { id: 'insights', name: 'Panelim', icon: AreaChart },
+  { id: 'profile', name: 'Profil', icon: User }, // Yeni Profil sekmesi
 ];
 
 export function Navigation({ activeTab, onTabChange }: NavigationProps) {
@@ -35,9 +32,8 @@ export function Navigation({ activeTab, onTabChange }: NavigationProps) {
               }`}
             >
               <Icon className={`h-5 w-5 ${isActive ? 'text-blue-600' : 'text-gray-600'}`} />
-
               <span className={`text-xs font-medium ${
-                isActive ? 'text-blue-600' : 'text-gray-600'
+                isActive ? 'text-gray-600' : 'text-gray-600'
               }`}>
                 {tab.name}
               </span>

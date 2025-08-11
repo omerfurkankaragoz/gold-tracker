@@ -1,13 +1,15 @@
+// Konum: src/context/InvestmentsContext.tsx
+
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode, useMemo } from 'react';
 import { supabase, Investment } from '../lib/supabase';
-import { usePrices } from '../hooks/usePrices'; // Fiyatları dinlemek için içeri alıyoruz
+import { usePrices } from '../hooks/usePrices';
+import { Session, User } from '@supabase/supabase-js';
 
-// Context'in artık toplam portföy değerini de tutacağını belirtiyoruz
 interface IInvestmentsContext {
   investments: Investment[];
   loading: boolean;
-  totalPortfolioValue: number; // EN ÖNEMLİ EKLENTİ
-  addInvestment: (investment: Omit<Investment, 'id' | 'created_at' | 'updated_at'>) => Promise<{ data: Investment | null; error: any; }>;
+  totalPortfolioValue: number;
+  addInvestment: (investment: Omit<Investment, 'id' | 'created_at' | 'updated_at' | 'user_id'>) => Promise<{ data: Investment | null; error: any; }>;
   deleteInvestment: (id: string) => Promise<{ error: any; }>;
   refetch: () => void;
 }
@@ -17,31 +19,36 @@ const InvestmentsContext = createContext<IInvestmentsContext | undefined>(undefi
 export const InvestmentsProvider = ({ children }: { children: ReactNode }) => {
   const [investments, setInvestments] = useState<Investment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<User | null>(null);
   
-  // Fiyatları doğrudan bu context içinde dinliyoruz
   const { prices } = usePrices();
 
-  // ==================================================================
-  // ÇÖZÜMÜN KALBİ: Toplam Değeri Burada Hesaplıyoruz
-  // 'investments' veya 'prices' her değiştiğinde bu değer anında yeniden hesaplanır.
-  // ==================================================================
-  const totalPortfolioValue = useMemo(() => {
-    if (investments.length === 0 || Object.keys(prices).length === 0) {
-      return 0;
-    }
-    return investments.reduce((total, investment) => {
-      const currentPrice = prices[investment.type]?.sellingPrice || 0;
-      return total + (investment.amount * currentPrice);
-    }, 0);
-  }, [investments, prices]);
+  // Oturum durumunu dinle ve kullanıcıyı state'e al
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
 
-  const fetchInvestments = useCallback(async () => {
+  // ==================================================================
+  // KRİTİK DEĞİŞİKLİK: Veri çekme işlemi artık kullanıcıya bağlı
+  // ==================================================================
+  const fetchInvestments = useCallback(async (currentUser: User) => {
+    if (!currentUser) return; // Kullanıcı yoksa işlem yapma
     setLoading(true);
     try {
+      // Sadece o an giriş yapmış kullanıcının yatırımlarını çek (.eq('user_id', ...))
       const { data, error } = await supabase
         .from('investments')
         .select('*')
+        .eq('user_id', currentUser.id) // FİLTRELEME
         .order('purchase_date', { ascending: false });
 
       if (error) throw error;
@@ -54,17 +61,38 @@ export const InvestmentsProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
-  const addInvestment = async (investment: Omit<Investment, 'id' | 'created_at' | 'updated_at'>) => {
+  // Kullanıcı değiştiğinde yatırımlarını yeniden çek
+  useEffect(() => {
+    if (user) {
+      fetchInvestments(user);
+    } else {
+      // Kullanıcı çıkış yaparsa listeyi temizle
+      setInvestments([]);
+    }
+  }, [user, fetchInvestments]);
+
+  const totalPortfolioValue = useMemo(() => {
+    return investments.reduce((total, investment) => {
+      const currentPrice = prices[investment.type]?.sellingPrice || 0;
+      return total + (investment.amount * currentPrice);
+    }, 0);
+  }, [investments, prices]);
+
+
+  const addInvestment = async (investment: Omit<Investment, 'id' | 'created_at' | 'updated_at' | 'user_id'>) => {
+    if (!user) throw new Error("Kullanıcı giriş yapmamış.");
     try {
+      // Eklenen yeni varlığa o anki kullanıcının ID'sini ekle
+      const investmentWithUser = { ...investment, user_id: user.id };
+      
       const { data, error } = await supabase
         .from('investments')
-        .insert([investment])
+        .insert([investmentWithUser])
         .select()
         .single();
 
       if (error) throw error;
       
-      // YENİ EKLENEN YATIRIMI LİSTEYE EKLE (Bu işlem totalPortfolioValue'yu yeniden tetikler)
       if (data) {
         setInvestments(prev => [data, ...prev]);
       }
@@ -75,8 +103,10 @@ export const InvestmentsProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const deleteInvestment = async (id: string) => {
+    if (!user) throw new Error("Kullanıcı giriş yapmamış.");
     try {
-      const { error } = await supabase.from('investments').delete().eq('id', id);
+      // Silme işleminde de kullanıcının kendi verisini sildiğinden emin ol
+      const { error } = await supabase.from('investments').delete().eq('id', id).eq('user_id', user.id);
       if (error) throw error;
       setInvestments(prev => prev.filter(inv => inv.id !== id));
       return { error: null };
@@ -85,18 +115,13 @@ export const InvestmentsProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  useEffect(() => {
-    fetchInvestments();
-  }, [fetchInvestments]);
-
-  // Yeni toplam değeri context aracılığıyla tüm uygulamaya dağıtıyoruz
   const value = {
     investments,
     loading,
     totalPortfolioValue,
     addInvestment,
     deleteInvestment,
-    refetch: fetchInvestments,
+    refetch: () => user ? fetchInvestments(user) : undefined,
   };
 
   return (
