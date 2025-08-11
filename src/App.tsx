@@ -20,12 +20,10 @@ function App() {
 
   return (
     <div className="h-screen flex flex-col bg-gray-100">
-      {/* 1. Sabit Üst Bilgi (Header) */}
-      <header className="bg-white shadow-sm border-b border-gray-200 px-4 py-3 h-[57px] flex-shrink-0">
-        {/* Gelecekte buraya sayfa başlığı gibi içerikler eklenebilir */}
-      </header>
+      {/* Sabit üst bilgi (header) bölümü buradan kaldırıldı. */}
 
       {/* 2. Kaydırılabilir Ana İçerik Alanı */}
+      {/* Header kaldırıldığı için bu alan artık en tepeden başlayacak. */}
       <main className="flex-grow overflow-y-auto w-full max-w-4xl mx-auto px-4 py-6 pb-28">
         {renderContent()}
       </main>
