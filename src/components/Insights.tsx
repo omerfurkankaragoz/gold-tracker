@@ -3,9 +3,9 @@ import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianG
 import { TrendingUp, Loader, BarChart2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useInvestmentsContext } from '../context/InvestmentsContext';
-import { PortfolioChart } from './PortfolioChart';
+import { PortfolioChart } from './PortfolioChart'; // PortfolioChart'ı buraya import ediyoruz
 
-// Define the type for our chart data points
+// Grafik verisinin tipini tanımlıyoruz
 type ChartDataPoint = {
   time: string;
   value: number;
@@ -29,24 +29,22 @@ export function Insights() {
 
         if (error) throw error;
 
-        // **CRASH FIX:** Ensure data from the database is valid before processing
         const formattedHistory = history
           ?.map(item => {
-            // Check if item and item.value are valid
             if (item && typeof item.value === 'number') {
               return {
                 time: new Date(item.recorded_at).toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit' }),
                 value: parseFloat(item.value.toFixed(2)),
               };
             }
-            return null; // Return null for invalid items
+            return null;
           })
-          .filter(Boolean) as ChartDataPoint[] || []; // Filter out any nulls
+          .filter(Boolean) as ChartDataPoint[] || [];
         
         setHistoryData(formattedHistory);
       } catch (error) {
-        console.error("Error fetching history data:", error);
-        setHistoryData([]); // Set to empty array on error to prevent crashes
+        console.error("Geçmiş verileri çekerken hata:", error);
+        setHistoryData([]);
       } finally {
         setInitialLoading(false);
       }
@@ -56,6 +54,7 @@ export function Insights() {
 
   const chartData = useMemo(() => {
     const finalData = [...historyData];
+
     if (totalPortfolioValue > 0) {
       finalData.push({
         time: 'Şimdi',
@@ -65,23 +64,22 @@ export function Insights() {
     return finalData;
   }, [historyData, totalPortfolioValue]);
 
-
   if (initialLoading || contextLoading) {
     return (
       <div className="flex flex-col items-center justify-center h-64 text-center">
         <Loader className="animate-spin text-blue-600 h-8 w-8" />
-        <p className="mt-4 text-gray-600">Loading your panel...</p>
+        <p className="mt-4 text-gray-600">Paneliniz yükleniyor...</p>
       </div>
     );
   }
 
-  if (chartData.length < 2) {
+  if (chartData.length === 0 && totalPortfolioValue === 0) {
     return (
         <div className="text-center py-12 bg-white rounded-2xl shadow-sm">
             <BarChart2 className="mx-auto h-12 w-12 text-gray-300 mb-4" />
-            <h3 className="font-semibold text-gray-700 mb-2">Not Enough Data for Chart</h3>
+            <h3 className="font-semibold text-gray-700 mb-2">Başlamak için Varlık Ekleyin</h3>
             <p className="text-sm text-gray-500 max-w-xs mx-auto">
-                Your first data point will be saved tonight, and your chart will appear here tomorrow.
+                Henüz görüntülenecek bir portföy veriniz yok. İlk varlığınızı eklediğinizde grafiğiniz burada oluşacaktır.
             </p>
         </div>
     );
@@ -109,7 +107,7 @@ export function Insights() {
   return (
     <div className="space-y-6">
       <div className="bg-white rounded-2xl p-6 text-center shadow-sm">
-        <p className="text-sm text-gray-500 mb-2">Total Assets</p>
+        <p className="text-sm text-gray-500 mb-2">Toplam Varlıklarım</p>
         <h1 className="text-4xl font-bold text-gray-900">
           ₺{endValue.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
         </h1>
@@ -155,7 +153,11 @@ export function Insights() {
         </ResponsiveContainer>
       </div>
       
+      {/* ================================================================== */}
+      {/* Portföy Dağılımı Grafiğini Buraya EKLİYORUZ */}
+      {/* ================================================================== */}
       <PortfolioChart />
+      
     </div>
   );
 }

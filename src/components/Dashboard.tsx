@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { DollarSign, Euro, Coins, TrendingUp } from 'lucide-react';
 import { PriceCard } from './PriceCard';
-// PortfolioChart import'u ve kullanımı kaldırıldı
 import { usePrices } from '../hooks/usePrices';
 import { useInvestmentsContext } from '../context/InvestmentsContext';
 import { AddInvestmentModal } from './AddInvestmentModal';
@@ -13,7 +12,10 @@ interface DashboardProps {
 }
 
 export function Dashboard({ onNavigate }: DashboardProps) {
-  const { prices } = usePrices();
+  // ==================================================================
+  // DEĞİŞİKLİK: 'lastUpdated' bilgisini de alıyoruz
+  // ==================================================================
+  const { prices, lastUpdated } = usePrices();
   const { investments, totalPortfolioValue } = useInvestmentsContext();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -24,7 +26,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
     setIsModalOpen(true);
   };
 
-  const totalInvested = investments.reduce((total, inv) => 
+  const totalInvested = investments.reduce((total, inv) =>
     total + (inv.amount * inv.purchase_price), 0
   );
   const totalGain = totalPortfolioValue - totalInvested;
@@ -36,8 +38,8 @@ export function Dashboard({ onNavigate }: DashboardProps) {
 
   return (
     <div className="space-y-6">
-      <button 
-        onClick={() => onNavigate('insights')} 
+      <button
+        onClick={() => onNavigate('insights')}
         className="w-full text-left transition-transform duration-200 active:scale-95"
       >
         <div className="bg-gradient-to-r from-blue-600 to-teal-600 rounded-2xl p-6 text-white shadow-lg">
@@ -61,21 +63,32 @@ export function Dashboard({ onNavigate }: DashboardProps) {
         </div>
       </button>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        {priceCardsToShow.map(([type, price]) => {
-          const typedPrice = price as Price;
-          const isGold = typedPrice.name.toLowerCase().includes('altın') || typedPrice.name.toLowerCase().includes('bilezik');
-          const Icon = isGold ? Coins : (typedPrice.symbol === 'USD' ? DollarSign : Euro);
-          
-          return (
-            <button key={type} onClick={() => handleCardClick(type as Investment['type'])} className="text-left h-full">
-              <PriceCard price={typedPrice} icon={<Icon className="h-5 w-5" />} />
-            </button>
-          );
-        })}
+      <div>
+        {/* ================================================================== */}
+        {/* DEĞİŞİKLİK: Yeni başlık ve zaman bilgisi bölümü */}
+        {/* ================================================================== */}
+        <div className="flex items-baseline justify-between mb-2 px-1">
+            <h2 className="text-xl font-bold text-gray-800">Canlı Piyasa Verileri</h2>
+            {lastUpdated && (
+                <p className="text-xs text-gray-500 font-medium">
+                    {lastUpdated.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                </p>
+            )}
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          {priceCardsToShow.map(([type, price]) => {
+            const typedPrice = price as Price;
+            const isGold = typedPrice.name.toLowerCase().includes('altın') || typedPrice.name.toLowerCase().includes('bilezik');
+            const Icon = isGold ? Coins : (typedPrice.symbol === 'USD' ? DollarSign : Euro);
+            
+            return (
+              <button key={type} onClick={() => handleCardClick(type as Investment['type'])} className="text-left h-full">
+                <PriceCard price={typedPrice} icon={<Icon className="h-5 w-5" />} />
+              </button>
+            );
+          })}
+        </div>
       </div>
-
-      {/* PortfolioChart buradan kaldırıldı */}
 
       <AddInvestmentModal
         isOpen={isModalOpen}

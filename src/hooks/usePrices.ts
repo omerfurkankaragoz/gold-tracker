@@ -9,9 +9,6 @@ export type Price = {
   changePercent: number;
 };
 
-// ==================================================================
-// DEĞİŞİKLİK: 'Amerikan Doları' -> 'Dolar'
-// ==================================================================
 const initialPrices: Record<string, Price> = {
   usd: { symbol: 'USD', name: 'Dolar', sellingPrice: 0, buyingPrice: 0, change: 0, changePercent: 0 },
   eur: { symbol: 'EUR', name: 'Euro', sellingPrice: 0, buyingPrice: 0, change: 0, changePercent: 0 },
@@ -51,9 +48,13 @@ const parseApiNumber = (value: any): number => {
 export function usePrices() {
   const [prices, setPrices] = useState<Record<string, Price>>(initialPrices);
   const [loading, setLoading] = useState(true);
+  // ==================================================================
+  // DEĞİŞİKLİK 1: Son güncelleme zamanını tutacak state
+  // ==================================================================
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   const fetchPrices = useCallback(async () => {
-    setLoading(true);
+    // İlk yükleme dışında arkaplanda sessizce güncellesin diye setLoading'i kaldırdık
     try {
       const [currencyResponse, goldResponse] = await Promise.all([
         fetch('/api/currency'),
@@ -61,8 +62,10 @@ export function usePrices() {
       ]);
 
       const newPrices = JSON.parse(JSON.stringify(initialPrices));
+      let isUpdateSuccessful = false;
 
       if (currencyResponse.ok) {
+        isUpdateSuccessful = true;
         const currencyData = await currencyResponse.json();
         const rates = currencyData.rates;
         if (rates && rates.USD) {
@@ -75,11 +78,10 @@ export function usePrices() {
             newPrices.eur.sellingPrice = price;
             newPrices.eur.buyingPrice = price;
         }
-      } else {
-        console.error('Döviz API isteği başarısız oldu.', await currencyResponse.json());
       }
 
       if (goldResponse.ok) {
+        isUpdateSuccessful = true;
         const goldData = await goldResponse.json();
         if (goldData && goldData.Rates) {
           const rates = goldData.Rates;
@@ -87,7 +89,6 @@ export function usePrices() {
             if (Object.prototype.hasOwnProperty.call(goldApiMap, apiKey)) {
               const goldItem = rates[apiKey];
               const internalGoldType = goldApiMap[apiKey];
-
               if (goldItem && (typeof goldItem.Selling === 'number' || typeof goldItem.Selling === 'string')) {
                 newPrices[internalGoldType].sellingPrice = parseApiNumber(goldItem.Selling);
               }
@@ -97,11 +98,16 @@ export function usePrices() {
             }
           }
         }
-      } else {
-         console.error('Altın API isteği başarısız oldu.', await goldResponse.json());
       }
       
-      setPrices(newPrices);
+      // Sadece en az bir API'den başarılı veri çekildiyse zamanı güncelle
+      if (isUpdateSuccessful) {
+        setPrices(newPrices);
+        // ==================================================================
+        // DEĞİŞİKLİK 2: Fiyatlar güncellendiğinde zamanı kaydet
+        // ==================================================================
+        setLastUpdated(new Date());
+      }
 
     } catch (error)      {
       console.error('Fiyatları alırken genel bir hata oluştu:', error);
@@ -112,9 +118,13 @@ export function usePrices() {
 
   useEffect(() => {
     fetchPrices();
+    // Verileri her 5 dakikada bir çeker (300000 milisaniye)
     const interval = setInterval(fetchPrices, 300000); 
     return () => clearInterval(interval);
   }, [fetchPrices]);
 
-  return { prices, loading };
+  // ==================================================================
+  // DEĞİŞİKLİK 3: Yeni state'i dışarıya aktar
+  // ==================================================================
+  return { prices, loading, lastUpdated };
 }
