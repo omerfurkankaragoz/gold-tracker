@@ -1,3 +1,5 @@
+// Konum: src/components/Holdings.tsx
+
 import React, { useState, useMemo } from 'react';
 import { Plus, Trash2, TrendingUp, TrendingDown, DollarSign, Euro, Coins, ChevronsUpDown, ChevronDown, ChevronUp } from 'lucide-react';
 import { useInvestmentsContext } from '../context/InvestmentsContext';
@@ -7,7 +9,8 @@ import { format } from 'date-fns';
 import { tr } from 'date-fns/locale';
 import { Investment } from '../lib/supabase';
 
-const typeDetails: Record<Investment['type'], { icon: React.ElementType; name: string; unit: string }> = {
+// YENİ: Bu objeyi dışa aktarıyoruz ki diğer component'ler de kullanabilsin.
+export const typeDetails: Record<string, { icon: React.ElementType; name: string; unit: string }> = {
   usd: { icon: DollarSign, name: 'Dolar', unit: '$' },
   eur: { icon: Euro, name: 'Euro', unit: '€' },
   tl: { icon: () => <span className="font-bold">₺</span>, name: 'Türk Lirası', unit: '₺' },
@@ -24,7 +27,12 @@ const typeDetails: Record<Investment['type'], { icon: React.ElementType; name: s
 
 type SortKey = 'purchase_date' | 'name' | 'currentValue';
 
-export function Holdings() {
+// YENİ: Component'in alacağı yeni prop'u tanımlıyoruz
+interface HoldingsProps {
+  onSelectInvestment: (id: string) => void;
+}
+
+export function Holdings({ onSelectInvestment }: HoldingsProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { investments, deleteInvestment } = useInvestmentsContext();
   const { prices } = usePrices();
@@ -46,7 +54,7 @@ export function Holdings() {
       } else if (sortConfig.key === 'currentValue') {
         aValue = a.amount * (prices[a.type]?.sellingPrice || 0);
         bValue = b.amount * (prices[b.type]?.sellingPrice || 0);
-      } else { // purchase_date
+      } else {
         aValue = new Date(a.purchase_date).getTime();
         bValue = new Date(b.purchase_date).getTime();
       }
@@ -71,15 +79,13 @@ export function Holdings() {
     setSortConfig({ key, direction });
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (e: React.MouseEvent, id: string) => {
+    e.stopPropagation(); // YENİ: Silme butonuna basınca detay sayfasına gitmesini engelle
     if (window.confirm('Bu yatırımı silmek istediğinizden emin misiniz?')) {
       await deleteInvestment(id);
     }
   };
 
-  // ==================================================================
-  // DEĞİŞİKLİK: Buton component'ini yeniden tasarlıyoruz
-  // ==================================================================
   const SortButton = ({ sortKey, label }: { sortKey: SortKey; label: string }) => {
     const isActive = sortConfig.key === sortKey;
     const Icon = isActive 
@@ -115,7 +121,7 @@ export function Holdings() {
       </div>
 
       {investments.length === 0 ? (
-        <div className="text-center py-12 bg-white rounded-2xl shadow-lg">
+        <div className="text-center py-12 bg-white rounded-2xl shadow-sm">
           <h3 className="font-semibold text-gray-700 mb-2">Henüz varlık eklemediniz</h3>
           <p className="text-sm text-gray-500">
               Başlamak için 'Ekle' butonuna tıklayarak ilk yatırımınızı girin.
@@ -123,9 +129,6 @@ export function Holdings() {
         </div>
       ) : (
         <>
-          {/* ================================================================== */}
-          {/* DEĞİŞİKLİK: Butonların kapsayıcısını yeniden tasarlıyoruz */}
-          {/* ================================================================== */}
           <div className="flex items-center justify-between space-x-1 p-1 bg-gray-100 border border-gray-200 rounded-full">
             <SortButton sortKey="purchase_date" label="Tarih" />
             <SortButton sortKey="name" label="İsim" />
@@ -135,7 +138,7 @@ export function Holdings() {
           <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
             <div className="divide-y divide-gray-200">
               {sortedInvestments.map((investment) => {
-                const details = typeDetails[investment.type];
+                const details = typeDetails[investment.type as Investment['type']];
                 const Icon = details.icon;
                 const currentPrice = prices[investment.type]?.sellingPrice || 0;
                 const currentValue = investment.amount * currentPrice;
@@ -144,7 +147,12 @@ export function Holdings() {
                 const gainPercent = purchaseValue > 0 ? (gain / purchaseValue) * 100 : 0;
 
                 return (
-                  <div key={investment.id} className="p-4 transition-colors hover:bg-gray-50">
+                  // YENİ: Tüm kartı tıklanabilir bir butona çeviriyoruz
+                  <button
+                    key={investment.id}
+                    onClick={() => onSelectInvestment(investment.id)}
+                    className="w-full text-left p-4 transition-colors hover:bg-gray-50 active:bg-gray-100"
+                  >
                     <div className="flex justify-between items-start mb-4">
                       <div className="flex items-center space-x-3 min-w-0">
                         <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
@@ -153,7 +161,7 @@ export function Holdings() {
                         <div className="min-w-0">
                           <p className="font-semibold text-gray-900 truncate">{details.name}</p>
                           <p className="text-sm text-gray-500">
-                            {investment.amount} {details.unit}
+                            {investment.amount.toLocaleString('tr-TR', {maximumFractionDigits: 4})} {details.unit}
                           </p>
                           <p className="text-xs text-gray-400">
                             {format(new Date(investment.purchase_date), 'dd MMM yyyy', { locale: tr })}
@@ -161,8 +169,8 @@ export function Holdings() {
                         </div>
                       </div>
                       <button
-                        onClick={() => handleDelete(investment.id)}
-                        className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors flex-shrink-0 ml-2"
+                        onClick={(e) => handleDelete(e, investment.id)} // YENİ: Event'i de alıyor
+                        className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors flex-shrink-0 ml-2 z-10 relative"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
@@ -175,7 +183,7 @@ export function Holdings() {
                           ₺{currentValue.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
                         </p>
                         <p className="text-sm text-gray-500 break-words">
-                          ₺{currentPrice.toLocaleString('tr-TR', { minimumFractionDigits: 2 })} / {details.unit}
+                          ₺{currentPrice.toLocaleString('tr-TR', { minimumFractionDigits: 4 })} / {details.unit}
                         </p>
                       </div>
                       <div>
@@ -189,7 +197,7 @@ export function Holdings() {
                         </p>
                       </div>
                     </div>
-                  </div>
+                  </button>
                 );
               })}
             </div>
