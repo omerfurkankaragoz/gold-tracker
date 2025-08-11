@@ -1,50 +1,53 @@
-import React,
-{
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  useCallback,
-  ReactNode
-} from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode, useMemo } from 'react';
 import { supabase, Investment } from '../lib/supabase';
+import { usePrices } from '../hooks/usePrices'; // Fiyatları dinlemek için içeri alıyoruz
 
-// Context'in tutacağı verilerin tipini tanımlıyoruz
+// Context'in artık toplam portföy değerini de tutacağını belirtiyoruz
 interface IInvestmentsContext {
   investments: Investment[];
   loading: boolean;
+  totalPortfolioValue: number; // EN ÖNEMLİ EKLENTİ
   addInvestment: (investment: Omit<Investment, 'id' | 'created_at' | 'updated_at'>) => Promise<{ data: Investment | null; error: any; }>;
   deleteInvestment: (id: string) => Promise<{ error: any; }>;
   refetch: () => void;
 }
 
-// Context'i oluşturuyoruz
 const InvestmentsContext = createContext<IInvestmentsContext | undefined>(undefined);
 
-// Uygulamamızı sarmalayacak olan Provider component'i
 export const InvestmentsProvider = ({ children }: { children: ReactNode }) => {
   const [investments, setInvestments] = useState<Investment[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  // Fiyatları doğrudan bu context içinde dinliyoruz
+  const { prices } = usePrices();
+
+  // ==================================================================
+  // ÇÖZÜMÜN KALBİ: Toplam Değeri Burada Hesaplıyoruz
+  // 'investments' veya 'prices' her değiştiğinde bu değer anında yeniden hesaplanır.
+  // ==================================================================
+  const totalPortfolioValue = useMemo(() => {
+    if (investments.length === 0 || Object.keys(prices).length === 0) {
+      return 0;
+    }
+    return investments.reduce((total, investment) => {
+      const currentPrice = prices[investment.type]?.sellingPrice || 0;
+      return total + (investment.amount * currentPrice);
+    }, 0);
+  }, [investments, prices]);
+
 
   const fetchInvestments = useCallback(async () => {
     setLoading(true);
     try {
-      // Filtreleme olmadan tüm yatırımları çekiyoruz.
-      // Bu, kullanıcı girişi olmayan senaryolar için uygundur.
       const { data, error } = await supabase
         .from('investments')
         .select('*')
         .order('purchase_date', { ascending: false });
 
-      if (error) {
-        // Hata varsa konsola yazdırıyoruz ama uygulamayı kesintiye uğratmıyoruz.
-        console.error('Error fetching investments:', error);
-        throw error;
-      }
-      
+      if (error) throw error;
       setInvestments(data || []);
     } catch (error) {
-      // Hata durumunda listeyi boşaltarak tutarsız veri gösterimini engelliyoruz.
+      console.error('Error fetching investments:', error);
       setInvestments([]);
     } finally {
       setLoading(false);
@@ -53,23 +56,18 @@ export const InvestmentsProvider = ({ children }: { children: ReactNode }) => {
 
   const addInvestment = async (investment: Omit<Investment, 'id' | 'created_at' | 'updated_at'>) => {
     try {
-      // Veritabanına yeni yatırımı ekliyoruz
       const { data, error } = await supabase
         .from('investments')
         .insert([investment])
         .select()
-        .single(); // Eklenen tek bir kaydı geri döndürmesini sağlıyoruz
+        .single();
 
-      if (error) {
-        console.error('Error adding investment:', error);
-        throw error;
-      }
+      if (error) throw error;
       
-      // Ekleme başarılı olursa, state'i güncelleyerek arayüzün anında yenilenmesini sağlıyoruz.
+      // YENİ EKLENEN YATIRIMI LİSTEYE EKLE (Bu işlem totalPortfolioValue'yu yeniden tetikler)
       if (data) {
         setInvestments(prev => [data, ...prev]);
       }
-      
       return { data, error: null };
     } catch (error) {
       return { data: null, error };
@@ -79,11 +77,7 @@ export const InvestmentsProvider = ({ children }: { children: ReactNode }) => {
   const deleteInvestment = async (id: string) => {
     try {
       const { error } = await supabase.from('investments').delete().eq('id', id);
-      if (error) {
-        console.error('Error deleting investment:', error);
-        throw error;
-      }
-      // Silme başarılı olursa, state'den ilgili yatırımı çıkarıyoruz.
+      if (error) throw error;
       setInvestments(prev => prev.filter(inv => inv.id !== id));
       return { error: null };
     } catch (error) {
@@ -92,13 +86,14 @@ export const InvestmentsProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
-    // Component ilk yüklendiğinde yatırımları getiriyoruz.
     fetchInvestments();
   }, [fetchInvestments]);
 
+  // Yeni toplam değeri context aracılığıyla tüm uygulamaya dağıtıyoruz
   const value = {
     investments,
     loading,
+    totalPortfolioValue,
     addInvestment,
     deleteInvestment,
     refetch: fetchInvestments,
@@ -111,7 +106,6 @@ export const InvestmentsProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-// Bu custom hook, component'lerden context'e kolayca erişmemizi sağlayacak
 export const useInvestmentsContext = () => {
   const context = useContext(InvestmentsContext);
   if (context === undefined) {

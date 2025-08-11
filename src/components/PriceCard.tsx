@@ -1,42 +1,40 @@
 import React from 'react';
-import { TrendingUp, TrendingDown } from 'lucide-react';
 import { Price } from '../hooks/usePrices';
 
 interface PriceCardProps {
   price: Price;
   icon?: React.ReactNode;
-  unit?: string;
 }
 
-export function PriceCard({ price, icon, unit = '' }: PriceCardProps) {
-  const isPositive = price.change >= 0;
+export function PriceCard({ price, icon }: PriceCardProps) {
+  // Para birimi türüne göre kaç ondalık basamak gösterileceğini belirliyoruz
+  const isDoviz = price.symbol === 'USD' || price.symbol === 'EUR';
+  const fractionDigits = isDoviz ? 2 : 4;
 
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center space-x-3">
+    <div className="bg-white rounded-2xl p-4 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 flex flex-col justify-between h-full">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center space-x-2">
           {icon && <div className="text-gray-600">{icon}</div>}
-          <h3 className="font-semibold text-gray-900">{price.name}</h3>
+          <h3 className="font-semibold text-gray-800 text-sm min-h-[40px] flex items-center">{price.name}</h3>
         </div>
         <span className="text-xs font-medium text-gray-500">{price.symbol}</span>
       </div>
       
-      <div className="space-y-2">
-        <div className="text-2xl font-bold text-gray-900">
-          ₺{price.price.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
-          {unit && <span className="text-lg text-gray-500 ml-1">{unit}</span>}
+      <div className="space-y-2 text-center">
+        <div>
+          <span className="text-xs text-gray-500">Alış</span>
+          <p className="font-bold text-gray-900 text-md">
+            {/* toLocaleString ile doğru formatlamayı yapıyoruz */}
+            ₺{price.buyingPrice.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: fractionDigits })}
+          </p>
         </div>
-        
-        <div className={`flex items-center space-x-1 text-sm font-medium ${
-          isPositive ? 'text-green-600' : 'text-red-600'
-        }`}>
-          {isPositive ? (
-            <TrendingUp className="h-4 w-4" />
-          ) : (
-            <TrendingDown className="h-4 w-4" />
-          )}
-          <span>{isPositive ? '+' : ''}₺{price.change.toFixed(2)}</span>
-          <span>({isPositive ? '+' : ''}{price.changePercent.toFixed(2)}%)</span>
+        <div>
+          <span className="text-xs text-gray-500">Satış</span>
+          <p className="font-bold text-gray-900 text-md">
+            {/* toLocaleString ile doğru formatlamayı yapıyoruz */}
+            ₺{price.sellingPrice.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: fractionDigits })}
+          </p>
         </div>
       </div>
     </div>

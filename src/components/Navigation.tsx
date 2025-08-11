@@ -1,20 +1,24 @@
 import React from 'react';
-import { Home, Wallet, Sparkles } from 'lucide-react';
+import { Home, Wallet, Sparkles, AreaChart } from 'lucide-react'; // AreaChart ikonunu ekliyoruz
 
 interface NavigationProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
 }
 
+// ==================================================================
+// DEĞİŞİKLİK: 'Panelim' sekmesi ekleniyor
+// ==================================================================
 const tabs = [
   { id: 'dashboard', name: 'Anasayfa', icon: Home },
   { id: 'holdings', name: 'Varlıklar', icon: Wallet },
+  { id: 'insights', name: 'Panelim', icon: AreaChart }, // Yeni sekme
   { id: 'ai-tools', name: 'Yapay Zeka', icon: Sparkles },
 ];
 
 export function Navigation({ activeTab, onTabChange }: NavigationProps) {
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-2 z-50">
+    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-2 py-2 z-50">
       <div className="flex justify-around items-center max-w-md mx-auto">
         {tabs.map((tab) => {
           const Icon = tab.icon;
@@ -30,11 +34,9 @@ export function Navigation({ activeTab, onTabChange }: NavigationProps) {
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
-              {/* DEĞİŞİKLİK 1: İkon boyutu daha dengeli olması için küçültüldü */}
               <Icon className={`h-5 w-5 ${isActive ? 'text-blue-600' : 'text-gray-600'}`} />
 
-              {/* DEĞİŞİKLİK 2: Yazı boyutu büyütüldü ve kırpma (truncate) kaldırıldı */}
-              <span className={`text-sm font-medium ${
+              <span className={`text-xs font-medium ${
                 isActive ? 'text-blue-600' : 'text-gray-600'
               }`}>
                 {tab.name}

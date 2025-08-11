@@ -1,59 +1,78 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts';
-import { TrendingUp, PieChart as PieChartIcon } from 'lucide-react';
+import { PieChart as PieChartIcon, PiggyBank } from 'lucide-react';
 import { useInvestmentsContext } from '../context/InvestmentsContext';
-import { usePrices } from '../hooks/usePrices';
-import { Investment } from '../lib/supabase'; // Tipi import ediyoruz
+import { usePrices } from '../hooks/usePrices'; // Fiyatları doğrudan burada kullanıyoruz
+import { Investment } from '../lib/supabase';
 
-// Tüm yatırım türleri için isim ve renk tanımlamaları yapıyoruz.
-const typeDetails: Record<Investment['type'], { name: string; color: string }> = {
+// Her varlık türü için bir isim ve renk belirleyelim
+const typeDetails: Record<string, { name: string; color: string }> = {
     gold: { name: 'Gram Altın', color: '#FFC300' },
     quarter_gold: { name: 'Çeyrek Altın', color: '#F7B600' },
     half_gold: { name: 'Yarım Altın', color: '#EAA700' },
     full_gold: { name: 'Tam Altın', color: '#D69800' },
+    cumhuriyet_gold: { name: 'Cumhuriyet Altını', color: '#C28900' },
+    ata_gold: { name: 'Ata Altın', color: '#AD7A00' },
+    ayar_14_gold: { name: '14 Ayar Altın', color: '#996B00' },
+    ayar_18_gold: { name: '18 Ayar Altın', color: '#855C00' },
+    ayar_22_bilezik: { name: '22 Ayar Bilezik', color: '#704D00' },
     usd: { name: 'Dolar', color: '#28A745' },
     eur: { name: 'Euro', color: '#007BFF' },
-    tl: { name: 'Türk Lirası', color: '#6F42C1' }, // TL eklendi (mor renk)
-
+    tl: { name: 'Türk Lirası', color: '#6F42C1' },
 };
 
 export function PortfolioChart() {
-  const { investments } = useInvestmentsContext();
-  const { prices } = usePrices();
+  const { investments, totalPortfolioValue } = useInvestmentsContext();
+  const { prices } = usePrices(); // Fiyatları burada güvenli bir şekilde alıyoruz
 
-  // Portföydeki varlıkları anlık değerlerine göre gruplayıp hesaplıyoruz
-  const chartData = Object.entries(
-    investments.reduce((acc, investment) => {
-      const { type, amount } = investment;
-      const currentPrice = prices[type]?.price || 0;
-      const currentValue = amount * currentPrice;
-      const details = typeDetails[type];
-
-      if (!acc[type]) {
-        // İsimleri artık typeDetails'ten alıyoruz.
-        acc[type] = { name: details?.name || type, value: 0 };
-      }
-      acc[type].value += currentValue;
-      return acc;
-    }, {} as Record<string, { name: string; value: number }>)
-  ).map(([key, data]) => ({ ...data, type: key as Investment['type'] }));
-
-  const totalPortfolioValue = chartData.reduce((sum, item) => sum + item.value, 0);
-
-  const CustomTooltip = ({ active, payload }: any) => {
-    if (active && payload && payload.length) {
-      const data = payload[0].payload;
-      const percentage = totalPortfolioValue > 0 ? ((data.value / totalPortfolioValue) * 100).toFixed(2) : 0;
-      return (
-        <div className="bg-white p-3 rounded-lg shadow-lg border border-gray-200">
-          <p className="font-semibold">{data.name}</p>
-          <p className="text-gray-700">Değer: ₺{data.value.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</p>
-          <p className="text-sm text-gray-500">Portföydeki Payı: %{percentage}</p>
-        </div>
-      );
+  // Grafik için veriyi, yatırımlar veya fiyatlar değiştiğinde yeniden hesaplıyoruz
+  const chartData = useMemo(() => {
+    // Fiyatlar henüz yüklenmediyse, çökmemesi için boş bir dizi döndür
+    if (investments.length === 0 || Object.keys(prices).length === 0) {
+      return [];
     }
-    return null;
-  };
+
+    const aggregatedData = investments.reduce((acc, investment) => {
+      const { type } = investment;
+      const details = typeDetails[type];
+      const priceInfo = prices[type];
+
+      // Eğer varlığın fiyat bilgisi yoksa (henüz yüklenmediyse vb.), bu adımı atla
+      if (!details || !priceInfo) {
+        return acc;
+      }
+      
+      const investmentValue = investment.amount * priceInfo.sellingPrice;
+
+      if (!acc[details.name]) {
+        acc[details.name] = { value: 0, color: details.color };
+      }
+      
+      acc[details.name].value += investmentValue;
+      return acc;
+    }, {} as Record<string, { value: number, color: string }>);
+
+    return Object.entries(aggregatedData).map(([name, data]) => ({ name, ...data }));
+
+  }, [investments, prices]); // Bu bağımlılıklar sayesinde her şey güncel kalır
+
+
+  // Portföy boşsa gösterilecek modern uyarı ekranı
+  if (investments.length === 0) {
+    return (
+      <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 text-center">
+        <div className="flex items-center justify-center space-x-2 mb-4">
+          <PieChartIcon className="h-5 w-5 text-gray-400" />
+          <h2 className="text-lg font-semibold text-gray-900">Portföy Dağılımı</h2>
+        </div>
+        <div className="flex flex-col items-center justify-center py-8">
+            <PiggyBank className="h-16 w-16 text-gray-300 mb-4" />
+            <h3 className="font-semibold text-gray-700">Henüz Varlık Yok</h3>
+            <p className="text-sm text-gray-500 mt-1">Varlık eklediğinizde, dağılım grafiğiniz burada görünecek.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
@@ -62,36 +81,46 @@ export function PortfolioChart() {
         <h2 className="text-lg font-semibold text-gray-900">Portföy Dağılımı</h2>
       </div>
 
-      {investments.length === 0 ? (
-        <div className="h-64 flex flex-col items-center justify-center text-center">
-          <TrendingUp className="h-12 w-12 text-gray-300 mb-4" />
-          <h3 className="font-semibold text-gray-700">Grafik için veri yok</h3>
-          <p className="text-sm text-gray-500">Portföy dağılımınızı görmek için varlık ekleyin.</p>
-        </div>
-      ) : (
-        <div className="h-64">
-          <ResponsiveContainer width="100%" height="100%">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+        <div className="h-48 w-full">
+          <ResponsiveContainer>
             <PieChart>
               <Pie
                 data={chartData}
                 cx="50%"
                 cy="50%"
-                labelLine={false}
-                outerRadius={100}
-                fill="#8884d8"
+                innerRadius={50}
+                outerRadius={70}
+                paddingAngle={2}
                 dataKey="value"
                 nameKey="name"
               >
                 {chartData.map((entry) => (
-                  // Renkleri artık typeDetails'ten alıyoruz.
-                  <Cell key={`cell-${entry.name}`} fill={typeDetails[entry.type]?.color || '#8884d8'} />
+                  <Cell key={`cell-${entry.name}`} fill={entry.color} stroke={entry.color} />
                 ))}
               </Pie>
-              <Tooltip content={<CustomTooltip />} />
+              <Tooltip 
+                formatter={(value: number) => `₺${value.toLocaleString('tr-TR', {minimumFractionDigits: 2})}`}
+                wrapperClassName="!rounded-xl !border-gray-200 !shadow-lg"
+              />
             </PieChart>
           </ResponsiveContainer>
         </div>
-      )}
+        <div className="space-y-2">
+          {chartData.map((entry) => {
+            const percentage = totalPortfolioValue > 0 ? (entry.value / totalPortfolioValue) * 100 : 0;
+            return (
+              <div key={entry.name} className="flex items-center justify-between text-sm">
+                <div className="flex items-center">
+                  <span className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: entry.color }}></span>
+                  <span className="text-gray-700">{entry.name}</span>
+                </div>
+                <span className="font-semibold text-gray-800">{percentage.toFixed(1)}%</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }

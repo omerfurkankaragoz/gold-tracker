@@ -3,6 +3,7 @@ import { Dashboard } from './components/Dashboard';
 import { Holdings } from './components/Holdings';
 import { AITools } from './components/AITools';
 import { Navigation } from './components/Navigation';
+import { Insights } from './components/Insights';
 
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -11,24 +12,23 @@ function App() {
     switch (activeTab) {
       case 'holdings':
         return <Holdings />;
+      case 'insights':
+        return <Insights />;
       case 'ai-tools':
         return <AITools />;
       default:
-        return <Dashboard />;
+        // ==================================================================
+        // DEĞİŞİKLİK: Dashboard'a sayfa değiştirme fonksiyonunu gönderiyoruz
+        // ==================================================================
+        return <Dashboard onNavigate={setActiveTab} />;
     }
   };
 
   return (
-    <div className="h-screen flex flex-col bg-gray-100">
-      {/* Sabit üst bilgi (header) bölümü buradan kaldırıldı. */}
-
-      {/* 2. Kaydırılabilir Ana İçerik Alanı */}
-      {/* Header kaldırıldığı için bu alan artık en tepeden başlayacak. */}
-      <main className="flex-grow overflow-y-auto w-full max-w-4xl mx-auto px-4 py-6 pb-28">
+    <div className="h-full w-full flex flex-col bg-gray-100">
+      <main className="flex-grow overflow-y-auto px-3 py-6 pb-16">
         {renderContent()}
       </main>
-
-      {/* 3. Sabit Alt Navigasyon */}
       <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
     </div>
   );
