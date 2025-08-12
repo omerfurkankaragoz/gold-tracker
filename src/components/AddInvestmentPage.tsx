@@ -116,111 +116,134 @@ export function AddInvestmentPage({ onBack, initialSelectedType, isDirectAdd = f
         <h1 className="text-xl font-bold text-gray-900">Varlık Ekle</h1>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-1 space-y-4">
-        {/* Varlık Seçim Alanı */}
-        {!isDirectAdd && (
-          <div className="bg-white rounded-2xl shadow-md p-4">
-            <h2 className="text-sm font-semibold text-gray-500 mb-3">VARLIK TÜRÜ</h2>
-            <div className="relative mb-2">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+    {/* Scroll Alanı */}
+    <div className="flex-1 overflow-y-auto px-3 space-y-4 pb-32">
+      {/* Varlık Türü Seçimi */}
+      {!isDirectAdd && (
+        <div className="bg-white rounded-2xl shadow p-4">
+          <h2 className="text-sm font-semibold text-gray-500 mb-3">VARLIK TÜRÜ</h2>
+          <div className="relative mb-2">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Varlık Ara (Dolar, Çeyrek Altın vb.)"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-11 pr-4 py-2.5 text-base border border-gray-200 rounded-xl bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            {filteredInvestmentTypes.map((type) => {
+              const isSelected = selectedType === type.id;
+              const Icon = type.icon;
+              return (
+                <button
+                  key={type.id}
+                  type="button"
+                  onClick={() => setSelectedType(type.id as Investment['type'])}
+                  className={`p-3 rounded-xl text-left transition-all border-2 ${
+                    isSelected
+                      ? 'bg-blue-600 text-white border-blue-600 shadow-lg'
+                      : 'bg-gray-50 border-transparent hover:border-gray-300'
+                  }`}
+                >
+                  <div className="flex items-center space-x-2">
+                    <Icon className={`w-5 h-5 ${isSelected ? 'text-white' : 'text-blue-600'}`} />
+                    <span
+                      className={`font-bold text-sm ${
+                        isSelected ? 'text-white' : 'text-gray-800'
+                      }`}
+                    >
+                      {type.name}
+                    </span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* İşlem Detayları */}
+      <div className="bg-white rounded-2xl shadow p-4">
+        <h2 className="text-sm font-semibold text-gray-500 mb-3">İŞLEM DETAYLARI</h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-600 mb-1">
+                Miktar ({selectedInvestment?.unit})
+              </label>
               <input
-                type="text"
-                placeholder="Varlık Ara (Dolar, Çeyrek Altın vb.)"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-11 pr-4 py-2.5 text-base border border-gray-200 rounded-xl bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                type="tel"
+                inputMode="decimal"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                className="w-full p-3 bg-gray-100 border-2 border-transparent rounded-xl text-base focus:bg-white focus:border-blue-500"
+                placeholder="Örn: 10"
+                required
               />
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              {filteredInvestmentTypes.map((type) => {
-                const isSelected = selectedType === type.id;
-                const Icon = type.icon;
-                return (
-                  <button
-                    key={type.id}
-                    type="button"
-                    onClick={() => setSelectedType(type.id as Investment['type'])}
-                    className={`p-3 rounded-xl text-left transition-all border-2 ${
-                      isSelected ? 'bg-blue-600 text-white border-blue-600 shadow-lg' : 'bg-gray-50 border-transparent hover:border-gray-300'
-                    }`}
-                  >
-                    <div className="flex items-center space-x-2">
-                      <Icon className={`w-5 h-5 ${isSelected ? 'text-white' : 'text-blue-600'}`} />
-                      <span className={`font-bold text-sm ${isSelected ? 'text-white' : 'text-gray-800'}`}>{type.name}</span>
-                    </div>
-                  </button>
-                );
-              })}
+            <div>
+              <label className="block text-sm font-medium text-gray-600 mb-1">
+                Alış Fiyatı (₺)
+              </label>
+              <input
+                type="tel"
+                inputMode="decimal"
+                value={purchasePrice}
+                onChange={(e) => setPurchasePrice(e.target.value)}
+                disabled={selectedType === 'tl'}
+                className="w-full p-3 bg-gray-100 border-2 border-transparent rounded-xl text-base disabled:bg-gray-200 disabled:text-gray-500 focus:bg-white focus:border-blue-500"
+                placeholder="Fiyat"
+                required
+              />
             </div>
           </div>
-        )}
-
-        {/* Form Alanı */}
-        <div className="bg-white rounded-2xl shadow-md p-4">
-            <h2 className="text-sm font-semibold text-gray-500 mb-3">İŞLEM DETAYLARI</h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                      <label htmlFor="amountInput" className="block text-sm font-medium text-gray-600 mb-1">
-                        Miktar ({selectedInvestment?.unit})
-                      </label>
-                      <input 
-                        id="amountInput" type="tel" inputMode="decimal" value={amount}
-                        onChange={(e) => setAmount(e.target.value)}
-                        className="w-full p-3 bg-gray-100 border-2 border-transparent rounded-xl text-base focus:bg-white focus:border-blue-500"
-                        placeholder="Örn: 10" required 
-                      />
-                  </div>
-                  <div>
-                      <label htmlFor="priceInput" className="block text-sm font-medium text-gray-600 mb-1">
-                        Alış Fiyatı (₺)
-                      </label>
-                      <input 
-                        id="priceInput" type="tel" inputMode="decimal" value={purchasePrice}
-                        onChange={(e) => setPurchasePrice(e.target.value)}
-                        disabled={selectedType === 'tl'}
-                        className="w-full p-3 bg-gray-100 border-2 border-transparent rounded-xl text-base disabled:bg-gray-200 disabled:text-gray-500 focus:bg-white focus:border-blue-500"
-                        placeholder="Fiyat" required 
-                      />
-                  </div>
-                </div>
-                <div>
-                    <label htmlFor="dateInput" className="block text-sm font-medium text-gray-600 mb-1">
-                        Alış Tarihi
-                    </label>
-                    <input 
-                        id="dateInput" type="date" value={purchaseDate}
-                        onChange={(e) => setPurchaseDate(e.target.value)}
-                        max={today}
-                        className="w-full p-3 bg-gray-100 border-2 border-transparent rounded-xl text-base focus:bg-white focus:border-blue-500" required 
-                    />
-                </div>
-            </form>
-        </div>
-      </div>
-      
-      {/* Alt Eylem Alanı */}
-      <div className="p-4 bg-white border-t border-gray-100 shadow-inner mt-auto">
-        {totalCost > 0 && (
-            <div className="flex items-center justify-between bg-blue-50 text-blue-800 p-3 rounded-xl mb-4">
-                <div className='flex items-center space-x-2'>
-                    <Info className="w-5 h-5"/>
-                    <span className="font-semibold text-sm">Toplam Maliyet</span>
-                </div>
-                <span className="font-bold text-sm">
-                    ₺{totalCost.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                </span>
-            </div>
-        )}
-        <button 
-            type="submit" 
-            onClick={handleSubmit}
-            disabled={loading || !amount || !purchasePrice} 
-            className="w-full p-4 bg-blue-600 text-white font-bold text-lg rounded-xl hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center space-x-2 shadow-lg shadow-blue-500/50 transition-all duration-300 active:scale-95"
-        >
-            {loading ? <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <><Plus className="w-6 h-6" /><span>Varlığı Ekle</span></>}
-        </button>
+          <div>
+            <label className="block text-sm font-medium text-gray-600 mb-1">Alış Tarihi</label>
+            <input
+              type="date"
+              value={purchaseDate}
+              onChange={(e) => setPurchaseDate(e.target.value)}
+              max={today}
+              className="w-full p-3 bg-gray-100 border-2 border-transparent rounded-xl text-base focus:bg-white focus:border-blue-500"
+              required
+            />
+          </div>
+        </form>
       </div>
     </div>
-  );
+
+    {/* Sabit Alt Bar */}
+    <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-200 shadow-lg">
+      {totalCost > 0 && (
+        <div className="flex items-center justify-between bg-blue-50 text-blue-800 p-3 rounded-xl mb-3">
+          <div className="flex items-center space-x-2">
+            <Info className="w-5 h-5" />
+            <span className="font-semibold text-sm">Toplam Maliyet</span>
+          </div>
+          <span className="font-bold text-sm">
+            ₺{totalCost.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </span>
+        </div>
+      )}
+      <button
+        type="submit"
+        onClick={handleSubmit}
+        disabled={loading || !amount || !purchasePrice}
+        className="w-full p-4 bg-blue-600 text-white font-bold text-lg rounded-xl hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center space-x-2 transition-all active:scale-95"
+      >
+        {loading ? (
+          <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+        ) : (
+          <>
+            <Plus className="w-6 h-6" />
+            <span>Varlığı Ekle</span>
+          </>
+        )}
+      </button>
+    </div>
+  </div>
+);
+
 }
