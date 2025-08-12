@@ -201,48 +201,49 @@ export function AddInvestmentPage({ onBack, initialSelectedType, isDirectAdd = f
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-600 mb-1">Alış Tarihi</label>
-            <input
-              type="date"
-              value={purchaseDate}
-              onChange={(e) => setPurchaseDate(e.target.value)}
-              max={today}
-              className="w-full p-3 bg-gray-100 border-2 border-transparent rounded-xl text-base focus:bg-white focus:border-blue-500"
-              required
-            />
+          <input
+            type="date"
+            value={purchaseDate}
+            onChange={(e) => setPurchaseDate(e.target.value)}
+            max={today}
+            className="block w-full box-border p-3 bg-gray-100 border-2 border-transparent rounded-xl text-base focus:bg-white focus:border-blue-500 appearance-none"
+            required
+          />
           </div>
         </form>
       </div>
     </div>
 
-    {/* Sabit Alt Bar */}
-    <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-200 shadow-lg">
-      {totalCost > 0 && (
-        <div className="flex items-center justify-between bg-blue-50 text-blue-800 p-3 rounded-xl mb-3">
-          <div className="flex items-center space-x-2">
-            <Info className="w-5 h-5" />
-            <span className="font-semibold text-sm">Toplam Maliyet</span>
-          </div>
-          <span className="font-bold text-sm">
-            ₺{totalCost.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-          </span>
-        </div>
-      )}
-      <button
-        type="submit"
-        onClick={handleSubmit}
-        disabled={loading || !amount || !purchasePrice}
-        className="w-full p-4 bg-blue-600 text-white font-bold text-lg rounded-xl hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center space-x-2 transition-all active:scale-95"
-      >
-        {loading ? (
-          <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
-        ) : (
-          <>
-            <Plus className="w-6 h-6" />
-            <span>Varlığı Ekle</span>
-          </>
-        )}
-      </button>
+{/* Sabit Alt Bar */}
+<div className="fixed bottom-9 left-0 right-0 px-4">
+  {totalCost > 0 && (
+    <div className="flex items-center justify-between bg-blue-50 text-blue-800 p-3 rounded-xl mb-3 shadow-md">
+      <div className="flex items-center space-x-2">
+        <Info className="w-5 h-5" />
+        <span className="font-semibold text-sm">Toplam Maliyet</span>
+      </div>
+      <span className="font-bold text-sm">
+        ₺{totalCost.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+      </span>
     </div>
+  )}
+  <button
+    type="submit"
+    onClick={handleSubmit}
+    disabled={loading || !amount || !purchasePrice}
+    className="w-full p-4 bg-blue-600 text-white font-bold text-lg rounded-xl hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center space-x-2 transition-all active:scale-95 shadow-md"
+  >
+    {loading ? (
+      <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+    ) : (
+      <>
+        <Plus className="w-6 h-6" />
+        <span>Varlığı Ekle</span>
+      </>
+    )}
+  </button>
+</div>
+
   </div>
 );
 
