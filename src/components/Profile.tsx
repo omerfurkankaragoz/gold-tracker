@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-// Kullanılmayan ikonlar (HelpCircle, Star, vb.) import satırından kaldırıldı
-import { LogOut, User, Loader, Moon, Sun } from 'lucide-react'; 
+import { LogOut, User, Loader, Moon, Sun } from 'lucide-react';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 import { useTheme } from '../context/ThemeContext';
 
@@ -51,15 +50,18 @@ export function Profile() {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         setUser(user);
-        const { data: profileData, error } = await supabase
-          .from('profiles')
-          .select('full_name, avatar_url')
-          .eq('id', user.id)
-          .single();
-        if (error && error.code !== 'PGRST116') {
-          console.error("Profil bilgisi çekilirken hata:", error);
-        } else {
-          setProfile(profileData);
+        // Sadece misafir değilse profil bilgisini (avatar vb. için) çekmeye çalış
+        if (!user.is_anonymous) {
+            const { data: profileData, error } = await supabase
+              .from('profiles')
+              .select('full_name, avatar_url')
+              .eq('id', user.id)
+              .single();
+            if (error && error.code !== 'PGRST116') {
+              console.error("Profil bilgisi çekilirken hata:", error);
+            } else {
+              setProfile(profileData);
+            }
         }
       }
       setLoading(false);
@@ -79,8 +81,13 @@ export function Profile() {
     );
   }
 
-  const avatarUrl = profile?.avatar_url;
-  const displayName = profile?.full_name || (user?.is_anonymous ? 'Misafir Kullanıcı' : user?.email);
+  const avatarUrl = profile?.avatar_url || user?.user_metadata?.avatar_url;
+  
+  // ======================= GÜNCELLENEN BÖLÜM =======================
+  // is_anonymous true ise "Misafir Kullanıcı", değilse veritabanındaki adı veya boş string'i göster.
+  // Bu, "hiçbir şey yazmasın" isteğini karşılar.
+  const displayName = user?.is_anonymous ? 'Misafir Kullanıcı' : (profile?.full_name || '');
+  // ====================================================================
 
   return (
     <div className="space-y-8">
@@ -96,9 +103,13 @@ export function Profile() {
             <User className="w-12 h-12 text-gray-500 dark:text-gray-400" />
           </div>
         )}
-        <h1 className="w-full break-words text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
+        
+        {/* Eğer displayName boşsa, başlık alanı için bir minimum yükseklik vererek kaymayı önle */}
+        <h1 className={`w-full break-words text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100 ${!displayName && 'h-9'}`}>
           {displayName}
         </h1>
+        
+        {/* E-posta, misafir olmayan tüm kullanıcılar için her zaman gösterilir */}
         {!user?.is_anonymous && (
             <p className="w-full break-words text-gray-500 dark:text-gray-400 mt-1">
               {user?.email}
@@ -112,6 +123,7 @@ export function Profile() {
           <ThemeSwitch />
         </div>
       </div>
+      
       <div>
         <button
           onClick={handleSignOut}
