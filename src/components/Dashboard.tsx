@@ -66,7 +66,7 @@ export function Dashboard({ onNavigate, onAddInvestment, isBalanceVisible, setIs
 
       <div>
         <div className="flex items-baseline justify-between mb-3 px-1">
-            <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">Canlı Piyasa Verileri</h2>
+            <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">Güncel Kurlar</h2>
             {lastUpdated && (
                 <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">
                     {lastUpdated.toLocaleTimeString('tr-TR', { 

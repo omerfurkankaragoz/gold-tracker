@@ -17,6 +17,7 @@ export function PriceCard({ price, icon }: PriceCardProps) {
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-md hover:shadow-lg transition-all duration-300 border border-gray-100 dark:border-gray-700 flex items-center justify-between w-full">
+      {/* Sol Taraf: İkon ve İsim/Sembol */}
       <div className="flex items-center space-x-4">
         {icon && (
           <div className="bg-gray-100 dark:bg-gray-700 p-3 rounded-full">
@@ -28,15 +29,26 @@ export function PriceCard({ price, icon }: PriceCardProps) {
           <p className="text-sm text-gray-500 dark:text-gray-400">{price.symbol}</p>
         </div>
       </div>
-      <div className="text-right">
-        <p className="font-semibold text-gray-900 dark:text-white text-md">
-          ₺{price.sellingPrice.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: fractionDigits })}
-        </p>
-        <div className={`flex items-center justify-end space-x-1 text-sm font-medium ${changeColor}`}>
-          {isPositive ? <TrendingUp size={16} /> : <TrendingDown size={16} />}
-          <span>%{Math.abs(change).toFixed(2)}</span>
+
+      {/* ======================= GÜNCELLENEN BÖLÜM ======================= */}
+      {/* Sağ Taraf: Alış ve Satış Fiyatları */}
+      <div className="text-right flex items-center space-x-4">
+        {/* Alış Fiyatı */}
+        <div className="flex flex-col">
+          <span className="text-xs text-gray-500 dark:text-gray-400">Alış</span>
+          <p className="font-semibold text-gray-900 dark:text-white text-sm">
+            ₺{price.buyingPrice.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: fractionDigits })}
+          </p>
+        </div>
+        {/* Satış Fiyatı */}
+        <div className="flex flex-col">
+          <span className="text-xs text-gray-500 dark:text-gray-400">Satış</span>
+          <p className="font-semibold text-gray-900 dark:text-white text-sm">
+            ₺{price.sellingPrice.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: fractionDigits })}
+          </p>
         </div>
       </div>
+      {/* ==================================================================== */}
     </div>
   );
 }
