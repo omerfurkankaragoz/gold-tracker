@@ -1,8 +1,7 @@
 // Konum: src/components/Insights.tsx
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react'; // useCallback'i kaldırdık
 import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
-// Eye ve EyeOff import'ları kaldırıldı, sadece TrendingUp, Loader, BarChart2 kalıyor
 import { TrendingUp, Loader, BarChart2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useInvestmentsContext } from '../context/InvestmentsContext';
@@ -15,53 +14,105 @@ type ChartDataPoint = {
   value: number;
 };
 
-// Props arayüzü, App.tsx'den gelen verileri almak için aynı kalıyor
+type TimeRange = '1G' | '1H' | '1A' | '1Y' | 'Tümü';
+
+const timeRanges: { id: TimeRange; label: string }[] = [
+  { id: '1G', label: 'Günlük' },
+  { id: '1H', label: 'Haftalık' },
+  { id: '1A', label: 'Aylık' },
+  { id: '1Y', label: 'Yıllık' },
+  { id: 'Tümü', label: 'Tümü' },
+];
+
 interface InsightsProps {
   isBalanceVisible: boolean;
 }
 
-// Props'tan artık setIsBalanceVisible fonksiyonunu almıyoruz, çünkü burada buton yok
 export function Insights({ isBalanceVisible }: InsightsProps) {
   const { investments, totalPortfolioValue, loading: contextLoading } = useInvestmentsContext();
   const { prices, loading: pricesLoading } = usePrices();
-  
+
   const [historyData, setHistoryData] = useState<ChartDataPoint[]>([]);
   const [initialLoading, setInitialLoading] = useState(true);
+  const [activeRange, setActiveRange] = useState<TimeRange>('1A');
 
-  useEffect(() => {
-    const initializeChart = async () => {
-      setInitialLoading(true);
-      try {
-        const { data: history, error } = await supabase
+  // ======================= GÜNCELLENEN BÖLÜM 1 =======================
+  // Veri çekme fonksiyonunu daha sade bir hale getirmek için useCallback sarmalayıcısını kaldırdık.
+  // Bu, olası state etkileşim sorunlarını ortadan kaldırır.
+  const fetchHistoryData = async (range: TimeRange) => {
+    setInitialLoading(true);
+
+    try {
+      let queryBuilder; // Sorgu oluşturucuyu başta tanımlıyoruz.
+      let finalData = [];
+
+      if (range === '1G') {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); 
+        const yesterday = new Date(today);
+        yesterday.setDate(today.getDate() - 1);
+
+        const { data: yesterdayData, error: yesterdayError } = await supabase
           .from('portfolio_history')
           .select('recorded_at, value')
-          .order('recorded_at', { ascending: true })
-          .limit(30);
-
-        if (error) throw error;
-
-        const formattedHistory = history
-          ?.map(item => {
-            if (item && typeof item.value === 'number') {
-              return {
-                time: new Date(item.recorded_at).toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit' }),
-                value: parseFloat(item.value.toFixed(2)),
-              };
-            }
-            return null;
-          })
-          .filter(Boolean) as ChartDataPoint[] || [];
+          .gte('recorded_at', yesterday.toISOString())
+          .lt('recorded_at', today.toISOString())
+          .order('recorded_at', { ascending: false })
+          .limit(1);
         
-        setHistoryData(formattedHistory);
-      } catch (error) {
-        console.error("Geçmiş verileri çekerken hata:", error);
-        setHistoryData([]);
-      } finally {
-        setInitialLoading(false);
+        if (yesterdayError) throw yesterdayError;
+        finalData = yesterdayData || [];
+
+      } else {
+        const now = new Date();
+        let startDate: Date | null = null;
+        queryBuilder = supabase
+          .from('portfolio_history')
+          .select('recorded_at, value')
+          .order('recorded_at', { ascending: true });
+
+        switch (range) {
+          case '1H': startDate = new Date(now.setDate(now.getDate() - 7)); break;
+          case '1A': startDate = new Date(now.setMonth(now.getMonth() - 1)); break;
+          case '1Y': startDate = new Date(now.setFullYear(now.getFullYear() - 1)); break;
+          default: startDate = null; 
+        }
+
+        if (startDate) {
+          queryBuilder = queryBuilder.gte('recorded_at', startDate.toISOString());
+        }
+        
+        const { data, error } = await queryBuilder;
+        if (error) throw error;
+        finalData = data || [];
       }
-    };
-    initializeChart();
-  }, []);
+      
+      const formattedHistory = finalData
+        .map(item => {
+          if (item && typeof item.value === 'number') {
+            return {
+              time: new Date(item.recorded_at).toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit' }),
+              value: parseFloat(item.value.toFixed(2)),
+            };
+          }
+          return null;
+        })
+        .filter(Boolean) as ChartDataPoint[];
+      
+      setHistoryData(formattedHistory);
+
+    } catch (error) {
+      console.error("Geçmiş verileri çekerken hata:", error);
+      setHistoryData([]);
+    } finally {
+      setInitialLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchHistoryData(activeRange);
+  }, [activeRange]); // Artık sadece activeRange değiştiğinde tetikleniyor.
+  // =========================================================================
 
   const assetSummary = useMemo<SummaryData>(() => {
     const summary: SummaryData = {};
@@ -135,8 +186,6 @@ export function Insights({ isBalanceVisible }: InsightsProps) {
 
   return (
     <div className="space-y-6">
-      {/* ======================= DEĞİŞİKLİK BURADA ======================= */}
-      {/* Toplam varlıklar kartından göz ikonu butonu kaldırıldı */}
       <div className="bg-white rounded-2xl p-6 text-center shadow-sm">
         <p className="text-sm text-gray-500 mb-2">Toplam Varlıklarım</p>
         <h1 className="text-4xl font-bold text-gray-900">
@@ -159,7 +208,6 @@ export function Insights({ isBalanceVisible }: InsightsProps) {
             </div>
         )}
       </div>
-      {/* ================================================================= */}
 
       <div className="h-64 w-full">
         <ResponsiveContainer>
@@ -192,6 +240,25 @@ export function Insights({ isBalanceVisible }: InsightsProps) {
             />
           </AreaChart>
         </ResponsiveContainer>
+      </div>
+      
+      <div className="flex items-center justify-between space-x-1 p-1 bg-gray-100 border border-gray-200 rounded-full">
+        {timeRanges.map(range => (
+          <button
+            key={range.id}
+            onClick={() => setActiveRange(range.id)}
+            // ======================= GÜNCELLENEN BÖLÜM 2 =======================
+            // Hover efekti daha temiz bir hale getirildi. 
+            // Artık yazı rengi değişmiyor, sadece arka plan rengi hafifçe değişiyor.
+            className={`flex-1 px-3 py-2 text-sm font-semibold rounded-full transition-all duration-300 ${
+              activeRange === range.id
+                ? 'bg-white text-blue-600 shadow-md'
+                : 'bg-transparent text-gray-500 hover:bg-gray-200'
+            }`}
+          >
+            {range.label}
+          </button>
+        ))}
       </div>
       
       <AssetSummaryCard summary={assetSummary} loading={isLoading} />
