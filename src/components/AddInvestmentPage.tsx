@@ -135,7 +135,7 @@ export function AddInvestmentPage({ onBack, initialSelectedType, isDirectAdd = f
                     }`}
                   >
                     <div className="flex items-center space-x-2">
-                      <Icon className={`w-5 h-5 ${isSelected ? 'text-white' : 'text-blue-600 dark:text-blue-400'}`} />
+                      <Icon className={`w-5 h-5 ${isSelected ? 'text-white' : 'text-blue-600 dark:text-blue-600'}`} />
                       <span
                         className={`font-bold text-sm ${
                           isSelected ? 'text-white' : 'text-gray-800 dark:text-gray-200'

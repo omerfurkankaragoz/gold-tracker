@@ -1,8 +1,5 @@
-// Konum: src/context/ThemeContext.tsx (YENİ DOSYA)
-
 import React, { createContext, useState, useEffect, useContext, ReactNode } from 'react';
 
-// Temanın tipini ve başlangıç durumunu tanımlıyoruz
 type Theme = 'light' | 'dark';
 
 interface ThemeContextType {
@@ -10,31 +7,39 @@ interface ThemeContextType {
   toggleTheme: () => void;
 }
 
-// Context'i oluşturuyoruz
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-// Uygulamamızı sarmalayacak olan Provider component'i
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
-  // Tarayıcının veya sistemin tercihini veya local storage'daki kaydı okuyoruz
   const [theme, setTheme] = useState<Theme>(() => {
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme) {
       return savedTheme as Theme;
     }
-    // Sistem tercihini kontrol et
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   });
 
-  // Tema her değiştiğinde bu fonksiyon çalışır
   useEffect(() => {
     const root = window.document.documentElement;
     root.classList.remove('light', 'dark');
     root.classList.add(theme);
-    // Seçimi kullanıcının tarayıcısında sakla
     localStorage.setItem('theme', theme);
+
+    // ================= YENİ EKLENEN BÖLÜM =================
+    // Çentik (status bar) rengini tema ile birlikte güncelle
+    const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+    if (themeColorMeta) {
+      if (theme === 'dark') {
+        // Koyu tema için arka plan rengi (Tailwind gray-900)
+        themeColorMeta.setAttribute('content', '#111827'); 
+      } else {
+        // Açık tema için arka plan rengi
+        themeColorMeta.setAttribute('content', '#ffffff');
+      }
+    }
+    // ========================================================
+
   }, [theme]);
 
-  // Temayı değiştiren fonksiyon
   const toggleTheme = () => {
     setTheme(prevTheme => (prevTheme === 'light' ? 'dark' : 'light'));
   };
@@ -48,7 +53,6 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-// Bu custom hook, component'lerden context'e kolayca erişmemizi sağlayacak
 export const useTheme = () => {
   const context = useContext(ThemeContext);
   if (context === undefined) {

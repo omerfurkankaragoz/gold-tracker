@@ -56,10 +56,12 @@ export function AssetSummaryCard({ summary, loading }: AssetSummaryCardProps) {
           return (
             <div key={key} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded-xl">
               <div className="flex items-center space-x-4">
-                <div className="w-10 h-10 bg-white dark:bg-gray-600 border border-gray-200 dark:border-gray-500 rounded-full flex items-center justify-center flex-shrink-0">
-                  <Icon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                {/* ======================= GÜNCELLENEN BÖLÜM ======================= */}
+                <div className="bg-gray-100 dark:bg-gray-700 p-3 rounded-full flex-shrink-0">
+                   <Icon className="h-5 w-5 text-blue-600 dark:text-blue-600" />
                 </div>
-                <div>
+                {/* ==================================================================== */}
+                <div className="text-left">
                   <p className="font-semibold text-gray-800 dark:text-gray-200">{details.name}</p>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
                     {item.totalAmount.toLocaleString('tr-TR', { 

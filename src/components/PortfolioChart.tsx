@@ -64,7 +64,7 @@ export function PortfolioChart() {
   return (
     <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-100 dark:border-gray-700">
       <div className="flex items-center space-x-2 mb-4">
-        <PieChartIcon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+        <PieChartIcon className="h-5 w-5 text-blue-600 dark:text-blue-600" />
         <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Portföy Dağılımı</h2>
       </div>
 

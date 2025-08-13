@@ -1,5 +1,4 @@
 import React, { useState, useMemo } from 'react';
-// Hatanın olası kaynağı: Gem ikonunun bu satıra eklenmemiş olması.
 import { Plus, Trash2, TrendingUp, TrendingDown, DollarSign, Euro, Coins, ChevronsUpDown, ChevronDown, ChevronUp, Gem } from 'lucide-react';
 import { useInvestmentsContext } from '../context/InvestmentsContext';
 import { usePrices } from '../hooks/usePrices';
@@ -33,7 +32,6 @@ interface HoldingsProps {
 export function Holdings({ onSelectInvestment, onAddInvestment }: HoldingsProps) {
   const { investments, deleteInvestment } = useInvestmentsContext();
   const { prices } = usePrices();
-
   const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: 'ascending' | 'descending' }>({
     key: 'purchase_date',
     direction: 'descending',
@@ -41,10 +39,8 @@ export function Holdings({ onSelectInvestment, onAddInvestment }: HoldingsProps)
 
   const sortedInvestments = useMemo(() => {
     let sortableItems = [...investments];
-    
     sortableItems.sort((a, b) => {
       let aValue: string | number, bValue: string | number;
-
       if (sortConfig.key === 'name') {
         aValue = typeDetails[a.type].name;
         bValue = typeDetails[b.type].name;
@@ -55,16 +51,10 @@ export function Holdings({ onSelectInvestment, onAddInvestment }: HoldingsProps)
         aValue = new Date(a.purchase_date).getTime();
         bValue = new Date(b.purchase_date).getTime();
       }
-
-      if (aValue < bValue) {
-        return sortConfig.direction === 'ascending' ? -1 : 1;
-      }
-      if (aValue > bValue) {
-        return sortConfig.direction === 'ascending' ? 1 : -1;
-      }
+      if (aValue < bValue) return sortConfig.direction === 'ascending' ? -1 : 1;
+      if (aValue > bValue) return sortConfig.direction === 'ascending' ? 1 : -1;
       return 0;
     });
-
     return sortableItems;
   }, [investments, prices, sortConfig]);
 
@@ -85,10 +75,7 @@ export function Holdings({ onSelectInvestment, onAddInvestment }: HoldingsProps)
 
   const SortButton = ({ sortKey, label }: { sortKey: SortKey; label: string }) => {
     const isActive = sortConfig.key === sortKey;
-    const Icon = isActive 
-      ? (sortConfig.direction === 'ascending' ? ChevronUp : ChevronDown) 
-      : ChevronsUpDown;
-    
+    const Icon = isActive ? (sortConfig.direction === 'ascending' ? ChevronUp : ChevronDown) : ChevronsUpDown;
     return (
       <button 
         onClick={() => requestSort(sortKey)}
@@ -116,7 +103,6 @@ export function Holdings({ onSelectInvestment, onAddInvestment }: HoldingsProps)
           <span>Ekle</span>
         </button>
       </div>
-
       {investments.length === 0 ? (
         <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-2xl shadow-sm">
           <h3 className="font-semibold text-gray-700 dark:text-gray-300 mb-2">Henüz varlık eklemediniz</h3>
@@ -131,7 +117,6 @@ export function Holdings({ onSelectInvestment, onAddInvestment }: HoldingsProps)
             <SortButton sortKey="name" label="İsim" />
             <SortButton sortKey="currentValue" label="Değer" />
           </div>
-
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden">
             <div className="divide-y divide-gray-200 dark:divide-gray-700">
               {sortedInvestments.map((investment) => {
@@ -142,7 +127,6 @@ export function Holdings({ onSelectInvestment, onAddInvestment }: HoldingsProps)
                 const purchaseValue = investment.amount * investment.purchase_price;
                 const gain = currentValue - purchaseValue;
                 const gainPercent = purchaseValue > 0 ? (gain / purchaseValue) * 100 : 0;
-
                 return (
                   <button
                     key={investment.id}
@@ -150,11 +134,13 @@ export function Holdings({ onSelectInvestment, onAddInvestment }: HoldingsProps)
                     className="w-full text-left p-4 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50 active:bg-gray-100 dark:active:bg-gray-700"
                   >
                     <div className="flex justify-between items-start mb-4">
-                      <div className="flex items-center space-x-3 min-w-0">
-                        <div className="w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center flex-shrink-0">
-                          <Icon className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+                      <div className="flex items-center space-x-4 min-w-0">
+                        {/* ======================= GÜNCELLENEN BÖLÜM ======================= */}
+                        <div className="bg-gray-100 dark:bg-gray-700 p-3 rounded-full flex-shrink-0">
+                          <Icon className="h-5 w-5 text-blue-600 dark:text-blue-600" />
                         </div>
-                        <div className="min-w-0">
+                        {/* ==================================================================== */}
+                        <div className="min-w-0 text-left">
                           <p className="font-semibold text-gray-900 dark:text-gray-100 truncate">{details.name}</p>
                           <p className="text-sm text-gray-500 dark:text-gray-400">
                             {investment.amount.toLocaleString('tr-TR', {maximumFractionDigits: 4})} {details.unit}
@@ -171,7 +157,6 @@ export function Holdings({ onSelectInvestment, onAddInvestment }: HoldingsProps)
                         <Trash2 className="h-4 w-4" />
                       </button>
                     </div>
-
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Anlık Değer</p>
