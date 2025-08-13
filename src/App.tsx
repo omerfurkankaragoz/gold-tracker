@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Session } from '@supabase/supabase-js';
-import { supabase, Investment } from './lib/supabase'; // Investment tipini import ediyoruz
+import { supabase, Investment } from './lib/supabase';
 import { Dashboard } from './components/Dashboard';
 import { Holdings } from './components/Holdings';
 import { AITools } from './components/AITools';
@@ -45,12 +45,14 @@ function App() {
 function MainApp() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [selectedInvestmentId, setSelectedInvestmentId] = useState<string | null>(null);
-  
-  // YENİ: Ekleme sayfasının durumunu ve başlangıç türünü tek bir state'te tutuyoruz
   const [addInvestmentState, setAddInvestmentState] = useState<{
     isOpen: boolean;
     initialType?: Investment['type'];
   }>({ isOpen: false });
+  
+  // ================= DEĞİŞİKLİK 1: GÖRÜNÜRLÜK STATE'İ BURAYA TAŞINDI =================
+  const [isBalanceVisible, setIsBalanceVisible] = useState(true);
+  // ==============================================================================
 
   const handleSelectInvestment = (id: string) => {
     setActiveTab('holdings');
@@ -61,9 +63,7 @@ function MainApp() {
     setSelectedInvestmentId(null);
   };
 
-  // YENİ: Ekleme sayfasını açan fonksiyon artık başlangıç türü alabiliyor
   const handleGoToAddInvestment = (initialType?: Investment['type']) => {
-    // Dashboard'dan geliyorsa tab'ı dashboard yap, yoksa holdings yap
     if (initialType) {
         setActiveTab('dashboard');
     } else {
@@ -89,13 +89,20 @@ function MainApp() {
       case 'holdings':
         return <Holdings onSelectInvestment={handleSelectInvestment} onAddInvestment={() => handleGoToAddInvestment()} />;
       case 'insights':
-        return <Insights />;
+        // ================= DEĞİŞİKLİK 2: PROPLAR INSIGHTS'A GÖNDERİLİYOR =================
+        return <Insights isBalanceVisible={isBalanceVisible} setIsBalanceVisible={setIsBalanceVisible} />;
       case 'ai-tools':
         return <AITools />;
       case 'profile':
         return <Profile />;
       default:
-        return <Dashboard onNavigate={setActiveTab} onAddInvestment={handleGoToAddInvestment} />;
+        // ================= DEĞİŞİKLİK 3: PROPLAR DASHBOARD'A GÖNDERİLİYOR =================
+        return <Dashboard 
+                  onNavigate={setActiveTab} 
+                  onAddInvestment={handleGoToAddInvestment} 
+                  isBalanceVisible={isBalanceVisible}
+                  setIsBalanceVisible={setIsBalanceVisible}
+               />;
     }
   };
   

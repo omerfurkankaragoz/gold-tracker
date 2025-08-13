@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
+// Eye ve EyeOff import'ları kaldırıldı, sadece TrendingUp, Loader, BarChart2 kalıyor
 import { TrendingUp, Loader, BarChart2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useInvestmentsContext } from '../context/InvestmentsContext';
@@ -9,13 +10,18 @@ import { PortfolioChart } from './PortfolioChart';
 import { usePrices } from '../hooks/usePrices';
 import { AssetSummaryCard, SummaryData } from './AssetSummaryCard';
 
-// Grafik verisinin tipini tanımlıyoruz
 type ChartDataPoint = {
   time: string;
   value: number;
 };
 
-export function Insights() {
+// Props arayüzü, App.tsx'den gelen verileri almak için aynı kalıyor
+interface InsightsProps {
+  isBalanceVisible: boolean;
+}
+
+// Props'tan artık setIsBalanceVisible fonksiyonunu almıyoruz, çünkü burada buton yok
+export function Insights({ isBalanceVisible }: InsightsProps) {
   const { investments, totalPortfolioValue, loading: contextLoading } = useInvestmentsContext();
   const { prices, loading: pricesLoading } = usePrices();
   
@@ -57,32 +63,22 @@ export function Insights() {
     initializeChart();
   }, []);
 
-  // Varlık özeti için hesaplama bölümü artık TÜM türleri kapsıyor.
   const assetSummary = useMemo<SummaryData>(() => {
     const summary: SummaryData = {};
-
-    // Artık 'if' kontrolü yok, her yatırımı döngüye alıyoruz.
     investments.forEach(investment => {
-        // Fiyatı al (TL için fiyat varsayılan olarak 1'dir)
         const price = prices[investment.type]?.sellingPrice || 1;
-        
-        // Eğer bu türde bir varlık daha önce eklenmemişse, objeyi başlat
         if (!summary[investment.type]) {
             summary[investment.type] = { totalAmount: 0, totalValue: 0 };
         }
-
         const summaryItem = summary[investment.type]!;
         summaryItem.totalAmount += investment.amount;
         summaryItem.totalValue += investment.amount * price;
     });
-
     return summary;
   }, [investments, prices]);
 
-
   const chartData = useMemo(() => {
     const finalData = [...historyData];
-
     if (totalPortfolioValue > 0) {
       finalData.push({
         time: 'Şimdi',
@@ -126,7 +122,10 @@ export function Insights() {
         <div className="bg-gray-900 text-white p-2 rounded-md shadow-lg border border-gray-700">
           <p className="text-xs font-semibold">{label}</p>
           <p className="font-bold text-base text-blue-300">
-            ₺{payload[0].value.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            {isBalanceVisible ? 
+              `₺${payload[0].value.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+              : '₺******'
+            }
           </p>
         </div>
       );
@@ -136,19 +135,31 @@ export function Insights() {
 
   return (
     <div className="space-y-6">
+      {/* ======================= DEĞİŞİKLİK BURADA ======================= */}
+      {/* Toplam varlıklar kartından göz ikonu butonu kaldırıldı */}
       <div className="bg-white rounded-2xl p-6 text-center shadow-sm">
         <p className="text-sm text-gray-500 mb-2">Toplam Varlıklarım</p>
         <h1 className="text-4xl font-bold text-gray-900">
-          ₺{endValue.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          {isBalanceVisible ? 
+            `₺${endValue.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+            : '₺******'
+          }
         </h1>
         {chartData.length > 1 && (
             <div className={`flex items-center justify-center space-x-2 mt-2 font-semibold ${ periodChange >= 0 ? 'text-green-600' : 'text-red-600' }`}>
-                <TrendingUp className="h-5 w-5" />
-                <span>{periodChange >= 0 ? '+' : ''}₺{Math.abs(periodChange).toLocaleString('tr-TR', {minimumFractionDigits: 2})}</span>
-                <span>({periodChangePercent.toFixed(2)}%)</span>
+              {isBalanceVisible ? (
+                <>
+                  <TrendingUp className="h-5 w-5" />
+                  <span>{periodChange >= 0 ? '+' : ''}₺{Math.abs(periodChange).toLocaleString('tr-TR', {minimumFractionDigits: 2})}</span>
+                  <span>({periodChangePercent.toFixed(2)}%)</span>
+                </>
+              ) : (
+                <span>******</span>
+              )}
             </div>
         )}
       </div>
+      {/* ================================================================= */}
 
       <div className="h-64 w-full">
         <ResponsiveContainer>
@@ -183,10 +194,8 @@ export function Insights() {
         </ResponsiveContainer>
       </div>
       
-      {/* Varlık Özeti Kartını Portföy Dağılımının ÜSTÜNE ekliyoruz */}
       <AssetSummaryCard summary={assetSummary} loading={isLoading} />
       
-      {/* Portföy Dağılımı Grafiğini Buraya EKLİYORUZ */}
       <PortfolioChart />
       
     </div>
