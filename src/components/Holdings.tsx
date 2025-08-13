@@ -1,10 +1,8 @@
-// Konum: src/components/Holdings.tsx
-
 import React, { useState, useMemo } from 'react';
-import { Plus, Trash2, TrendingUp, TrendingDown, DollarSign, Euro, Coins, ChevronsUpDown, ChevronDown, ChevronUp,Gem  } from 'lucide-react';
+// Hatanın olası kaynağı: Gem ikonunun bu satıra eklenmemiş olması.
+import { Plus, Trash2, TrendingUp, TrendingDown, DollarSign, Euro, Coins, ChevronsUpDown, ChevronDown, ChevronUp, Gem } from 'lucide-react';
 import { useInvestmentsContext } from '../context/InvestmentsContext';
 import { usePrices } from '../hooks/usePrices';
-// AddInvestmentModal import'u kaldırıldı.
 import { format } from 'date-fns';
 import { tr } from 'date-fns/locale';
 import { Investment } from '../lib/supabase';
@@ -13,7 +11,7 @@ export const typeDetails: Record<string, { icon: React.ElementType; name: string
   usd: { icon: DollarSign, name: 'Dolar', unit: '$' },
   eur: { icon: Euro, name: 'Euro', unit: '€' },
   tl: { icon: () => <>₺</>, name: 'Türk Lirası', unit: '₺' },
-  gumus: { icon: Gem, name: 'Gram Gümüş', unit: 'gr' }, // GÜMÜŞ EKLENDİ
+  gumus: { icon: Gem, name: 'Gram Gümüş', unit: 'gr' },
   gold: { icon: Coins, name: 'Gram Altın', unit: 'gr' },
   quarter_gold: { icon: Coins, name: 'Çeyrek Altın', unit: 'adet' },
   half_gold: { icon: Coins, name: 'Yarım Altın', unit: 'adet' },
@@ -29,11 +27,10 @@ type SortKey = 'purchase_date' | 'name' | 'currentValue';
 
 interface HoldingsProps {
   onSelectInvestment: (id: string) => void;
-  onAddInvestment: () => void; // YENİ: Ekleme sayfasını açacak fonksiyon prop'u
+  onAddInvestment: () => void;
 }
 
 export function Holdings({ onSelectInvestment, onAddInvestment }: HoldingsProps) {
-  // isModalOpen state'i kaldırıldı.
   const { investments, deleteInvestment } = useInvestmentsContext();
   const { prices } = usePrices();
 
@@ -97,8 +94,8 @@ export function Holdings({ onSelectInvestment, onAddInvestment }: HoldingsProps)
         onClick={() => requestSort(sortKey)}
         className={`flex-1 flex items-center justify-center space-x-2 px-3 py-2 text-sm rounded-full transition-all duration-300 ${
           isActive 
-            ? 'bg-white text-blue-600 font-bold shadow-md' 
-            : 'bg-transparent text-gray-500 hover:text-gray-900'
+            ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-white font-bold shadow-md' 
+            : 'bg-transparent text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
         }`}
       >
         <Icon className="h-4 w-4" />
@@ -110,8 +107,7 @@ export function Holdings({ onSelectInvestment, onAddInvestment }: HoldingsProps)
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Varlıklarım</h1>
-        {/* YENİ: Buton artık onAddInvestment prop'unu çağırıyor */}
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Varlıklarım</h1>
         <button
           onClick={onAddInvestment}
           className="bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700 transition-colors flex items-center space-x-2"
@@ -122,22 +118,22 @@ export function Holdings({ onSelectInvestment, onAddInvestment }: HoldingsProps)
       </div>
 
       {investments.length === 0 ? (
-        <div className="text-center py-12 bg-white rounded-2xl shadow-sm">
-          <h3 className="font-semibold text-gray-700 mb-2">Henüz varlık eklemediniz</h3>
-          <p className="text-sm text-gray-500">
+        <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-2xl shadow-sm">
+          <h3 className="font-semibold text-gray-700 dark:text-gray-300 mb-2">Henüz varlık eklemediniz</h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
               Başlamak için 'Ekle' butonuna tıklayarak ilk yatırımınızı girin.
           </p>
         </div>
       ) : (
         <>
-          <div className="flex items-center justify-between space-x-1 p-1 bg-gray-100 border border-gray-200 rounded-full">
+          <div className="flex items-center justify-between space-x-1 p-1 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full">
             <SortButton sortKey="purchase_date" label="Tarih" />
             <SortButton sortKey="name" label="İsim" />
             <SortButton sortKey="currentValue" label="Değer" />
           </div>
 
-          <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-            <div className="divide-y divide-gray-200">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden">
+            <div className="divide-y divide-gray-200 dark:divide-gray-700">
               {sortedInvestments.map((investment) => {
                 const details = typeDetails[investment.type as Investment['type']];
                 const Icon = details.icon;
@@ -151,26 +147,26 @@ export function Holdings({ onSelectInvestment, onAddInvestment }: HoldingsProps)
                   <button
                     key={investment.id}
                     onClick={() => onSelectInvestment(investment.id)}
-                    className="w-full text-left p-4 transition-colors hover:bg-gray-50 active:bg-gray-100"
+                    className="w-full text-left p-4 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50 active:bg-gray-100 dark:active:bg-gray-700"
                   >
                     <div className="flex justify-between items-start mb-4">
                       <div className="flex items-center space-x-3 min-w-0">
-                        <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
-                          <Icon className="h-5 w-5 text-gray-600" />
+                        <div className="w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center flex-shrink-0">
+                          <Icon className="h-5 w-5 text-gray-600 dark:text-gray-300" />
                         </div>
                         <div className="min-w-0">
-                          <p className="font-semibold text-gray-900 truncate">{details.name}</p>
-                          <p className="text-sm text-gray-500">
+                          <p className="font-semibold text-gray-900 dark:text-gray-100 truncate">{details.name}</p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
                             {investment.amount.toLocaleString('tr-TR', {maximumFractionDigits: 4})} {details.unit}
                           </p>
-                          <p className="text-xs text-gray-400">
+                          <p className="text-xs text-gray-400 dark:text-gray-500">
                             {format(new Date(investment.purchase_date), 'dd MMM yyyy', { locale: tr })}
                           </p>
                         </div>
                       </div>
                       <button
                         onClick={(e) => handleDelete(e, investment.id)}
-                        className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors flex-shrink-0 ml-2 z-10 relative"
+                        className="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors flex-shrink-0 ml-2 z-10 relative"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
@@ -178,21 +174,21 @@ export function Holdings({ onSelectInvestment, onAddInvestment }: HoldingsProps)
 
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <p className="text-xs text-gray-500 mb-1">Anlık Değer</p>
-                        <p className="font-semibold text-gray-900 break-words">
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Anlık Değer</p>
+                        <p className="font-semibold text-gray-900 dark:text-white break-words">
                           ₺{currentValue.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
                         </p>
-                        <p className="text-sm text-gray-500 break-words">
+                        <p className="text-sm text-gray-500 dark:text-gray-400 break-words">
                           ₺{currentPrice.toLocaleString('tr-TR', { minimumFractionDigits: 4 })} / {details.unit}
                         </p>
                       </div>
                       <div>
-                        <p className="text-xs text-gray-500 mb-1">Kar/Zarar</p>
-                        <div className={`font-semibold flex items-center space-x-1 break-words ${gain >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Kar/Zarar</p>
+                        <div className={`font-semibold flex items-center space-x-1 break-words ${gain >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                           {gain >= 0 ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
                           <span>₺{Math.abs(gain).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</span>
                         </div>
-                        <p className={`text-sm ${gain >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        <p className={`text-sm ${gain >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                           {gainPercent >= 0 ? '+' : ''}{gainPercent.toFixed(2)}%
                         </p>
                       </div>
@@ -204,8 +200,6 @@ export function Holdings({ onSelectInvestment, onAddInvestment }: HoldingsProps)
           </div>
         </>
       )}
-
-      {/* AddInvestmentModal tamamen kaldırıldı */}
     </div>
   );
 }

@@ -1,6 +1,4 @@
-// Konum: src/components/Insights.tsx
-
-import React, { useState, useEffect, useMemo, useCallback } from 'react'; // useCallback'i kaldırdık
+import React, { useState, useEffect, useMemo } from 'react'; // Hata buradaydı, düzeltildi.
 import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { TrendingUp, Loader, BarChart2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
@@ -36,22 +34,15 @@ export function Insights({ isBalanceVisible }: InsightsProps) {
   const [initialLoading, setInitialLoading] = useState(true);
   const [activeRange, setActiveRange] = useState<TimeRange>('1A');
 
-  // ======================= GÜNCELLENEN BÖLÜM 1 =======================
-  // Veri çekme fonksiyonunu daha sade bir hale getirmek için useCallback sarmalayıcısını kaldırdık.
-  // Bu, olası state etkileşim sorunlarını ortadan kaldırır.
   const fetchHistoryData = async (range: TimeRange) => {
     setInitialLoading(true);
-
     try {
-      let queryBuilder; // Sorgu oluşturucuyu başta tanımlıyoruz.
       let finalData = [];
-
       if (range === '1G') {
         const today = new Date();
-        today.setHours(0, 0, 0, 0); 
+        today.setHours(0, 0, 0, 0);
         const yesterday = new Date(today);
         yesterday.setDate(today.getDate() - 1);
-
         const { data: yesterdayData, error: yesterdayError } = await supabase
           .from('portfolio_history')
           .select('recorded_at, value')
@@ -59,34 +50,28 @@ export function Insights({ isBalanceVisible }: InsightsProps) {
           .lt('recorded_at', today.toISOString())
           .order('recorded_at', { ascending: false })
           .limit(1);
-        
         if (yesterdayError) throw yesterdayError;
         finalData = yesterdayData || [];
-
       } else {
         const now = new Date();
         let startDate: Date | null = null;
-        queryBuilder = supabase
+        let queryBuilder = supabase
           .from('portfolio_history')
           .select('recorded_at, value')
           .order('recorded_at', { ascending: true });
-
         switch (range) {
           case '1H': startDate = new Date(now.setDate(now.getDate() - 7)); break;
           case '1A': startDate = new Date(now.setMonth(now.getMonth() - 1)); break;
           case '1Y': startDate = new Date(now.setFullYear(now.getFullYear() - 1)); break;
-          default: startDate = null; 
+          default: startDate = null;
         }
-
         if (startDate) {
           queryBuilder = queryBuilder.gte('recorded_at', startDate.toISOString());
         }
-        
         const { data, error } = await queryBuilder;
         if (error) throw error;
         finalData = data || [];
       }
-      
       const formattedHistory = finalData
         .map(item => {
           if (item && typeof item.value === 'number') {
@@ -98,9 +83,7 @@ export function Insights({ isBalanceVisible }: InsightsProps) {
           return null;
         })
         .filter(Boolean) as ChartDataPoint[];
-      
       setHistoryData(formattedHistory);
-
     } catch (error) {
       console.error("Geçmiş verileri çekerken hata:", error);
       setHistoryData([]);
@@ -111,19 +94,18 @@ export function Insights({ isBalanceVisible }: InsightsProps) {
 
   useEffect(() => {
     fetchHistoryData(activeRange);
-  }, [activeRange]); // Artık sadece activeRange değiştiğinde tetikleniyor.
-  // =========================================================================
+  }, [activeRange]);
 
   const assetSummary = useMemo<SummaryData>(() => {
     const summary: SummaryData = {};
     investments.forEach(investment => {
-        const price = prices[investment.type]?.sellingPrice || 1;
-        if (!summary[investment.type]) {
-            summary[investment.type] = { totalAmount: 0, totalValue: 0 };
-        }
-        const summaryItem = summary[investment.type]!;
-        summaryItem.totalAmount += investment.amount;
-        summaryItem.totalValue += investment.amount * price;
+      const price = prices[investment.type]?.sellingPrice || 1;
+      if (!summary[investment.type]) {
+        summary[investment.type] = { totalAmount: 0, totalValue: 0 };
+      }
+      const summaryItem = summary[investment.type]!;
+      summaryItem.totalAmount += investment.amount;
+      summaryItem.totalValue += investment.amount * price;
     });
     return summary;
   }, [investments, prices]);
@@ -144,21 +126,21 @@ export function Insights({ isBalanceVisible }: InsightsProps) {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center h-64 text-center">
-        <Loader className="animate-spin text-blue-600 h-8 w-8" />
-        <p className="mt-4 text-gray-600">Paneliniz yükleniyor...</p>
+        <Loader className="animate-spin text-blue-600" />
+        <p className="mt-4 text-gray-600 dark:text-gray-400">Paneliniz yükleniyor...</p>
       </div>
     );
   }
 
   if (chartData.length === 0 && totalPortfolioValue === 0) {
     return (
-        <div className="text-center py-12 bg-white rounded-2xl shadow-sm">
-            <BarChart2 className="mx-auto h-12 w-12 text-gray-300 mb-4" />
-            <h3 className="font-semibold text-gray-700 mb-2">Başlamak için Varlık Ekleyin</h3>
-            <p className="text-sm text-gray-500 max-w-xs mx-auto">
-                Henüz görüntülenecek bir portföy veriniz yok. İlk varlığınızı eklediğinizde grafiğiniz burada oluşacaktır.
-            </p>
-        </div>
+      <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
+        <BarChart2 className="mx-auto h-12 w-12 text-gray-300 dark:text-gray-600 mb-4" />
+        <h3 className="font-semibold text-gray-700 dark:text-gray-300 mb-2">Başlamak için Varlık Ekleyin</h3>
+        <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xs mx-auto">
+          Henüz görüntülenecek bir portföy veriniz yok. İlk varlığınızı eklediğinizde grafiğiniz burada oluşacaktır.
+        </p>
+      </div>
     );
   }
 
@@ -170,7 +152,7 @@ export function Insights({ isBalanceVisible }: InsightsProps) {
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-gray-900 text-white p-2 rounded-md shadow-lg border border-gray-700">
+        <div className="bg-gray-900 dark:bg-gray-700 text-white p-2 rounded-md shadow-lg border border-gray-700 dark:border-gray-600">
           <p className="text-xs font-semibold">{label}</p>
           <p className="font-bold text-base text-blue-300">
             {isBalanceVisible ? 
@@ -186,16 +168,16 @@ export function Insights({ isBalanceVisible }: InsightsProps) {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-2xl p-6 text-center shadow-sm">
-        <p className="text-sm text-gray-500 mb-2">Toplam Varlıklarım</p>
-        <h1 className="text-4xl font-bold text-gray-900">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 text-center shadow-sm border border-gray-200 dark:border-gray-700">
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Toplam Varlıklarım</p>
+        <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100">
           {isBalanceVisible ? 
             `₺${endValue.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
             : '₺******'
           }
         </h1>
         {chartData.length > 1 && (
-            <div className={`flex items-center justify-center space-x-2 mt-2 font-semibold ${ periodChange >= 0 ? 'text-green-600' : 'text-red-600' }`}>
+            <div className={`flex items-center justify-center space-x-2 mt-2 font-semibold ${ periodChange >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }`}>
               {isBalanceVisible ? (
                 <>
                   <TrendingUp className="h-5 w-5" />
@@ -218,12 +200,13 @@ export function Insights({ isBalanceVisible }: InsightsProps) {
                 <stop offset="95%" stopColor="#2563eb" stopOpacity={0}/>
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" className="dark:stroke-gray-700" vertical={false} />
             <Tooltip content={<CustomTooltip />} />
             <XAxis 
               dataKey="time" 
               tick={{ fontSize: 10 }} 
-              stroke="#9ca3af" 
+              stroke="#9ca3af"
+              className="dark:stroke-gray-400"
               tickLine={false} 
               axisLine={false}
               interval="preserveStartEnd"
@@ -242,18 +225,15 @@ export function Insights({ isBalanceVisible }: InsightsProps) {
         </ResponsiveContainer>
       </div>
       
-      <div className="flex items-center justify-between space-x-1 p-1 bg-gray-100 border border-gray-200 rounded-full">
+      <div className="flex items-center justify-between space-x-1 p-1 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full">
         {timeRanges.map(range => (
           <button
             key={range.id}
             onClick={() => setActiveRange(range.id)}
-            // ======================= GÜNCELLENEN BÖLÜM 2 =======================
-            // Hover efekti daha temiz bir hale getirildi. 
-            // Artık yazı rengi değişmiyor, sadece arka plan rengi hafifçe değişiyor.
             className={`flex-1 px-3 py-2 text-sm font-semibold rounded-full transition-all duration-300 ${
               activeRange === range.id
-                ? 'bg-white text-blue-600 shadow-md'
-                : 'bg-transparent text-gray-500 hover:bg-gray-200'
+                ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-white shadow-md'
+                : 'bg-transparent text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700/50'
             }`}
           >
             {range.label}

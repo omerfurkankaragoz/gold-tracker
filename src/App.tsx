@@ -1,5 +1,3 @@
-// Konum: src/App.tsx
-
 import React, { useState, useEffect } from 'react';
 import { Session } from '@supabase/supabase-js';
 import { supabase, Investment } from './lib/supabase';
@@ -31,7 +29,7 @@ function App() {
   }, []);
 
   if (loading) {
-    return <div className="h-full w-full bg-gray-100" />;
+    return <div className="h-full w-full bg-gray-100 dark:bg-gray-900" />;
   }
 
   return (
@@ -41,7 +39,6 @@ function App() {
   );
 }
 
-// Ana Uygulama Component'i
 function MainApp() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [selectedInvestmentId, setSelectedInvestmentId] = useState<string | null>(null);
@@ -50,9 +47,7 @@ function MainApp() {
     initialType?: Investment['type'];
   }>({ isOpen: false });
   
-  // ================= DEĞİŞİKLİK 1: GÖRÜNÜRLÜK STATE'İ BURAYA TAŞINDI =================
   const [isBalanceVisible, setIsBalanceVisible] = useState(true);
-  // ==============================================================================
 
   const handleSelectInvestment = (id: string) => {
     setActiveTab('holdings');
@@ -89,14 +84,12 @@ function MainApp() {
       case 'holdings':
         return <Holdings onSelectInvestment={handleSelectInvestment} onAddInvestment={() => handleGoToAddInvestment()} />;
       case 'insights':
-        // ================= DEĞİŞİKLİK 2: PROPLAR INSIGHTS'A GÖNDERİLİYOR =================
-        return <Insights isBalanceVisible={isBalanceVisible} setIsBalanceVisible={setIsBalanceVisible} />;
+        return <Insights isBalanceVisible={isBalanceVisible} />;
       case 'ai-tools':
         return <AITools />;
       case 'profile':
         return <Profile />;
       default:
-        // ================= DEĞİŞİKLİK 3: PROPLAR DASHBOARD'A GÖNDERİLİYOR =================
         return <Dashboard 
                   onNavigate={setActiveTab} 
                   onAddInvestment={handleGoToAddInvestment} 
@@ -109,7 +102,7 @@ function MainApp() {
   const isFullScreenPageOpen = !!selectedInvestmentId || addInvestmentState.isOpen;
 
   return (
-    <div className="h-full w-full flex flex-col bg-gray-100">
+    <div className="h-full w-full flex flex-col bg-gray-100 dark:bg-gray-900">
       <main className="flex-grow overflow-y-auto px-4 py-6 pb-20">
         {renderContent()}
       </main>
