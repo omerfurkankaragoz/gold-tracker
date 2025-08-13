@@ -1,14 +1,14 @@
 // Konum: src/components/Dashboard.tsx
 
-import React from 'react'; // useState import'u kaldırıldı
-import { DollarSign, Euro, Coins, TrendingUp, Eye, EyeOff } from 'lucide-react';
+import React, { useState } from 'react';
+// ================== DEĞİŞİKLİK 1: Gem İkonu Eklendi ==================
+import { DollarSign, Euro, Coins, TrendingUp, Eye, EyeOff, Gem } from 'lucide-react';
 import { PriceCard } from './PriceCard';
 import { usePrices } from '../hooks/usePrices';
 import { useInvestmentsContext } from '../context/InvestmentsContext';
 import { Investment } from '../lib/supabase';
 import { Price } from '../hooks/usePrices';
 
-// ================= DEĞİŞİKLİK 1: PROPLAR GÜNCELLENDİ =================
 interface DashboardProps {
   onNavigate: (tab: string) => void;
   onAddInvestment: (type: Investment['type']) => void;
@@ -17,12 +17,9 @@ interface DashboardProps {
 }
 
 export function Dashboard({ onNavigate, onAddInvestment, isBalanceVisible, setIsBalanceVisible }: DashboardProps) {
-// =========================================================================
   const { prices, lastUpdated } = usePrices();
   const { investments, totalPortfolioValue } = useInvestmentsContext();
 
-  // YEREL STATE KALDIRILDI
-  
   const handleCardClick = (type: Investment['type']) => {
     onAddInvestment(type);
   };
@@ -39,16 +36,15 @@ export function Dashboard({ onNavigate, onAddInvestment, isBalanceVisible, setIs
 
   return (
     <div className="space-y-6">
-      <div // Ana kart artık bir buton değil, div
+      <div
         onClick={() => onNavigate('insights')}
         className="w-full text-left bg-gradient-to-r from-blue-600 to-teal-600 rounded-2xl p-6 text-white shadow-lg cursor-pointer"
       >
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-xl font-semibold">Panelim</h1>
-          <button 
+          <button
             onClick={(e) => {
-              e.stopPropagation(); 
-              // ================= DEĞİŞİKLİK 2: PROPTAN GELEN FONKSİYON KULLANILIYOR =================
+              e.stopPropagation();
               setIsBalanceVisible(!isBalanceVisible);
             }}
             className="p-1 rounded-full text-blue-200 hover:bg-white/20 transition-colors"
@@ -56,15 +52,12 @@ export function Dashboard({ onNavigate, onAddInvestment, isBalanceVisible, setIs
             {isBalanceVisible ? <Eye className="h-5 w-5" /> : <EyeOff className="h-5 w-5" />}
           </button>
         </div>
-        
         <div className="space-y-2">
           <p className="text-blue-100">Birikimlerinize genel bakış</p>
           <div className="text-3xl font-bold">
             {isBalanceVisible ? `₺${totalPortfolioValue.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}` : '₺******'}
           </div>
-          <div className={`flex items-center space-x-1 text-sm ${
-            totalGain >= 0 ? 'text-green-200' : 'text-red-200'
-          }`}>
+          <div className={`flex items-center space-x-1 text-sm ${totalGain >= 0 ? 'text-green-200' : 'text-red-200'}`}>
             {isBalanceVisible ? (
               <>
                 <TrendingUp className={`h-4 w-4 ${totalGain < 0 ? 'transform rotate-180' : ''}`} />
@@ -79,25 +72,36 @@ export function Dashboard({ onNavigate, onAddInvestment, isBalanceVisible, setIs
       </div>
 
       <div>
-        <div className="flex items-baseline justify-between mb-2 px-1">
+        <div className="flex items-baseline justify-between mb-3 px-1">
           <h2 className="text-xl font-bold text-gray-800">Canlı Piyasa Verileri</h2>
           {lastUpdated && (
             <p className="text-xs text-gray-500 font-medium">
               {lastUpdated.toLocaleTimeString('tr-TR', {
-                hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Europe/Istanbul'
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                timeZone: 'Europe/Istanbul'
               })}
             </p>
           )}
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        <div className="flex flex-col space-y-3">
           {priceCardsToShow.map(([type, price]) => {
             const typedPrice = price as Price;
-            const isGold = typedPrice.name.toLowerCase().includes('altın') || typedPrice.name.toLowerCase().includes('bilezik');
-            const Icon = isGold ? Coins : (typedPrice.symbol === 'USD' ? DollarSign : Euro);
-            
+
+            // ================== DEĞİŞİKLİK 2: İkon Belirleme Mantığı Güncellendi ==================
+            const getIcon = () => {
+              if (type === 'gumus') return Gem;
+              if (typedPrice.name.toLowerCase().includes('altın') || typedPrice.name.toLowerCase().includes('bilezik')) return Coins;
+              if (typedPrice.symbol === 'USD') return DollarSign;
+              return Euro; // Geri kalan her şey için Euro
+            };
+            const Icon = getIcon();
+            // ======================================================================================
+
             return (
-              <button key={type} onClick={() => handleCardClick(type as Investment['type'])} className="text-left h-full">
-                <PriceCard price={typedPrice} icon={<Icon className="h-5 w-5" />} />
+              <button key={type} onClick={() => handleCardClick(type as Investment['type'])} className="w-full">
+                <PriceCard price={typedPrice} icon={<Icon className="h-5 w-5 text-blue-600" />} />
               </button>
             );
           })}

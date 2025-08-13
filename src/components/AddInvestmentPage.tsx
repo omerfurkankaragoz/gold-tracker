@@ -1,7 +1,7 @@
 // Konum: src/components/AddInvestmentPage.tsx
 
 import React, { useState, useMemo, useEffect } from 'react';
-import { ChevronLeft, Search, DollarSign, Euro, Coins, Plus, Info } from 'lucide-react';
+import { ChevronLeft, Search, DollarSign, Euro, Coins, Plus, Info,Gem} from 'lucide-react';
 import { useInvestmentsContext } from '../context/InvestmentsContext';
 import { usePrices } from '../hooks/usePrices';
 import { Investment } from '../lib/supabase';
@@ -18,6 +18,7 @@ const investmentTypes = [
   { id: 'tl', name: 'Türk Lirası', symbol: 'TRY', icon: () => <>₺</>, unit: '₺' },
   { id: 'usd', name: 'Dolar', symbol: 'USD', icon: DollarSign, unit: '$' },
   { id: 'eur', name: 'Euro', symbol: 'EUR', icon: Euro, unit: '€' },
+  { id: 'gumus', name: 'Gram Gümüş', symbol: 'G', icon: Gem, unit: 'gr' }, // GÜMÜŞ EKLENDİ
   { id: 'gold', name: 'Gram Altın', symbol: 'GA', icon: Coins, unit: 'gr' },
   { id: 'quarter_gold', name: 'Çeyrek Altın', symbol: 'CE-K', icon: Coins, unit: 'adet' },
   { id: 'half_gold', name: 'Yarım Altın', symbol: 'YA-K', icon: Coins, unit: 'adet' },

@@ -10,6 +10,7 @@ const corsHeaders = {
 
 // Bu harita, API'deki "Rates" objesinin içindeki anahtarları veritabanına çevirir.
 const goldApiMap: { [key: string]: string } = {
+  'GUMUS': 'gumus', // GÜMÜŞ EŞLEŞTİRMESİ EKLENDİ
   'GRA': 'gold',
   'CEYREKALTIN': 'quarter_gold',
   'YARIMALTIN': 'half_gold',

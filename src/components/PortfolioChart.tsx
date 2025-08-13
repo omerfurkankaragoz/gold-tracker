@@ -16,6 +16,7 @@ const typeDetails: Record<string, { name: string; color: string }> = {
     ayar_14_gold: { name: '14 Ayar Altın', color: '#996B00' },
     ayar_18_gold: { name: '18 Ayar Altın', color: '#855C00' },
     ayar_22_bilezik: { name: '22 Ayar Bilezik', color: '#704D00' },
+    gumus: { name: 'Gram Gümüş', color: '#C0C0C0' }, // GÜMÜŞ EKLENDİ (gümüş rengi)
     usd: { name: 'Dolar', color: '#28A745' },
     eur: { name: 'Euro', color: '#007BFF' },
     tl: { name: 'Türk Lirası', color: '#6F42C1' },

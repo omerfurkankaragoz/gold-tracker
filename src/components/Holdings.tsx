@@ -1,7 +1,7 @@
 // Konum: src/components/Holdings.tsx
 
 import React, { useState, useMemo } from 'react';
-import { Plus, Trash2, TrendingUp, TrendingDown, DollarSign, Euro, Coins, ChevronsUpDown, ChevronDown, ChevronUp } from 'lucide-react';
+import { Plus, Trash2, TrendingUp, TrendingDown, DollarSign, Euro, Coins, ChevronsUpDown, ChevronDown, ChevronUp,Gem  } from 'lucide-react';
 import { useInvestmentsContext } from '../context/InvestmentsContext';
 import { usePrices } from '../hooks/usePrices';
 // AddInvestmentModal import'u kaldırıldı.
@@ -13,6 +13,7 @@ export const typeDetails: Record<string, { icon: React.ElementType; name: string
   usd: { icon: DollarSign, name: 'Dolar', unit: '$' },
   eur: { icon: Euro, name: 'Euro', unit: '€' },
   tl: { icon: () => <>₺</>, name: 'Türk Lirası', unit: '₺' },
+  gumus: { icon: Gem, name: 'Gram Gümüş', unit: 'gr' }, // GÜMÜŞ EKLENDİ
   gold: { icon: Coins, name: 'Gram Altın', unit: 'gr' },
   quarter_gold: { icon: Coins, name: 'Çeyrek Altın', unit: 'adet' },
   half_gold: { icon: Coins, name: 'Yarım Altın', unit: 'adet' },

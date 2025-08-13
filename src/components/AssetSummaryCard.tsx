@@ -1,9 +1,9 @@
 // Konum: src/components/AssetSummaryCard.tsx
 
 import React from 'react';
-import { Coins, DollarSign, Euro } from 'lucide-react';
+// Gümüş için Gem (Mücevher) ikonunu import ediyoruz
+import { Coins, DollarSign, Euro, Gem } from 'lucide-react';
 
-// Bu tip, component'in dışarıdan alacağı verinin yapısını tanımlar.
 export type SummaryData = {
   [key: string]: {
     totalAmount: number;
@@ -16,11 +16,13 @@ interface AssetSummaryCardProps {
   loading: boolean;
 }
 
-// TÜM varlık türleri için ikon, isim, birim gibi statik detayları burada merkezi olarak tanımlıyoruz.
+// ================== DEĞİŞİKLİK 1: GÜMÜŞÜN DETAYLARI EKLENDİ ==================
+// Varlıkların ikon, isim, birim gibi statik detayları
 const assetDetails: { [key: string]: { name: string, unit: string, icon: React.ElementType } } = {
     usd: { name: 'Dolar', unit: '$', icon: DollarSign },
     eur: { name: 'Euro', unit: '€', icon: Euro },
     tl: { name: 'Türk Lirası', unit: '₺', icon: () => <span className="font-bold">₺</span> },
+    gumus: { name: 'Gram Gümüş', unit: 'gr', icon: Gem }, // Gümüş detayı eklendi
     gold: { name: 'Gram Altın', unit: 'gr', icon: Coins },
     quarter_gold: { name: 'Çeyrek Altın', unit: 'adet', icon: Coins },
     half_gold: { name: 'Yarım Altın', unit: 'adet', icon: Coins },
@@ -32,15 +34,15 @@ const assetDetails: { [key: string]: { name: string, unit: string, icon: React.E
     ayar_22_bilezik: { name: '22 Ayar Bilezik', unit: 'gr', icon: Coins },
 };
 
-// Varlıkları hangi sırada göstereceğimizi belirleyen bir dizi.
+// ================== DEĞİŞİKLİK 2: GÜMÜŞÜN SIRALAMASI EKLENDİ ==================
+// Varlıkların hangi sırada gösterileceğini belirleyen dizi
 const displayOrder = [
-    'tl', 'usd', 'eur', 'gold', 'quarter_gold', 'half_gold', 'full_gold', 
+    'tl', 'usd', 'eur', 'gumus', 'gold', 'quarter_gold', 'half_gold', 'full_gold', // Gümüş, altınların hemen önüne eklendi
     'cumhuriyet_gold', 'ata_gold', 'ayar_14_gold', 'ayar_18_gold', 'ayar_22_bilezik'
 ];
 
 export function AssetSummaryCard({ summary, loading }: AssetSummaryCardProps) {
   
-  // Özetlenecek bir veri olup olmadığını kontrol ediyoruz.
   const hasData = Object.values(summary).some(item => item && item.totalAmount > 0);
 
   if (loading || !hasData) {
@@ -55,7 +57,6 @@ export function AssetSummaryCard({ summary, loading }: AssetSummaryCardProps) {
           const item = summary[key];
           const details = assetDetails[key];
           
-          // Eğer bu türde bir varlık yoksa veya detayları tanımlanmamışsa, o satırı atla.
           if (!item || !details || item.totalAmount === 0) return null;
 
           const Icon = details.icon;
@@ -69,7 +70,6 @@ export function AssetSummaryCard({ summary, loading }: AssetSummaryCardProps) {
                 <div>
                   <p className="font-semibold text-gray-800">{details.name}</p>
                   <p className="text-sm text-gray-600">
-                    {/* TL için özel formatlama, diğerleri için genel formatlama */}
                     {item.totalAmount.toLocaleString('tr-TR', { 
                         minimumFractionDigits: key === 'tl' ? 2 : 0,
                         maximumFractionDigits: 4 

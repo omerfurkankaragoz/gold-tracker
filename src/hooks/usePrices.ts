@@ -13,6 +13,7 @@ const initialPrices: Record<string, Price> = {
   usd: { symbol: 'USD', name: 'Dolar', sellingPrice: 0, buyingPrice: 0, change: 0, changePercent: 0 },
   eur: { symbol: 'EUR', name: 'Euro', sellingPrice: 0, buyingPrice: 0, change: 0, changePercent: 0 },
   tl: { symbol: 'TRY', name: 'Türk Lirası', sellingPrice: 1, buyingPrice: 1, change: 0, changePercent: 0 },
+  gumus: { symbol: 'G', name: 'Gram Gümüş', sellingPrice: 0, buyingPrice: 0, change: 0, changePercent: 0 }, // GÜMÜŞ EKLENDİ
   gold: { symbol: 'GA', name: 'Gram Altın', sellingPrice: 0, buyingPrice: 0, change: 0, changePercent: 0 },
   quarter_gold: { symbol: 'C', name: 'Çeyrek Altın', sellingPrice: 0, buyingPrice: 0, change: 0, changePercent: 0 },
   half_gold: { symbol: 'Y', name: 'Yarım Altın', sellingPrice: 0, buyingPrice: 0, change: 0, changePercent: 0 },
@@ -25,6 +26,7 @@ const initialPrices: Record<string, Price> = {
 };
 
 const goldApiMap: { [key: string]: keyof typeof initialPrices } = {
+    'GUMUS': 'gumus', // GÜMÜŞ EŞLEŞTİRMESİ EKLENDİ
     'GRA': 'gold',
     'CEYREKALTIN': 'quarter_gold',
     'YARIMALTIN': 'half_gold',
