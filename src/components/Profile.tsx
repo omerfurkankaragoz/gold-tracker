@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { LogOut, User, Loader, Moon, Sun } from 'lucide-react';
+import { LogOut, User, Loader, Moon, Sun, ChevronRight, Download, HelpCircle, Star } from 'lucide-react';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 import { useTheme } from '../context/ThemeContext';
 
@@ -12,12 +12,13 @@ type ProfileData = {
 // Tema Değiştirme Butonu (Switch) Component'i
 function ThemeSwitch() {
   const { theme, toggleTheme } = useTheme();
-  
   return (
     <div className="flex items-center justify-between p-4">
-      <div className="flex items-center space-x-3">
-        {theme === 'light' ? <Sun className="text-gray-500 dark:text-gray-400" /> : <Moon className="text-gray-500 dark:text-gray-400" />}
-        <span className="font-semibold text-gray-700 dark:text-gray-300">
+      <div className="flex items-center space-x-4">
+        <div className="bg-gray-100 dark:bg-gray-700 p-2 rounded-lg">
+            {theme === 'light' ? <Sun className="text-yellow-500" /> : <Moon className="text-yellow-400" />}
+        </div>
+        <span className="font-semibold text-gray-800 dark:text-gray-200">
           {theme === 'light' ? 'Açık Tema' : 'Koyu Tema'}
         </span>
       </div>
@@ -46,17 +47,14 @@ export function Profile() {
   useEffect(() => {
     const fetchUserData = async () => {
       setLoading(true);
-      
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         setUser(user);
-        
         const { data: profileData, error } = await supabase
           .from('profiles')
           .select('full_name, avatar_url')
           .eq('id', user.id)
           .single();
-
         if (error && error.code !== 'PGRST116') {
           console.error("Profil bilgisi çekilirken hata:", error);
         } else {
@@ -65,7 +63,6 @@ export function Profile() {
       }
       setLoading(false);
     };
-
     fetchUserData();
   }, []);
 
@@ -85,7 +82,7 @@ export function Profile() {
   const displayName = profile?.full_name || (user?.is_anonymous ? 'Misafir Kullanıcı' : user?.email);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="flex flex-col items-center text-center">
         {avatarUrl ? (
           <img 
@@ -98,8 +95,7 @@ export function Profile() {
             <User className="w-12 h-12 text-gray-500 dark:text-gray-400" />
           </div>
         )}
-        
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+        <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
           {displayName}
         </h1>
         {!user?.is_anonymous && (
@@ -109,14 +105,19 @@ export function Profile() {
         )}
       </div>
 
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 divide-y divide-gray-100 dark:divide-gray-700">
-        <ThemeSwitch />
+      <div className="space-y-4">
+        <h2 className="text-lg font-semibold text-gray-500 dark:text-gray-400 px-2">Ayarlar</h2>
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-md border border-gray-100 dark:border-gray-700">
+          <ThemeSwitch />
+        </div>
+      </div>
+      <div>
         <button
           onClick={handleSignOut}
-          className="w-full flex items-center p-4 text-left text-red-600 dark:text-red-500 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors rounded-b-2xl"
+          className="w-full flex items-center justify-center p-4 text-red-600 dark:text-red-500 font-semibold hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors rounded-2xl"
         >
-          <LogOut className="w-5 h-5 mr-3" />
-          <span className="font-semibold">Çıkış Yap</span>
+          <LogOut className="w-5 h-5 mr-2" />
+          <span>Çıkış Yap</span>
         </button>
       </div>
     </div>

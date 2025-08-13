@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Plus, Trash2, TrendingUp, TrendingDown, DollarSign, Euro, Coins, ChevronsUpDown, ChevronDown, ChevronUp, Gem ,TurkishLira} from 'lucide-react';
+import { Plus, Trash2, TrendingUp, TrendingDown, DollarSign, Euro, Coins, ChevronsUpDown, ChevronDown, ChevronUp, Gem, TurkishLiraIcon } from 'lucide-react';
 import { useInvestmentsContext } from '../context/InvestmentsContext';
 import { usePrices } from '../hooks/usePrices';
 import { format } from 'date-fns';
@@ -9,7 +9,7 @@ import { Investment } from '../lib/supabase';
 export const typeDetails: Record<string, { icon: React.ElementType; name: string; unit: string }> = {
   usd: { icon: DollarSign, name: 'Dolar', unit: '$' },
   eur: { icon: Euro, name: 'Euro', unit: '€' },
-  tl: { icon: TurkishLira, name: 'Türk Lirası', unit: '₺' },
+  tl: { icon: TurkishLiraIcon, name: 'Türk Lirası', unit: '₺' },
   gumus: { icon: Gem, name: 'Gram Gümüş', unit: 'gr' },
   gold: { icon: Coins, name: 'Gram Altın', unit: 'gr' },
   quarter_gold: { icon: Coins, name: 'Çeyrek Altın', unit: 'adet' },
@@ -19,7 +19,6 @@ export const typeDetails: Record<string, { icon: React.ElementType; name: string
   ata_gold: { icon: Coins, name: 'Ata Altın', unit: 'adet' },
   ayar_14_gold: { icon: Coins, name: '14 Ayar Altın', unit: 'gr' },
   ayar_18_gold: { icon: Coins, name: '18 Ayar Altın', unit: 'gr' },
-  ayar_22_bilezik: { icon: Coins, name: '22 Ayar Bilezik', unit: 'gr' },
 };
 
 type SortKey = 'purchase_date' | 'name' | 'currentValue';
@@ -166,13 +165,18 @@ export function Holdings({ onSelectInvestment, onAddInvestment, isBalanceVisible
                       <p className="font-semibold text-gray-900 dark:text-white mt-1">
                         {isBalanceVisible ? `₺${currentValue.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}` : '******'}
                       </p>
+                      {/* ======================= DEĞİŞİKLİK BURADA ======================= */}
+                      {/* Alış tarihi bilgisi bu bölüme geri eklendi */}
+                      <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">
+                        {format(new Date(investment.purchase_date), 'dd MMM yyyy', { locale: tr })}
+                      </p>
+                      {/* ==================================================================== */}
                     </div>
                     <div className="text-right">
                       <p className="text-sm text-gray-500 dark:text-gray-400">Kar/Zarar</p>
                       <div className={`font-semibold flex items-center justify-end space-x-1 mt-1 ${gain >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                         {isBalanceVisible ? (
                           <>
-                            {/* ======================= DEĞİŞİKLİK BURADA ======================= */}
                             <span>₺{Math.abs(gain).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</span>
                             <span className='ml-2'>({Math.abs(gainPercent).toFixed(2)}%)</span>
                           </>
