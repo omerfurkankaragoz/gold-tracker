@@ -14,7 +14,7 @@ interface DashboardProps {
 }
 
 export function Dashboard({ onNavigate, onAddInvestment, isBalanceVisible, setIsBalanceVisible }: DashboardProps) {
-  const { prices, lastUpdated } = usePrices();
+  const { prices } = usePrices();
   const { investments, totalPortfolioValue } = useInvestmentsContext();
 
   const handleCardClick = (type: Investment['type']) => {
@@ -28,29 +28,25 @@ export function Dashboard({ onNavigate, onAddInvestment, isBalanceVisible, setIs
   const priceCardsToShow = Object.entries(prices).filter(([key, p]) => key !== 'tl' && (p as Price).sellingPrice > 0);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div
         onClick={() => onNavigate('insights')}
-        className="w-full text-left bg-gradient-to-r from-blue-600 to-teal-600 rounded-2xl p-6 text-white shadow-lg cursor-pointer"
+        className="w-full text-left bg-gradient-to-r from-blue-600 to-teal-600 rounded-3xl p-6 text-white shadow-lg cursor-pointer"
       >
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-xl font-semibold">Panelim</h1>
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold">Panelim</h2>
           <button 
-            onClick={(e) => {
-              e.stopPropagation(); 
-              setIsBalanceVisible(!isBalanceVisible);
-            }}
+            onClick={(e) => { e.stopPropagation(); setIsBalanceVisible(!isBalanceVisible); }}
             className="p-1 rounded-full text-blue-200 hover:bg-white/20 transition-colors"
           >
             {isBalanceVisible ? <Eye className="h-5 w-5" /> : <EyeOff className="h-5 w-5" />}
           </button>
         </div>
-        <div className="space-y-2">
-          <p className="text-blue-100">Birikimlerinize genel bakış</p>
-          <div className="text-3xl font-bold">
+        <div className="mt-4">
+          <p className="text-3xl font-semibold tracking-tight">
             {isBalanceVisible ? `₺${totalPortfolioValue.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}` : '₺******'}
-          </div>
-          <div className={`flex items-center space-x-1 text-sm ${totalGain >= 0 ? 'text-green-200' : 'text-red-200'}`}>
+          </p>
+          <div className={`mt-2 flex items-center space-x-1 text-sm ${totalGain >= 0 ? 'text-green-200' : 'text-red-200'}`}>
             {isBalanceVisible ? (
               <>
                 <TrendingUp className={`h-4 w-4 ${totalGain < 0 ? 'transform rotate-180' : ''}`} />
@@ -65,18 +61,12 @@ export function Dashboard({ onNavigate, onAddInvestment, isBalanceVisible, setIs
       </div>
 
       <div>
-        <div className="flex items-baseline justify-between mb-3 px-1">
-            <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">Güncel Kurlar</h2>
-            {lastUpdated && (
-                <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">
-                    {lastUpdated.toLocaleTimeString('tr-TR', { 
-                        hour: '2-digit', 
-                        minute: '2-digit', 
-                        second: '2-digit',
-                        timeZone: 'Europe/Istanbul' 
-                    })}
-                </p>
-            )}
+        <div className="flex items-baseline justify-between mb-3 px-2">
+          <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Piyasalar</h2>
+          <div className="flex space-x-16">
+            <span className="text-sm font-semibold text-gray-500 dark:text-gray-400">Alış</span>
+            <span className="text-sm font-semibold text-gray-500 dark:text-gray-400">Satış</span>
+          </div>
         </div>
         <div className="flex flex-col space-y-3">
           {priceCardsToShow.map(([type, price]) => {
@@ -88,10 +78,9 @@ export function Dashboard({ onNavigate, onAddInvestment, isBalanceVisible, setIs
               return Euro;
             };
             const Icon = getIcon();
-            
             return (
               <button key={type} onClick={() => handleCardClick(type as Investment['type'])} className="w-full">
-                <PriceCard price={typedPrice} icon={<Icon className="h-5 w-5 text-blue-600" />} />
+                <PriceCard price={typedPrice} icon={<Icon className="h-6 w-6 text-blue-600" />} />
               </button>
             );
           })}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Coins, DollarSign, Euro, Gem } from 'lucide-react';
+import { Coins, DollarSign, Euro, Gem,TurkishLira } from 'lucide-react';
 
 export type SummaryData = {
   [key: string]: {
@@ -16,7 +16,7 @@ interface AssetSummaryCardProps {
 const assetDetails: { [key: string]: { name: string, unit: string, icon: React.ElementType } } = {
   usd: { name: 'Dolar', unit: '$', icon: DollarSign },
   eur: { name: 'Euro', unit: '€', icon: Euro },
-  tl: { name: 'Türk Lirası', unit: '₺', icon: () => <span className="font-bold">₺</span> },
+  tl: { name: 'Türk Lirası', unit: '₺', icon: TurkishLira },
   gumus: { name: 'Gram Gümüş', unit: 'gr', icon: Gem },
   gold: { name: 'Gram Altın', unit: 'gr', icon: Coins },
   quarter_gold: { name: 'Çeyrek Altın', unit: 'adet', icon: Coins },

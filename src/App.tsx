@@ -20,11 +20,9 @@ function App() {
       setSession(session);
       setLoading(false);
     });
-
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
     });
-
     return () => subscription.unsubscribe();
   }, []);
 
@@ -82,7 +80,13 @@ function MainApp() {
 
     switch (activeTab) {
       case 'holdings':
-        return <Holdings onSelectInvestment={handleSelectInvestment} onAddInvestment={() => handleGoToAddInvestment()} />;
+        // ======================= DEĞİŞİKLİK BURADA =======================
+        // isBalanceVisible prop'unun gönderildiğinden emin oluyoruz.
+        return <Holdings 
+                  onSelectInvestment={handleSelectInvestment} 
+                  onAddInvestment={() => handleGoToAddInvestment()} 
+                  isBalanceVisible={isBalanceVisible}
+               />;
       case 'insights':
         return <Insights isBalanceVisible={isBalanceVisible} />;
       case 'ai-tools':

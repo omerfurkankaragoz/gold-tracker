@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react'; // Hata buradaydı, düzeltildi.
+import React, { useState, useEffect, useMemo } from 'react';
 import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { TrendingUp, Loader, BarChart2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
@@ -134,7 +134,7 @@ export function Insights({ isBalanceVisible }: InsightsProps) {
 
   if (chartData.length === 0 && totalPortfolioValue === 0) {
     return (
-      <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
+      <div className="text-center py-16 bg-gray-50 dark:bg-gray-800/50 rounded-2xl">
         <BarChart2 className="mx-auto h-12 w-12 text-gray-300 dark:text-gray-600 mb-4" />
         <h3 className="font-semibold text-gray-700 dark:text-gray-300 mb-2">Başlamak için Varlık Ekleyin</h3>
         <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xs mx-auto">
@@ -152,9 +152,9 @@ export function Insights({ isBalanceVisible }: InsightsProps) {
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-gray-900 dark:bg-gray-700 text-white p-2 rounded-md shadow-lg border border-gray-700 dark:border-gray-600">
+        <div className="bg-gray-900/80 dark:bg-gray-700/80 backdrop-blur-sm text-white p-2 rounded-lg shadow-lg border border-gray-700 dark:border-gray-600">
           <p className="text-xs font-semibold">{label}</p>
-          <p className="font-bold text-base text-blue-300">
+          <p className="font-bold text-base text-white">
             {isBalanceVisible ? 
               `₺${payload[0].value.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
               : '₺******'
@@ -167,17 +167,17 @@ export function Insights({ isBalanceVisible }: InsightsProps) {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 text-center shadow-sm border border-gray-200 dark:border-gray-700">
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Toplam Varlıklarım</p>
-        <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100">
+    <div className="space-y-8">
+      <div className="px-2">
+        <p className="text-base font-medium text-gray-500 dark:text-gray-400">Toplam Varlık Değeri</p>
+        <p className="text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100 mt-1">
           {isBalanceVisible ? 
             `₺${endValue.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
             : '₺******'
           }
-        </h1>
+        </p>
         {chartData.length > 1 && (
-            <div className={`flex items-center justify-center space-x-2 mt-2 font-semibold ${ periodChange >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }`}>
+            <div className={`flex items-center space-x-2 mt-1 font-semibold ${ periodChange >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }`}>
               {isBalanceVisible ? (
                 <>
                   <TrendingUp className="h-5 w-5" />
@@ -191,54 +191,60 @@ export function Insights({ isBalanceVisible }: InsightsProps) {
         )}
       </div>
 
-      <div className="h-64 w-full">
-        <ResponsiveContainer>
-          <AreaChart data={chartData} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
-            <defs>
-              <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#2563eb" stopOpacity={0.4}/>
-                <stop offset="95%" stopColor="#2563eb" stopOpacity={0}/>
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" className="dark:stroke-gray-700" vertical={false} />
-            <Tooltip content={<CustomTooltip />} />
-            <XAxis 
-              dataKey="time" 
-              tick={{ fontSize: 10 }} 
-              stroke="#9ca3af"
-              className="dark:stroke-gray-400"
-              tickLine={false} 
-              axisLine={false}
-              interval="preserveStartEnd"
-              padding={{ left: 10, right: 10 }}
-            />
-            <Area 
-              type="monotone" 
-              dataKey="value" 
-              stroke="#2563eb" 
-              strokeWidth={2.5} 
-              fill="url(#colorValue)" 
-              fillOpacity={1}
-              connectNulls 
-            />
-          </AreaChart>
-        </ResponsiveContainer>
-      </div>
-      
-      <div className="flex items-center justify-between space-x-1 p-1 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full">
-        {timeRanges.map(range => (
-          <button
-            key={range.id}
-            onClick={() => setActiveRange(range.id)}
-            className={`flex-1 px-3 py-2 text-sm font-semibold rounded-full transition-all duration-300 ${
-              activeRange === range.id
-                ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-white shadow-md'
-                : 'bg-transparent text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700/50'
-            }`}
-          >
-            {range.label}
-          </button>
-        ))}
+      <div>
+        {/* ======================= GÜNCELLENEN BÖLÜM 1: Grafik Kapsayıcı ======================= */}
+        {/* -mx-4 sınıfı kaldırılarak grafiğin ortalanması sağlandı. */}
+        <div className="h-64 w-full">
+          <ResponsiveContainer>
+            <AreaChart data={chartData}>
+              <defs>
+                <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#2563eb" stopOpacity={0.4}/>
+                  <stop offset="95%" stopColor="#2563eb" stopOpacity={0}/>
+                </linearGradient>
+              </defs>
+              <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'rgba(156, 163, 175, 0.3)', strokeWidth: 2, strokeDasharray: '3 3' }} />
+              {/* ======================= GÜNCELLENEN BÖLÜM 2: X Ekseni Eklendi ======================= */}
+              {/* Grafiğin altında tarihleri göstermek ve tooltip'i düzeltmek için XAxis geri eklendi. */}
+              <XAxis 
+                dataKey="time" 
+                tick={{ fontSize: 12 }} 
+                stroke="#9ca3af"
+                className="dark:stroke-gray-400"
+                tickLine={false} 
+                axisLine={false}
+                interval="preserveStartEnd"
+                padding={{ left: 20, right: 20 }}
+              />
+              {/* ===================================================================================== */}
+              <Area 
+                type="monotone" 
+                dataKey="value" 
+                stroke="#2563eb" 
+                strokeWidth={2.5} 
+                fill="url(#colorValue)" 
+                fillOpacity={1}
+                connectNulls 
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+        {/* ===================================================================================== */}
+        <div className="flex items-center justify-between space-x-1 p-1 mt-4 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full">
+          {timeRanges.map(range => (
+            <button
+              key={range.id}
+              onClick={() => setActiveRange(range.id)}
+              className={`flex-1 px-3 py-2 text-sm font-semibold rounded-full transition-all duration-300 ${
+                activeRange === range.id
+                  ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-white shadow-md'
+                  : 'bg-transparent text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700/50'
+              }`}
+            >
+              {range.label}
+            </button>
+          ))}
+        </div>
       </div>
       
       <AssetSummaryCard summary={assetSummary} loading={isLoading} />
