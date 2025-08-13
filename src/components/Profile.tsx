@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { LogOut, User, Loader, Moon, Sun, ChevronRight, Download, HelpCircle, Star } from 'lucide-react';
+// Kullanılmayan ikonlar (HelpCircle, Star, vb.) import satırından kaldırıldı
+import { LogOut, User, Loader, Moon, Sun } from 'lucide-react'; 
 import { User as SupabaseUser } from '@supabase/supabase-js';
 import { useTheme } from '../context/ThemeContext';
 
@@ -83,8 +84,6 @@ export function Profile() {
 
   return (
     <div className="space-y-8">
-      {/* ======================= GÜNCELLENEN BÖLÜM 1 ======================= */}
-      {/* İsim ve e-posta taşmasını engellemek için `w-full break-words` eklendi */}
       <div className="flex flex-col items-center text-center px-4">
         {avatarUrl ? (
           <img 
@@ -108,33 +107,11 @@ export function Profile() {
       </div>
 
       <div className="space-y-4">
-        {/* Başlıktaki `px-2` kaldırılarak tam genişlik sağlandı */}
         <h2 className="text-lg font-semibold text-gray-500 dark:text-gray-400">Ayarlar</h2>
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-md border border-gray-100 dark:border-gray-700">
           <ThemeSwitch />
         </div>
       </div>
-      
-      <div className="space-y-4">
-        <h2 className="text-lg font-semibold text-gray-500 dark:text-gray-400">Uygulama</h2>
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-md border border-gray-100 dark:border-gray-700 divide-y divide-gray-100 dark:divide-gray-700">
-            <button className="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-t-2xl">
-                <div className="flex items-center space-x-4">
-                    <div className="bg-gray-100 dark:bg-gray-700 p-2 rounded-lg"><HelpCircle className="text-gray-500 dark:text-gray-400" /></div>
-                    <span className="font-semibold text-gray-800 dark:text-gray-200">Yardım & Destek</span>
-                </div>
-                <ChevronRight className="text-gray-400" />
-            </button>
-            <button className="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-b-2xl">
-                <div className="flex items-center space-x-4">
-                    <div className="bg-gray-100 dark:bg-gray-700 p-2 rounded-lg"><Star className="text-gray-500 dark:text-gray-400" /></div>
-                    <span className="font-semibold text-gray-800 dark:text-gray-200">Uygulamayı Değerlendir</span>
-                </div>
-                <ChevronRight className="text-gray-400" />
-            </button>
-        </div>
-      </div>
-      {/* ==================================================================== */}
       <div>
         <button
           onClick={handleSignOut}
