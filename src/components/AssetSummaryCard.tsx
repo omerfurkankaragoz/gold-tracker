@@ -4,10 +4,15 @@ import { Coins, DollarSign, Euro, Gem,TurkishLiraIcon } from 'lucide-react';
 export type SummaryData = {
   [key: string]: { totalAmount: number; totalValue: number } | undefined;
 };
+
+// ======================= DEĞİŞİKLİK 1: PROP ARAYÜZÜ GÜNCELLENDİ =======================
 interface AssetSummaryCardProps {
   summary: SummaryData;
   loading: boolean;
+  isBalanceVisible: boolean; // Yeni prop eklendi
 }
+// ====================================================================================
+
 const assetDetails: { [key: string]: { name: string, unit: string, icon: React.ElementType } } = {
   usd: { name: 'Dolar', unit: '$', icon: DollarSign }, eur: { name: 'Euro', unit: '€', icon: Euro },
   tl: { name: 'Türk Lirası', unit: '₺', icon: TurkishLiraIcon },
@@ -19,7 +24,7 @@ const assetDetails: { [key: string]: { name: string, unit: string, icon: React.E
 };
 const displayOrder = ['tl', 'usd', 'eur', 'gumus', 'gold', 'quarter_gold', 'half_gold', 'full_gold', 'cumhuriyet_gold', 'ata_gold', 'ayar_14_gold', 'ayar_18_gold'];
 
-export function AssetSummaryCard({ summary, loading }: AssetSummaryCardProps) {
+export function AssetSummaryCard({ summary, loading, isBalanceVisible }: AssetSummaryCardProps) {
   const hasData = Object.values(summary).some(item => item && item.totalAmount > 0);
   if (loading || !hasData) return null;
 
@@ -42,14 +47,22 @@ export function AssetSummaryCard({ summary, loading }: AssetSummaryCardProps) {
                 </div>
                 <div className="text-left">
                   <p className="font-semibold text-base text-apple-light-text-primary dark:text-apple-dark-text-primary">{details.name}</p>
+                  {/* ======================= DEĞİŞİKLİK 2: KOŞULLU GÖSTERİM ======================= */}
                   <p className="text-sm text-apple-light-text-secondary dark:text-apple-dark-text-secondary">
-                    {item.totalAmount.toLocaleString('tr-TR', { minimumFractionDigits: key === 'tl' ? 2 : 0, maximumFractionDigits: 4 })} {details.unit}
+                    {isBalanceVisible ? 
+                      `${item.totalAmount.toLocaleString('tr-TR', { minimumFractionDigits: key === 'tl' ? 2 : 0, maximumFractionDigits: 4 })} ${details.unit}`
+                      : '******'
+                    }
                   </p>
                 </div>
               </div>
               <p className="font-semibold text-lg text-apple-light-text-primary dark:text-apple-dark-text-primary">
-                ₺{item.totalValue.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                {isBalanceVisible ? 
+                  `₺${item.totalValue.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`
+                  : '******'
+                }
               </p>
+              {/* ==================================================================================== */}
             </div>
           );
         })}

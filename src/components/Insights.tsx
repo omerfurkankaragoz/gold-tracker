@@ -155,8 +155,11 @@ export function Insights({ isBalanceVisible }: InsightsProps) {
         </div>
       </div>
       
-      <AssetSummaryCard summary={assetSummary} loading={isLoading} />
-      
+   <AssetSummaryCard 
+        summary={assetSummary} 
+        loading={isLoading} 
+        isBalanceVisible={isBalanceVisible} 
+      />      
       <PortfolioChart />
     </div>
   );
