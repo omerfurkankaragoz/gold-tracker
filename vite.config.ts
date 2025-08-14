@@ -8,8 +8,8 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       manifest: {
-        name: 'Birikim',
-        short_name: 'Birikim',
+        name: 'Kenz',
+        short_name: 'Kenz',
         description: 'Kişisel yatırım ve birikim takibi uygulaması.',
         theme_color: '#ffffff',
         background_color: '#ffffff',

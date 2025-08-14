@@ -15,7 +15,7 @@ function ThemeSwitch() {
   return (
     <div className="flex items-center justify-between p-4">
       <div className="flex items-center space-x-4">
-        <div className="bg-gray-200/50 dark:bg-apple-dark-bg p-2 rounded-lg">
+        <div className="bg-apple-light-bg dark:bg-apple-dark-bg p-2 rounded-lg">
             {theme === 'light' ? <Sun className="text-apple-light-text-secondary" /> : <Moon className="text-apple-dark-text-secondary" />}
         </div>
         <span className="font-semibold text-apple-light-text-primary dark:text-apple-dark-text-primary">
@@ -80,8 +80,20 @@ export function Profile() {
     );
   }
 
+  // ======================= GÜNCELLENEN BÖLÜM =======================
   const avatarUrl = profile?.avatar_url || user?.user_metadata?.avatar_url;
-  const displayName = user?.is_anonymous ? 'Misafir Kullanıcı' : (profile?.full_name || user?.email || '');
+
+  // Akıllı isim gösterme mantığı
+  const displayName = user?.is_anonymous
+    ? 'Misafir Kullanıcı'
+    : profile?.full_name || user?.email || '';
+
+  // E-posta'nın ayrıca gösterilip gösterilmeyeceğini belirle
+  const showEmailSeparately = !user?.is_anonymous && profile?.full_name && user?.email;
+  
+  // Görünen ismin bir e-posta olup olmadığını kontrol et (font boyutunu ayarlamak için)
+  const isDisplayNameEmail = displayName.includes('@');
+  // ====================================================================
 
   return (
     <div className="space-y-8">
@@ -97,10 +109,16 @@ export function Profile() {
             <User className="w-12 h-12 text-apple-light-text-secondary dark:text-apple-dark-text-secondary" />
           </div>
         )}
-        <h1 className={`w-full break-words text-3xl font-bold tracking-tight text-apple-light-text-primary dark:text-apple-dark-text-primary ${!displayName && 'h-9'}`}>
+        
+        {/* E-posta ise fontu küçült, değilse büyük bırak */}
+        <h1 className={`w-full break-words font-bold tracking-tight text-apple-light-text-primary dark:text-apple-dark-text-primary ${
+          isDisplayNameEmail ? 'text-xl' : 'text-3xl'
+        }`}>
           {displayName}
         </h1>
-        {user && !user.is_anonymous && profile?.full_name && (
+        
+        {/* Sadece kullanıcının tam adı gösteriliyorsa, e-postayı ayrıca altta göster */}
+        {showEmailSeparately && (
             <p className="w-full break-words text-apple-light-text-secondary dark:text-apple-dark-text-secondary mt-1">
               {user.email}
             </p>

@@ -3,18 +3,22 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ======================= YENİ EKLENEN BÖLÜM: Animasyonlar ======================= */
+/* ======================= GÜNCELLENEN BÖLÜM: Animasyonlar ======================= */
 @layer utilities {
-  @keyframes float {
-    0%, 100% {
-      transform: translateY(0px) rotate(-12deg);
+  /* İkon şeridinin sürekli ve pürüzsüz bir şekilde yukarı kaymasını sağlayan animasyon */
+  @keyframes scroll-up {
+    0% {
+      transform: translateY(0);
     }
-    50% {
-      transform: translateY(-15px) rotate(-12deg);
+    100% {
+      /* Toplam yüksekliğin yarısı kadar kaydırarak başa dönme hissini ortadan kaldırır */
+      transform: translateY(-50%); 
     }
   }
-  .animate-float {
-    animation: float 4s ease-in-out infinite;
+
+  .animate-scroll-up {
+    /* Animasyon süresini artırarak daha yavaş ve akıcı bir geçiş sağlıyoruz */
+    animation: scroll-up 10s linear infinite;
   }
 }
 /* ============================================================================== */
@@ -25,7 +29,7 @@
   }
 
   html, body {
-    @apply bg-apple-light-bg dark:bg-apple-dark-bg; /* Yeni renk paletini kullanıyoruz */
+    @apply bg-white dark:bg-gray-900;
     height: 100%;
     width: 100%;
     overflow: hidden;
