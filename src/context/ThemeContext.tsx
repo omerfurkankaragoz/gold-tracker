@@ -10,13 +10,16 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
+  // ======================= GÜNCELLENEN BÖLÜM =======================
+  // Tema state'inin başlangıç değerini ayarlayan mantığı değiştiriyoruz.
   const [theme, setTheme] = useState<Theme>(() => {
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme) {
-      return savedTheme as Theme;
-    }
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    // Önce kullanıcının tarayıcısında saklanmış bir tema var mı diye bak.
+    const savedTheme = localStorage.getItem('theme') as Theme | null;
+    
+    // Eğer varsa o temayı kullan, yoksa her zaman 'light' (açık) tema ile başla.
+    return savedTheme || 'light';
   });
+  // ====================================================================
 
   useEffect(() => {
     const root = window.document.documentElement;
@@ -24,20 +27,14 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     root.classList.add(theme);
     localStorage.setItem('theme', theme);
 
-    // ================= YENİ EKLENEN BÖLÜM =================
-    // Çentik (status bar) rengini tema ile birlikte güncelle
     const themeColorMeta = document.querySelector('meta[name="theme-color"]');
     if (themeColorMeta) {
       if (theme === 'dark') {
-        // Koyu tema için arka plan rengi (Tailwind gray-900)
         themeColorMeta.setAttribute('content', '#111827'); 
       } else {
-        // Açık tema için arka plan rengi
         themeColorMeta.setAttribute('content', '#ffffff');
       }
     }
-    // ========================================================
-
   }, [theme]);
 
   const toggleTheme = () => {

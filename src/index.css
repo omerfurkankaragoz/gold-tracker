@@ -3,13 +3,26 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ======================= YENİ EKLENEN BÖLÜM: Animasyonlar ======================= */
+@layer utilities {
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px) rotate(-12deg);
+    }
+    50% {
+      transform: translateY(-15px) rotate(-12deg);
+    }
+  }
+  .animate-float {
+    animation: float 4s ease-in-out infinite;
+  }
+}
+/* ============================================================================== */
+
 @layer base {
-  /* ======================= GÜNCELLENEN BÖLÜM ======================= */
-  /* Apple tasarım diline uygun sistem fontlarını tanımlıyoruz */
   html {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
   }
-  /* ==================================================================== */
 
   html, body {
     @apply bg-white dark:bg-gray-900;
