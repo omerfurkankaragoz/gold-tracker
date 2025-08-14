@@ -15,17 +15,17 @@ function ThemeSwitch() {
   return (
     <div className="flex items-center justify-between p-4">
       <div className="flex items-center space-x-4">
-        <div className="bg-gray-100 dark:bg-gray-700 p-2 rounded-lg">
-            {theme === 'light' ? <Sun className="text-yellow-500" /> : <Moon className="text-yellow-400" />}
+        <div className="bg-gray-200/50 dark:bg-apple-dark-bg p-2 rounded-lg">
+            {theme === 'light' ? <Sun className="text-apple-light-text-secondary" /> : <Moon className="text-apple-dark-text-secondary" />}
         </div>
-        <span className="font-semibold text-gray-800 dark:text-gray-200">
+        <span className="font-semibold text-apple-light-text-primary dark:text-apple-dark-text-primary">
           {theme === 'light' ? 'Açık Tema' : 'Koyu Tema'}
         </span>
       </div>
       <button
         onClick={toggleTheme}
-        className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-          theme === 'dark' ? 'bg-blue-600' : 'bg-gray-200'
+        className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-apple-blue focus:ring-offset-2 ${
+          theme === 'dark' ? 'bg-apple-blue' : 'bg-gray-200'
         }`}
       >
         <span
@@ -50,7 +50,6 @@ export function Profile() {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         setUser(user);
-        // Sadece misafir değilse profil bilgisini (avatar vb. için) çekmeye çalış
         if (!user.is_anonymous) {
             const { data: profileData, error } = await supabase
               .from('profiles')
@@ -76,18 +75,13 @@ export function Profile() {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <Loader className="animate-spin text-blue-600" />
+        <Loader className="animate-spin text-apple-blue" />
       </div>
     );
   }
 
   const avatarUrl = profile?.avatar_url || user?.user_metadata?.avatar_url;
-  
-  // ======================= GÜNCELLENEN BÖLÜM =======================
-  // is_anonymous true ise "Misafir Kullanıcı", değilse veritabanındaki adı veya boş string'i göster.
-  // Bu, "hiçbir şey yazmasın" isteğini karşılar.
-  const displayName = user?.is_anonymous ? 'Misafir Kullanıcı' : (profile?.full_name || '');
-  // ====================================================================
+  const displayName = user?.is_anonymous ? 'Misafir Kullanıcı' : (profile?.full_name || user?.email || '');
 
   return (
     <div className="space-y-8">
@@ -99,27 +93,23 @@ export function Profile() {
             className="w-24 h-24 rounded-full object-cover mb-4 shadow-md"
           />
         ) : (
-          <div className="w-24 h-24 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center mb-4">
-            <User className="w-12 h-12 text-gray-500 dark:text-gray-400" />
+          <div className="w-24 h-24 rounded-full bg-gray-200 dark:bg-apple-dark-card flex items-center justify-center mb-4">
+            <User className="w-12 h-12 text-apple-light-text-secondary dark:text-apple-dark-text-secondary" />
           </div>
         )}
-        
-        {/* Eğer displayName boşsa, başlık alanı için bir minimum yükseklik vererek kaymayı önle */}
-        <h1 className={`w-full break-words text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100 ${!displayName && 'h-9'}`}>
+        <h1 className={`w-full break-words text-3xl font-bold tracking-tight text-apple-light-text-primary dark:text-apple-dark-text-primary ${!displayName && 'h-9'}`}>
           {displayName}
         </h1>
-        
-        {/* E-posta, misafir olmayan tüm kullanıcılar için her zaman gösterilir */}
-        {!user?.is_anonymous && (
-            <p className="w-full break-words text-gray-500 dark:text-gray-400 mt-1">
-              {user?.email}
+        {user && !user.is_anonymous && profile?.full_name && (
+            <p className="w-full break-words text-apple-light-text-secondary dark:text-apple-dark-text-secondary mt-1">
+              {user.email}
             </p>
         )}
       </div>
 
       <div className="space-y-4">
-        <h2 className="text-lg font-semibold text-gray-500 dark:text-gray-400">Ayarlar</h2>
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-md border border-gray-100 dark:border-gray-700">
+        <h2 className="text-xl font-semibold tracking-tight text-apple-light-text-primary dark:text-apple-dark-text-primary px-2">Ayarlar</h2>
+        <div className="bg-apple-light-card dark:bg-apple-dark-card rounded-2xl">
           <ThemeSwitch />
         </div>
       </div>
@@ -127,7 +117,7 @@ export function Profile() {
       <div>
         <button
           onClick={handleSignOut}
-          className="w-full flex items-center justify-center p-4 text-red-600 dark:text-red-500 font-semibold bg-white dark:bg-gray-800 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors rounded-2xl shadow-md border border-gray-100 dark:border-gray-700"
+          className="w-full flex items-center justify-center p-4 text-apple-red font-semibold bg-apple-light-card dark:bg-apple-dark-card hover:bg-red-50 dark:hover:bg-apple-red/10 transition-colors rounded-2xl"
         >
           <LogOut className="w-5 h-5 mr-2" />
           <span>Çıkış Yap</span>

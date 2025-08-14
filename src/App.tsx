@@ -27,7 +27,7 @@ function App() {
   }, []);
 
   if (loading) {
-    return <div className="h-full w-full bg-gray-100 dark:bg-gray-900" />;
+    return <div className="h-full w-full bg-apple-light-bg dark:bg-apple-dark-bg" />;
   }
 
   return (
@@ -80,8 +80,6 @@ function MainApp() {
 
     switch (activeTab) {
       case 'holdings':
-        // ======================= DEĞİŞİKLİK BURADA =======================
-        // isBalanceVisible prop'unun gönderildiğinden emin oluyoruz.
         return <Holdings 
                   onSelectInvestment={handleSelectInvestment} 
                   onAddInvestment={() => handleGoToAddInvestment()} 
@@ -106,7 +104,7 @@ function MainApp() {
   const isFullScreenPageOpen = !!selectedInvestmentId || addInvestmentState.isOpen;
 
   return (
-    <div className="h-full w-full flex flex-col bg-gray-100 dark:bg-gray-900">
+    <div className="h-full w-full flex flex-col bg-apple-light-bg dark:bg-apple-dark-bg">
       <main className="flex-grow overflow-y-auto px-4 py-6 pb-20">
         {renderContent()}
       </main>

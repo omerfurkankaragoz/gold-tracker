@@ -27,11 +27,11 @@ export function Dashboard({ onNavigate, onAddInvestment, isBalanceVisible, setIs
 
   const priceCardsToShow = Object.entries(prices).filter(([key, p]) => key !== 'tl' && (p as Price).sellingPrice > 0);
 
-  return (
+   return (
     <div className="space-y-8">
       <div
         onClick={() => onNavigate('insights')}
-        className="w-full text-left bg-gradient-to-r from-blue-600 to-teal-600 rounded-3xl p-6 text-white shadow-lg cursor-pointer"
+        className="w-full text-left bg-gradient-to-br from-apple-blue to-teal-500 rounded-3xl p-6 text-white shadow-lg cursor-pointer"
       >
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold">Panelim</h2>
@@ -50,8 +50,8 @@ export function Dashboard({ onNavigate, onAddInvestment, isBalanceVisible, setIs
             {isBalanceVisible ? (
               <>
                 <TrendingUp className={`h-4 w-4 ${totalGain < 0 ? 'transform rotate-180' : ''}`} />
-                <span>{totalGain >= 0 ? '+' : ''}₺{Math.abs(totalGain).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</span>
-                <span>({totalGain >= 0 ? '+' : ''}{totalGainPercent.toFixed(2)}%)</span>
+                <span>₺{Math.abs(totalGain).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</span>
+                <span>({Math.abs(totalGainPercent).toFixed(2)}%)</span>
               </>
             ) : (
               <span>******</span>
@@ -62,10 +62,10 @@ export function Dashboard({ onNavigate, onAddInvestment, isBalanceVisible, setIs
 
       <div>
         <div className="flex items-baseline justify-between mb-3 px-2">
-          <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Piyasalar</h2>
+          <h2 className="text-2xl font-bold tracking-tight text-apple-light-text-primary dark:text-apple-dark-text-primary">Piyasalar</h2>
           <div className="flex space-x-16">
-            <span className="text-sm font-semibold text-gray-500 dark:text-gray-400">Alış</span>
-            <span className="text-sm font-semibold text-gray-500 dark:text-gray-400">Satış</span>
+            <span className="text-sm font-semibold text-apple-light-text-secondary dark:text-apple-dark-text-secondary">Alış</span>
+            <span className="text-sm font-semibold text-apple-light-text-secondary dark:text-apple-dark-text-secondary">Satış</span>
           </div>
         </div>
         <div className="flex flex-col space-y-3">
@@ -73,14 +73,14 @@ export function Dashboard({ onNavigate, onAddInvestment, isBalanceVisible, setIs
             const typedPrice = price as Price;
             const getIcon = () => {
               if (type === 'gumus') return Gem;
-              if (typedPrice.name.toLowerCase().includes('altın') || typedPrice.name.toLowerCase().includes('bilezik')) return Coins;
+              if (typedPrice.name.toLowerCase().includes('altın')) return Coins;
               if (typedPrice.symbol === 'USD') return DollarSign;
               return Euro;
             };
             const Icon = getIcon();
             return (
               <button key={type} onClick={() => handleCardClick(type as Investment['type'])} className="w-full">
-                <PriceCard price={typedPrice} icon={<Icon className="h-6 w-6 text-blue-600" />} />
+                <PriceCard price={typedPrice} icon={<Icon className="h-6 w-6 text-apple-blue" />} />
               </button>
             );
           })}

@@ -1,81 +1,55 @@
 import React from 'react';
-import { Coins, DollarSign, Euro, Gem,TurkishLira } from 'lucide-react';
+import { Coins, DollarSign, Euro, Gem,TurkishLiraIcon } from 'lucide-react';
 
 export type SummaryData = {
-  [key: string]: {
-    totalAmount: number;
-    totalValue: number;
-  } | undefined;
+  [key: string]: { totalAmount: number; totalValue: number } | undefined;
 };
-
 interface AssetSummaryCardProps {
   summary: SummaryData;
   loading: boolean;
 }
-
 const assetDetails: { [key: string]: { name: string, unit: string, icon: React.ElementType } } = {
-  usd: { name: 'Dolar', unit: '$', icon: DollarSign },
-  eur: { name: 'Euro', unit: '€', icon: Euro },
-  tl: { name: 'Türk Lirası', unit: '₺', icon: TurkishLira },
-  gumus: { name: 'Gram Gümüş', unit: 'gr', icon: Gem },
-  gold: { name: 'Gram Altın', unit: 'gr', icon: Coins },
-  quarter_gold: { name: 'Çeyrek Altın', unit: 'adet', icon: Coins },
-  half_gold: { name: 'Yarım Altın', unit: 'adet', icon: Coins },
-  full_gold: { name: 'Tam Altın', unit: 'adet', icon: Coins },
-  cumhuriyet_gold: { name: 'Cumhuriyet Altını', unit: 'adet', icon: Coins },
-  ata_gold: { name: 'Ata Altın', unit: 'adet', icon: Coins },
-  ayar_14_gold: { name: '14 Ayar Altın', unit: 'gr', icon: Coins },
+  usd: { name: 'Dolar', unit: '$', icon: DollarSign }, eur: { name: 'Euro', unit: '€', icon: Euro },
+  tl: { name: 'Türk Lirası', unit: '₺', icon: TurkishLiraIcon },
+  gumus: { name: 'Gram Gümüş', unit: 'gr', icon: Gem }, gold: { name: 'Gram Altın', unit: 'gr', icon: Coins },
+  quarter_gold: { name: 'Çeyrek Altın', unit: 'adet', icon: Coins }, half_gold: { name: 'Yarım Altın', unit: 'adet', icon: Coins },
+  full_gold: { name: 'Tam Altın', unit: 'adet', icon: Coins }, cumhuriyet_gold: { name: 'Cumhuriyet Altını', unit: 'adet', icon: Coins },
+  ata_gold: { name: 'Ata Altın', unit: 'adet', icon: Coins }, ayar_14_gold: { name: '14 Ayar Altın', unit: 'gr', icon: Coins },
   ayar_18_gold: { name: '18 Ayar Altın', unit: 'gr', icon: Coins },
-  ayar_22_bilezik: { name: '22 Ayar Bilezik', unit: 'gr', icon: Coins },
 };
-
-const displayOrder = [
-  'tl', 'usd', 'eur', 'gumus', 'gold', 'quarter_gold', 'half_gold', 'full_gold',
-  'cumhuriyet_gold', 'ata_gold', 'ayar_14_gold', 'ayar_18_gold', 'ayar_22_bilezik'
-];
+const displayOrder = ['tl', 'usd', 'eur', 'gumus', 'gold', 'quarter_gold', 'half_gold', 'full_gold', 'cumhuriyet_gold', 'ata_gold', 'ayar_14_gold', 'ayar_18_gold'];
 
 export function AssetSummaryCard({ summary, loading }: AssetSummaryCardProps) {
   const hasData = Object.values(summary).some(item => item && item.totalAmount > 0);
-
-  if (loading || !hasData) {
-    return null;
-  }
+  if (loading || !hasData) return null;
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-100 dark:border-gray-700">
-      <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Varlık Özetim</h2>
+    <div className="space-y-4">
+      <div className="px-2">
+        <h2 className="text-2xl font-bold tracking-tight text-apple-light-text-primary dark:text-apple-dark-text-primary">Varlık Özetim</h2>
+      </div>
       <div className="space-y-3">
         {displayOrder.map(key => {
           const item = summary[key];
           const details = assetDetails[key];
-          
           if (!item || !details || item.totalAmount === 0) return null;
-
           const Icon = details.icon;
-
           return (
-            <div key={key} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded-xl">
+            <div key={key} className="flex items-center justify-between p-4 bg-apple-light-card dark:bg-apple-dark-card rounded-2xl">
               <div className="flex items-center space-x-4">
-                {/* ======================= GÜNCELLENEN BÖLÜM ======================= */}
-                <div className="bg-gray-100 dark:bg-gray-700 p-3 rounded-full flex-shrink-0">
-                   <Icon className="h-5 w-5 text-blue-600 dark:text-blue-600" />
+                <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-full flex-shrink-0">
+                  <Icon className="h-6 w-6 text-apple-blue" />
                 </div>
-                {/* ==================================================================== */}
                 <div className="text-left">
-                  <p className="font-semibold text-gray-800 dark:text-gray-200">{details.name}</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    {item.totalAmount.toLocaleString('tr-TR', { 
-                        minimumFractionDigits: key === 'tl' ? 2 : 0,
-                        maximumFractionDigits: 4 
-                    })} {details.unit}
+                  <p className="font-semibold text-base text-apple-light-text-primary dark:text-apple-dark-text-primary">{details.name}</p>
+                  <p className="text-sm text-apple-light-text-secondary dark:text-apple-dark-text-secondary">
+                    {item.totalAmount.toLocaleString('tr-TR', { minimumFractionDigits: key === 'tl' ? 2 : 0, maximumFractionDigits: 4 })} {details.unit}
                   </p>
                 </div>
               </div>
-              <div className="text-right">
-                <p className="font-bold text-gray-900 dark:text-white">
-                  ₺{item.totalValue.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                </p>
-              </div>
+              <p className="font-semibold text-lg text-apple-light-text-primary dark:text-apple-dark-text-primary">
+                ₺{item.totalValue.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+              </p>
             </div>
           );
         })}

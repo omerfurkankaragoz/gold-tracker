@@ -25,7 +25,7 @@
   }
 
   html, body {
-    @apply bg-white dark:bg-gray-900;
+    @apply bg-apple-light-bg dark:bg-apple-dark-bg; /* Yeni renk paletini kullanıyoruz */
     height: 100%;
     width: 100%;
     overflow: hidden;

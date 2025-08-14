@@ -9,7 +9,7 @@ import { Investment } from '../lib/supabase';
 export const typeDetails: Record<string, { icon: React.ElementType; name: string; unit: string }> = {
   usd: { icon: DollarSign, name: 'Dolar', unit: '$' },
   eur: { icon: Euro, name: 'Euro', unit: '€' },
-  tl: { icon: TurkishLiraIcon, name: 'Türk Lirası', unit: '₺' },
+  tl: { icon:TurkishLiraIcon, name: 'Türk Lirası', unit: '₺' },
   gumus: { icon: Gem, name: 'Gram Gümüş', unit: 'gr' },
   gold: { icon: Coins, name: 'Gram Altın', unit: 'gr' },
   quarter_gold: { icon: Coins, name: 'Çeyrek Altın', unit: 'adet' },
@@ -75,17 +75,14 @@ export function Holdings({ onSelectInvestment, onAddInvestment, isBalanceVisible
 
   const SortButton = ({ sortKey, label }: { sortKey: SortKey; label: string }) => {
     const isActive = sortConfig.key === sortKey;
-    const Icon = isActive 
-      ? (sortConfig.direction === 'ascending' ? ChevronUp : ChevronDown) 
-      : ChevronsUpDown;
-    
+    const Icon = isActive ? (sortConfig.direction === 'ascending' ? ChevronUp : ChevronDown) : ChevronsUpDown;
     return (
       <button 
         onClick={() => requestSort(sortKey)}
         className={`flex-1 flex items-center justify-center space-x-2 px-3 py-2 text-sm rounded-full transition-all duration-300 ${
           isActive 
-            ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-white font-bold shadow-md' 
-            : 'bg-transparent text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700/50'
+            ? 'bg-apple-light-card dark:bg-gray-700 text-apple-blue font-bold shadow-md' 
+            : 'bg-transparent text-apple-light-text-secondary dark:text-apple-dark-text-secondary hover:bg-gray-200 dark:hover:bg-gray-700/50'
         }`}
       >
         <Icon className="h-4 w-4" />
@@ -97,26 +94,26 @@ export function Holdings({ onSelectInvestment, onAddInvestment, isBalanceVisible
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between px-2">
-        <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">Varlıklarım</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-apple-light-text-primary dark:text-apple-dark-text-primary">Varlıklarım</h1>
         <button
           onClick={onAddInvestment}
-          className="bg-blue-600 text-white p-2 rounded-full hover:bg-blue-700 transition-colors"
+          className="bg-apple-blue text-white p-2 rounded-full hover:opacity-90 transition-opacity"
         >
           <Plus className="h-6 w-6" />
         </button>
       </div>
 
       {investments.length === 0 ? (
-        <div className="text-center py-16 bg-gray-50 dark:bg-gray-800/50 rounded-2xl">
-          <h3 className="font-semibold text-gray-700 dark:text-gray-300 mb-2">Henüz varlık eklemediniz</h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+        <div className="text-center py-16 bg-apple-light-card/50 dark:bg-apple-dark-card rounded-2xl">
+          <h3 className="font-semibold text-apple-light-text-secondary dark:text-apple-dark-text-secondary mb-2">Henüz varlık eklemediniz</h3>
+          <p className="text-sm text-apple-light-text-secondary dark:text-apple-dark-text-secondary">
               Başlamak için '+' butonuna tıklayarak ilk yatırımınızı girin.
           </p>
         </div>
       ) : (
         <>
           <div className="px-2">
-            <div className="flex items-center justify-between space-x-1 p-1 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full">
+            <div className="flex items-center justify-between space-x-1 p-1 bg-gray-200/50 dark:bg-apple-dark-card rounded-full">
               <SortButton sortKey="purchase_date" label="Tarih" />
               <SortButton sortKey="name" label="İsim" />
               <SortButton sortKey="currentValue" label="Değer" />
@@ -137,23 +134,23 @@ export function Holdings({ onSelectInvestment, onAddInvestment, isBalanceVisible
                 <button
                   key={investment.id}
                   onClick={() => onSelectInvestment(investment.id)}
-                  className="w-full text-left bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-md border border-gray-100 dark:border-gray-700 space-y-4"
+                  className="w-full text-left bg-apple-light-card dark:bg-apple-dark-card p-4 rounded-2xl space-y-4"
                 >
                   <div className="flex justify-between items-center">
                     <div className="flex items-center space-x-4">
-                      <div className="bg-gray-100 dark:bg-gray-700 p-3 rounded-full flex-shrink-0">
-                        <Icon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                      <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-full flex-shrink-0">
+                        <Icon className="h-6 w-6 text-apple-blue" />
                       </div>
                       <div className="text-left">
-                        <p className="font-semibold text-base text-gray-900 dark:text-gray-100">{details.name}</p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                        <p className="font-semibold text-base text-apple-light-text-primary dark:text-apple-dark-text-primary">{details.name}</p>
+                        <p className="text-sm text-apple-light-text-secondary dark:text-apple-dark-text-secondary">
                           {investment.amount.toLocaleString('tr-TR', {maximumFractionDigits: 4})} {details.unit}
                         </p>
                       </div>
                     </div>
                     <button
                       onClick={(e) => handleDelete(e, investment.id)}
-                      className="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors flex-shrink-0 ml-2 z-10 relative"
+                      className="p-2 text-apple-light-text-secondary dark:text-apple-dark-text-secondary hover:text-apple-red dark:hover:text-apple-red rounded-lg transition-colors flex-shrink-0 ml-2 z-10 relative"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -161,20 +158,17 @@ export function Holdings({ onSelectInvestment, onAddInvestment, isBalanceVisible
                   
                   <div className="grid grid-cols-2 gap-4">
                     <div className="text-left">
-                      <p className="text-sm text-gray-500 dark:text-gray-400">Anlık Değer</p>
-                      <p className="font-semibold text-gray-900 dark:text-white mt-1">
+                      <p className="text-sm text-apple-light-text-secondary dark:text-apple-dark-text-secondary">Anlık Değer</p>
+                      <p className="font-semibold text-apple-light-text-primary dark:text-apple-dark-text-primary mt-1">
                         {isBalanceVisible ? `₺${currentValue.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}` : '******'}
                       </p>
-                      {/* ======================= DEĞİŞİKLİK BURADA ======================= */}
-                      {/* Alış tarihi bilgisi bu bölüme geri eklendi */}
-                      <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">
+                      <p className="text-xs text-apple-light-text-secondary/70 dark:text-apple-dark-text-secondary/70 mt-2">
                         {format(new Date(investment.purchase_date), 'dd MMM yyyy', { locale: tr })}
                       </p>
-                      {/* ==================================================================== */}
                     </div>
                     <div className="text-right">
-                      <p className="text-sm text-gray-500 dark:text-gray-400">Kar/Zarar</p>
-                      <div className={`font-semibold flex items-center justify-end space-x-1 mt-1 ${gain >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                      <p className="text-sm text-apple-light-text-secondary dark:text-apple-dark-text-secondary">Kar/Zarar</p>
+                      <div className={`font-semibold flex items-center justify-end space-x-1 mt-1 ${gain >= 0 ? 'text-apple-green' : 'text-apple-red'}`}>
                         {isBalanceVisible ? (
                           <>
                             <span>₺{Math.abs(gain).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</span>

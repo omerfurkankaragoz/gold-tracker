@@ -10,16 +10,10 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
-  // ======================= GÜNCELLENEN BÖLÜM =======================
-  // Tema state'inin başlangıç değerini ayarlayan mantığı değiştiriyoruz.
   const [theme, setTheme] = useState<Theme>(() => {
-    // Önce kullanıcının tarayıcısında saklanmış bir tema var mı diye bak.
     const savedTheme = localStorage.getItem('theme') as Theme | null;
-    
-    // Eğer varsa o temayı kullan, yoksa her zaman 'light' (açık) tema ile başla.
     return savedTheme || 'light';
   });
-  // ====================================================================
 
   useEffect(() => {
     const root = window.document.documentElement;
@@ -27,14 +21,18 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     root.classList.add(theme);
     localStorage.setItem('theme', theme);
 
+    // ======================= GÜNCELLENEN BÖLÜM =======================
+    // Çentik (status bar) rengini yeni Apple renk paletiyle güncelliyoruz
     const themeColorMeta = document.querySelector('meta[name="theme-color"]');
     if (themeColorMeta) {
       if (theme === 'dark') {
-        themeColorMeta.setAttribute('content', '#111827'); 
+        themeColorMeta.setAttribute('content', '#000000'); // apple-dark-bg
       } else {
-        themeColorMeta.setAttribute('content', '#ffffff');
+        themeColorMeta.setAttribute('content', '#F2F2F7'); // apple-light-bg
       }
     }
+    // ========================================================
+
   }, [theme]);
 
   const toggleTheme = () => {

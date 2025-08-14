@@ -96,28 +96,26 @@ export function AddInvestmentPage({ onBack, initialSelectedType, isDirectAdd = f
   };
 
   return (
-    <div className="flex flex-col h-full animate-fade-in text-gray-900 dark:text-gray-100">
+    <div className="flex flex-col h-full animate-fade-in text-apple-light-text-primary dark:text-apple-dark-text-primary">
       <div className="relative flex items-center justify-center p-2 mb-4">
-        <button onClick={onBack} className="absolute left-0 p-2 bg-gray-100 dark:bg-gray-800 rounded-full transition-transform active:scale-90">
-          <ChevronLeft className="w-6 h-6 text-gray-700 dark:text-gray-300" />
+        <button onClick={onBack} className="absolute left-0 p-2 bg-gray-200/50 dark:bg-apple-dark-card rounded-full transition-transform active:scale-90">
+          <ChevronLeft className="w-6 h-6" />
         </button>
         <h1 className="text-xl font-semibold">Varlık Ekle</h1>
       </div>
 
-      {/* ======================= GÜNCELLENEN BÖLÜM ======================= */}
-      {/* "Toplam Maliyet" kutusunun durumuna göre alt boşluk (padding) dinamik olarak değişir */}
       <div className={`flex-1 overflow-y-auto px-2 space-y-6 transition-all duration-300 ${totalCost > 0 ? 'pb-40' : 'pb-8'}`}>
         {!isDirectAdd && (
           <div className="space-y-4">
-             <h2 className="text-lg font-semibold text-gray-500 dark:text-gray-400 px-2">Varlık Türü</h2>
+             <h2 className="text-lg font-semibold text-apple-light-text-secondary dark:text-apple-dark-text-secondary px-2">Varlık Türü</h2>
             <div className="relative px-2">
-              <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-apple-light-text-secondary dark:text-apple-dark-text-secondary" />
               <input
                 type="text"
                 placeholder="Varlık Ara..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 text-base border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full pl-10 pr-4 py-3 text-base border-none rounded-xl bg-gray-200/50 dark:bg-apple-dark-card placeholder-apple-light-text-secondary dark:placeholder-apple-dark-text-secondary focus:ring-2 focus:ring-apple-blue"
               />
             </div>
             <div className="grid grid-cols-3 gap-2 px-2">
@@ -131,16 +129,16 @@ export function AddInvestmentPage({ onBack, initialSelectedType, isDirectAdd = f
                     onClick={() => setSelectedType(type.id as Investment['type'])}
                     className={`p-3 rounded-xl text-center transition-all flex flex-col items-center justify-center space-y-2 h-24 ${
                       isSelected
-                        ? 'bg-blue-600 text-white shadow-lg'
-                        : 'bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                        ? 'bg-apple-blue text-white'
+                        : 'bg-apple-light-card dark:bg-apple-dark-card hover:bg-gray-200/50 dark:hover:bg-gray-800'
                     }`}
                   >
-                    <div className={`p-3 rounded-full transition-colors ${isSelected ? 'bg-blue-500' : 'bg-gray-100 dark:bg-gray-700'}`}>
-                      <Icon className={`h-6 w-6 transition-colors ${isSelected ? 'text-white' : 'text-blue-600 dark:text-blue-400'}`} />
+                    <div className={`p-3 rounded-full transition-colors ${isSelected ? 'bg-white/20' : 'bg-gray-100 dark:bg-gray-800'}`}>
+                      <Icon className={`h-6 w-6 transition-colors ${isSelected ? 'text-white' : 'text-apple-blue'}`} />
                     </div>
                     <span
                       className={`font-semibold text-xs transition-colors ${
-                        isSelected ? 'text-white' : 'text-gray-800 dark:text-gray-200'
+                        isSelected ? 'text-white' : 'text-apple-light-text-primary dark:text-apple-dark-text-primary'
                       }`}
                     >
                       {type.name.replace(' Altını', '')}
@@ -153,58 +151,55 @@ export function AddInvestmentPage({ onBack, initialSelectedType, isDirectAdd = f
         )}
 
         <div className="space-y-4">
-           <h2 className="text-lg font-semibold text-gray-500 dark:text-gray-400 px-2">İşlem Detayları</h2>
-           <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 space-y-4 mx-2">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
-                    Miktar ({selectedInvestment?.unit})
-                  </label>
-                  <input
-                    type="tel"
-                    inputMode="decimal"
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
-                    className="w-full p-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent rounded-lg text-base text-gray-900 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-800/50 focus:border-blue-500"
-                    placeholder="10"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
-                    Alış Fiyatı (₺)
-                  </label>
-                  <input
-                    type="tel"
-                    inputMode="decimal"
-                    value={purchasePrice}
-                    onChange={(e) => setPurchasePrice(e.target.value)}
-                    disabled={selectedType === 'tl'}
-                    className="w-full p-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent rounded-lg text-base text-gray-900 dark:text-gray-100 disabled:bg-gray-200 dark:disabled:bg-gray-600 disabled:text-gray-500 focus:bg-white dark:focus:bg-gray-800/50 focus:border-blue-500"
-                    placeholder="Fiyat"
-                    required
-                  />
-                </div>
+           <h2 className="text-lg font-semibold text-apple-light-text-secondary dark:text-apple-dark-text-secondary px-2">İşlem Detayları</h2>
+           <div className="bg-apple-light-card dark:bg-apple-dark-card rounded-2xl p-4 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-apple-light-text-secondary dark:text-apple-dark-text-secondary mb-1">
+                  Miktar ({selectedInvestment?.unit})
+                </label>
+                <input
+                  type="tel"
+                  inputMode="decimal"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  className="w-full p-3 bg-apple-light-bg dark:bg-apple-dark-bg border-none rounded-lg text-base focus:ring-2 focus:ring-apple-blue"
+                  placeholder="10"
+                  required
+                />
               </div>
               <div>
-                 <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Alış Tarihi</label>
+                <label className="block text-sm font-medium text-apple-light-text-secondary dark:text-apple-dark-text-secondary mb-1">
+                  Alış Fiyatı (₺)
+                </label>
+                <input
+                  type="tel"
+                  inputMode="decimal"
+                  value={purchasePrice}
+                  onChange={(e) => setPurchasePrice(e.target.value)}
+                  disabled={selectedType === 'tl'}
+                  className="w-full p-3 bg-apple-light-bg dark:bg-apple-dark-bg border-none rounded-lg text-base disabled:opacity-50 focus:ring-2 focus:ring-apple-blue"
+                  placeholder="Fiyat"
+                  required
+                />
+              </div>
+                <div>
+                <label className="block text-sm font-medium text-apple-light-text-secondary dark:text-apple-dark-text-secondary mb-1">Alış Tarihi</label>
               <input
                 type="date"
                 value={purchaseDate}
                 onChange={(e) => setPurchaseDate(e.target.value)}
                 max={today}
-                className="block w-full box-border p-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent rounded-xl text-base text-gray-900 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-800 focus:border-blue-500 appearance-none"
+                className="block w-full box-border p-3 bg-apple-light-bg dark:bg-apple-dark-bg border-none rounded-lg text-base text-gray-900 dark:text-gray-100 focus:ring-2 dark:focus:ring-apple-blue focus:focus:ring-apple-blue appearance-none"
                 required
               />
             </div>
            </div>
         </div>
       </div>
-      {/* ==================================================================== */}
 
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-gray-100/80 dark:bg-gray-900/80 backdrop-blur-sm border-t border-gray-200 dark:border-gray-700">
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-apple-light-bg/80 dark:bg-apple-dark-card/80 backdrop-blur-sm border-t border-gray-200/50 dark:border-gray-700/50">
         {totalCost > 0 && (
-          <div className="flex items-center justify-between bg-gray-200 dark:bg-gray-800 text-gray-800 dark:text-gray-200 p-3 rounded-xl mb-3">
+          <div className="flex items-center justify-between bg-gray-200/50 dark:bg-apple-dark-card p-3 rounded-xl mb-3">
             <div className="flex items-center space-x-2">
               <Info className="w-5 h-5" />
               <span className="font-semibold text-sm">Toplam Maliyet</span>
@@ -218,7 +213,7 @@ export function AddInvestmentPage({ onBack, initialSelectedType, isDirectAdd = f
           type="submit"
           onClick={handleSubmit}
           disabled={loading || !amount || !purchasePrice}
-          className="w-full p-4 bg-blue-600 text-white font-bold text-lg rounded-xl hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center space-x-2 transition-all active:scale-95 shadow-lg shadow-blue-500/20"
+          className="w-full p-4 bg-apple-blue text-white font-bold text-lg rounded-xl hover:opacity-90 disabled:opacity-50 flex items-center justify-center space-x-2 transition-all active:scale-95"
         >
           {loading ? (
             <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />

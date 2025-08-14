@@ -16,11 +16,10 @@ const tabs = [
 export function Navigation({ activeTab, onTabChange }: NavigationProps) {
   return (
     // ======================= GÜNCELLENEN BÖLÜM =======================
-    // Arka planı, yüksekliği ve en önemlisi alt boşluğu güncelliyoruz.
+    // Arka plan renkleri yeni Apple renk paletiyle güncellendi
     <div 
-      className="fixed bottom-0 left-0 right-0 bg-gray-100/80 dark:bg-gray-800/80 backdrop-blur-lg border-t border-gray-200 dark:border-gray-700 z-50"
-      // pt-3: Üstten boşluk, pb-[calc(0.75rem+env(safe-area-inset-bottom))]: Alttan güvenli alan dahil boşluk
-      style={{ paddingTop: '0.75rem', paddingBottom: `calc(0.75rem ` }}
+      className="fixed bottom-0 left-0 right-0 bg-apple-light-bg/80 dark:bg-apple-dark-card/80 backdrop-blur-lg border-t border-gray-200 dark:border-gray-700 z-50"
+      style={{ paddingTop: '0.75rem', paddingBottom: `calc(0.75rem` }}
     >
       <div className="flex justify-around items-center max-w-md mx-auto">
         {tabs.map((tab) => {
@@ -33,8 +32,8 @@ export function Navigation({ activeTab, onTabChange }: NavigationProps) {
               onClick={() => onTabChange(tab.id)}
               className={`flex flex-col items-center justify-center space-y-1 transition-colors w-20 h-12 ${
                 isActive
-                  ? 'text-blue-600 dark:text-blue-500'
-                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                  ? 'text-apple-blue'
+                  : 'text-apple-light-text-secondary dark:text-apple-dark-text-secondary hover:text-apple-light-text-primary dark:hover:text-apple-dark-text-primary'
               }`}
             >
               <Icon className="h-6 w-6" strokeWidth={isActive ? 2.5 : 2} />
