@@ -3,13 +3,12 @@ import { Session } from '@supabase/supabase-js';
 import { supabase, Investment } from './lib/supabase';
 import { Dashboard } from './components/Dashboard';
 import { Holdings } from './components/Holdings';
-import { AITools } from './components/AITools';
-import { Navigation } from './components/Navigation';
 import { Insights } from './components/Insights';
 import { Auth } from './components/Auth';
 import { Profile } from './components/Profile';
 import { InvestmentDetail } from './components/InvestmentDetail';
 import { AddInvestmentPage } from './components/AddInvestmentPage';
+import { Navigation } from './components/Navigation';
 
 function App() {
   const [session, setSession] = useState<Session | null>(null);
@@ -45,7 +44,22 @@ function MainApp() {
     initialType?: Investment['type'];
   }>({ isOpen: false });
   
-  const [isBalanceVisible, setIsBalanceVisible] = useState(true);
+  // ======================= GÜNCELLENEN BÖLÜM 1: State'in Hafızadan Okunması =======================
+  // isBalanceVisible state'i artık başlangıç değerini localStorage'dan okur.
+  const [isBalanceVisible, setIsBalanceVisible] = useState<boolean>(() => {
+    const savedState = localStorage.getItem('isBalanceVisible');
+    // Eğer kayıtlı bir durum varsa onu kullan (string'i boolean'a çevirerek).
+    // Eğer kayıt yoksa, varsayılan olarak 'true' (görünür) başla.
+    return savedState !== null ? JSON.parse(savedState) : true;
+  });
+
+  // ======================= GÜNCELLENEN BÖLÜM 2: State Değişikliğinin Kaydedilmesi =======================
+  // isBalanceVisible state'i her değiştiğinde bu fonksiyon çalışır.
+  useEffect(() => {
+    // Yeni durumu string formatında localStorage'a kaydeder.
+    localStorage.setItem('isBalanceVisible', JSON.stringify(isBalanceVisible));
+  }, [isBalanceVisible]);
+  // ===============================================================================================
 
   const handleSelectInvestment = (id: string) => {
     setActiveTab('holdings');
@@ -87,8 +101,6 @@ function MainApp() {
                />;
       case 'insights':
         return <Insights isBalanceVisible={isBalanceVisible} />;
-      case 'ai-tools':
-        return <AITools />;
       case 'profile':
         return <Profile />;
       default:
@@ -105,7 +117,7 @@ function MainApp() {
 
   return (
     <div className="h-full w-full flex flex-col bg-apple-light-bg dark:bg-apple-dark-bg">
-      <main className="flex-grow overflow-y-auto px-4 py-6 pb-20">
+      <main className="flex-grow overflow-y-auto px-4 py-6 pb-24">
         {renderContent()}
       </main>
       {!isFullScreenPageOpen && (

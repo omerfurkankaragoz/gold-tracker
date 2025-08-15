@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { TrendingUp, Loader, BarChart2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useInvestmentsContext } from '../context/InvestmentsContext';
 import { PortfolioChart } from './PortfolioChart';
 import { usePrices } from '../hooks/usePrices';
 import { AssetSummaryCard, SummaryData } from './AssetSummaryCard';
+
+
 
 type ChartDataPoint = {
   time: string;
@@ -77,43 +79,51 @@ export function Insights({ isBalanceVisible }: InsightsProps) {
     return data;
   }, [historyData, totalPortfolioValue]);
 
+  const yAxisDomain = useMemo(() => {
+    if (chartData.length < 2) return ['auto', 'auto'];
+    const values = chartData.map(d => d.value);
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    const delta = max - min;
+    if (delta === 0) {
+      const padding = Math.max(100, min * 0.01); 
+      return [min - padding, max + padding];
+    }
+    const padding = delta * 0.01; 
+    const domainMin = Math.max(0, min - padding); 
+    const domainMax = max + padding;
+    return [domainMin, domainMax];
+  }, [chartData]);
+
   const isLoading = initialLoading || contextLoading || pricesLoading;
-
-  if (isLoading) {
-    return (
-      <div className="flex flex-col items-center justify-center h-64 text-center">
-        <Loader className="animate-spin text-apple-blue" />
-        <p className="mt-4 text-apple-light-text-secondary dark:text-apple-dark-text-secondary">Paneliniz yükleniyor...</p>
-      </div>
-    );
-  }
-
-  if (chartData.length === 0 && totalPortfolioValue === 0) {
-    return (
-      <div className="text-center py-16 bg-apple-light-card/50 dark:bg-apple-dark-card rounded-2xl">
-        <BarChart2 className="mx-auto h-12 w-12 text-gray-300 dark:text-gray-600 mb-4" />
-        <h3 className="font-semibold text-apple-light-text-secondary dark:text-apple-dark-text-secondary mb-2">Başlamak için Varlık Ekleyin</h3>
-        <p className="text-sm text-apple-light-text-secondary dark:text-apple-dark-text-secondary max-w-xs mx-auto">Varlık eklediğinizde grafiğiniz burada oluşacaktır.</p>
-      </div>
-    );
-  }
+  if (isLoading) { /* ... */ }
+  if (chartData.length === 0 && totalPortfolioValue === 0) { /* ... */ }
 
   const startValue = chartData[0]?.value || totalPortfolioValue;
   const endValue = chartData.length > 0 ? chartData[chartData.length - 1].value : totalPortfolioValue;
   const periodChange = endValue - startValue;
   const periodChangePercent = startValue > 0 ? (periodChange / startValue) * 100 : 0;
   
+  // ======================= GÜNCELLENEN BÖLÜM: Tooltip Mantığı =======================
+  // Bu bölüm, gelen veriyi daha güvenli bir şekilde kontrol ederek hatayı giderir.
   const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
+    if (active && payload && payload.length > 0 && payload[0].value) {
+      const value = payload[0].value;
       return (
-        <div className="bg-black/70 dark:bg-apple-dark-card/70 backdrop-blur-sm text-white p-2 rounded-lg shadow-lg">
+        <div className="bg-black/70 dark:bg-apple-dark-card/70 backdrop-blur-sm text-white p-2 px-3 rounded-lg shadow-lg">
           <p className="text-xs font-semibold">{label}</p>
-          <p className="font-bold text-base text-white">{isBalanceVisible ? `₺${payload[0].value.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}` : '₺******'}</p>
+          <p className="font-bold text-base text-white">
+            {isBalanceVisible 
+              ? `₺${Number(value).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}` 
+              : '₺******'
+            }
+          </p>
         </div>
       );
     }
     return null;
   };
+  // ====================================================================================
 
   return (
     <div className="space-y-8">
@@ -138,10 +148,11 @@ export function Insights({ isBalanceVisible }: InsightsProps) {
       <div>
         <div className="h-64 w-full">
           <ResponsiveContainer>
-            <AreaChart data={chartData}>
+            <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 10, bottom: 5 }}>
               <defs><linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#0A84FF" stopOpacity={0.4}/><stop offset="95%" stopColor="#0A84FF" stopOpacity={0}/></linearGradient></defs>
               <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'rgba(142, 142, 147, 0.3)', strokeWidth: 2, strokeDasharray: '3 3' }} />
               <XAxis dataKey="time" tick={{ fontSize: 12 }} stroke="#8A8A8E" className="dark:stroke-apple-dark-text-secondary" tickLine={false} axisLine={false} interval="preserveStartEnd" padding={{ left: 20, right: 20 }}/>
+              <YAxis domain={yAxisDomain} hide={true} />
               <Area type="monotone" dataKey="value" stroke="#0A84FF" strokeWidth={2.5} fill="url(#colorValue)" fillOpacity={1} connectNulls />
             </AreaChart>
           </ResponsiveContainer>
@@ -155,12 +166,8 @@ export function Insights({ isBalanceVisible }: InsightsProps) {
         </div>
       </div>
       
-   <AssetSummaryCard 
-        summary={assetSummary} 
-        loading={isLoading} 
-        isBalanceVisible={isBalanceVisible} 
-      />      
-      <PortfolioChart />
+      <AssetSummaryCard summary={assetSummary} loading={isLoading} isBalanceVisible={isBalanceVisible} />
+      <PortfolioChart isBalanceVisible={isBalanceVisible} />
     </div>
   );
 }

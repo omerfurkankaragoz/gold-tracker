@@ -13,7 +13,13 @@ const typeDetails: Record<string, { name: string; color: string }> = {
   eur: { name: 'Euro', color: '#007BFF' }, tl: { name: 'Türk Lirası', color: '#6F42C1' },
 };
 
-export function PortfolioChart() {
+// ======================= DEĞİŞİKLİK 1: PROP ARAYÜZÜ GÜNCELLENDİ =======================
+interface PortfolioChartProps {
+  isBalanceVisible: boolean;
+}
+
+export function PortfolioChart({ isBalanceVisible }: PortfolioChartProps) {
+// ====================================================================================
   const { investments, totalPortfolioValue } = useInvestmentsContext();
   const { prices } = usePrices();
 
@@ -29,6 +35,25 @@ export function PortfolioChart() {
     }, {} as Record<string, { value: number; color: string }>);
     return Object.entries(aggregatedData).map(([name, data]) => ({ name, ...data }));
   }, [investments, prices]);
+
+  // ======================= DEĞİŞİKLİK 2: CUSTOM TOOLTIP EKLENDİ =======================
+  const CustomTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length > 0 && payload[0].name && payload[0].value) {
+      const { name, value } = payload[0];
+      return (
+        <div className="bg-black/70 dark:bg-apple-dark-card/70 backdrop-blur-sm text-white p-2 px-3 rounded-lg shadow-lg">
+          <p className="text-xs font-semibold">{name}</p>
+          <p className="font-bold text-base text-white">
+            {isBalanceVisible
+              ? `₺${Number(value).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`
+              : '₺******'}
+          </p>
+        </div>
+      );
+    }
+    return null;
+  };
+  // ====================================================================================
 
   if (investments.length === 0) {
     return (
@@ -55,7 +80,9 @@ export function PortfolioChart() {
                 <Pie data={chartData} cx="50%" cy="50%" innerRadius={50} outerRadius={70} paddingAngle={2} dataKey="value" nameKey="name">
                   {chartData.map((entry) => <Cell key={`cell-${entry.name}`} fill={entry.color} stroke={entry.color} />)}
                 </Pie>
-                <Tooltip formatter={(value: number) => `₺${value.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`} wrapperClassName="!rounded-xl !shadow-lg !bg-black/70 dark:!bg-apple-dark-card/70 !backdrop-blur-sm" contentStyle={{ backgroundColor: 'transparent', border: 'none' }} labelStyle={{ color: '#fff' }}/>
+                {/* ======================= DEĞİŞİKLİK 3: TOOLTIP GÜNCELLENDİ ======================= */}
+                <Tooltip content={<CustomTooltip />} />
+                {/* ==================================================================================== */}
               </PieChart>
             </ResponsiveContainer>
           </div>
