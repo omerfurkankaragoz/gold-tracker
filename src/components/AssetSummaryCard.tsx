@@ -5,13 +5,11 @@ export type SummaryData = {
   [key: string]: { totalAmount: number; totalValue: number } | undefined;
 };
 
-// ======================= DEĞİŞİKLİK 1: PROP ARAYÜZÜ GÜNCELLENDİ =======================
 interface AssetSummaryCardProps {
   summary: SummaryData;
   loading: boolean;
-  isBalanceVisible: boolean; // Yeni prop eklendi
+  isBalanceVisible: boolean;
 }
-// ====================================================================================
 
 const assetDetails: { [key: string]: { name: string, unit: string, icon: React.ElementType } } = {
   usd: { name: 'Dolar', unit: '$', icon: DollarSign }, eur: { name: 'Euro', unit: '€', icon: Euro },
@@ -22,11 +20,17 @@ const assetDetails: { [key: string]: { name: string, unit: string, icon: React.E
   ata_gold: { name: 'Ata Altın', unit: 'adet', icon: Coins }, ayar_14_gold: { name: '14 Ayar Altın', unit: 'gr', icon: Coins },
   ayar_18_gold: { name: '18 Ayar Altın', unit: 'gr', icon: Coins },
 };
-const displayOrder = ['tl', 'usd', 'eur', 'gumus', 'gold', 'quarter_gold', 'half_gold', 'full_gold', 'cumhuriyet_gold', 'ata_gold', 'ayar_14_gold', 'ayar_18_gold'];
 
 export function AssetSummaryCard({ summary, loading, isBalanceVisible }: AssetSummaryCardProps) {
   const hasData = Object.values(summary).some(item => item && item.totalAmount > 0);
   if (loading || !hasData) return null;
+
+  // ======================= DEĞİŞİKLİK BURADA =======================
+  // Varlıkları `totalValue` değerine göre büyükten küçüğe sıralıyoruz.
+  const sortedAssetKeys = Object.keys(summary)
+    .filter(key => summary[key] && summary[key]!.totalValue > 0)
+    .sort((a, b) => (summary[b]?.totalValue ?? 0) - (summary[a]?.totalValue ?? 0));
+  // ====================================================================
 
   return (
     <div className="space-y-4">
@@ -34,9 +38,11 @@ export function AssetSummaryCard({ summary, loading, isBalanceVisible }: AssetSu
         <h2 className="text-2xl font-bold tracking-tight text-apple-light-text-primary dark:text-apple-dark-text-primary">Varlık Özetim</h2>
       </div>
       <div className="space-y-3">
-        {displayOrder.map(key => {
+        {/* Önceden tanımlı `displayOrder` yerine yeni oluşturulan `sortedAssetKeys` dizisini kullanıyoruz. */}
+        {sortedAssetKeys.map(key => {
           const item = summary[key];
           const details = assetDetails[key];
+          // Sıralama zaten filtresi boş varlıkları elediği için bu kontrol fazladan, ama güvenli.
           if (!item || !details || item.totalAmount === 0) return null;
           const Icon = details.icon;
           return (
@@ -47,7 +53,6 @@ export function AssetSummaryCard({ summary, loading, isBalanceVisible }: AssetSu
                 </div>
                 <div className="text-left">
                   <p className="font-semibold text-base text-apple-light-text-primary dark:text-apple-dark-text-primary">{details.name}</p>
-                  {/* ======================= DEĞİŞİKLİK 2: KOŞULLU GÖSTERİM ======================= */}
                   <p className="text-sm text-apple-light-text-secondary dark:text-apple-dark-text-secondary">
                     {isBalanceVisible ? 
                       `${item.totalAmount.toLocaleString('tr-TR', { minimumFractionDigits: key === 'tl' ? 2 : 0, maximumFractionDigits: 4 })} ${details.unit}`
@@ -62,7 +67,6 @@ export function AssetSummaryCard({ summary, loading, isBalanceVisible }: AssetSu
                   : '******'
                 }
               </p>
-              {/* ==================================================================================== */}
             </div>
           );
         })}

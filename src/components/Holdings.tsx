@@ -92,26 +92,22 @@ export function Holdings({ onSelectInvestment, onAddInvestment, isBalanceVisible
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between px-2">
-        <h1 className="text-3xl font-bold tracking-tight text-apple-light-text-primary dark:text-apple-dark-text-primary">Varlıklarım</h1>
-        <button
-          onClick={onAddInvestment}
-          className="bg-apple-blue text-white p-2 rounded-full hover:opacity-90 transition-opacity"
-        >
-          <Plus className="h-6 w-6" />
-        </button>
-      </div>
-
-      {investments.length === 0 ? (
-        <div className="text-center py-16 bg-apple-light-card/50 dark:bg-apple-dark-card rounded-2xl">
-          <h3 className="font-semibold text-apple-light-text-secondary dark:text-apple-dark-text-secondary mb-2">Henüz varlık eklemediniz</h3>
-          <p className="text-sm text-apple-light-text-secondary dark:text-apple-dark-text-secondary">
-              Başlamak için '+' butonuna tıklayarak ilk yatırımınızı girin.
-          </p>
+    <div>
+      {/* ======================= SABİT ÜST BÖLÜM (NİHAİ ÇÖZÜM) ======================= */}
+      <div className="sticky top-0 z-20 bg-apple-light-bg dark:bg-apple-dark-bg space-y-4 py-4">
+        {/* Başlık ve Ekle Butonu */}
+        <div className="flex items-center justify-between px-2">
+          <h1 className="text-3xl font-bold tracking-tight text-apple-light-text-primary dark:text-apple-dark-text-primary">Varlıklarım</h1>
+          <button
+            onClick={onAddInvestment}
+            className="bg-apple-blue text-white p-2 rounded-full hover:opacity-90 transition-opacity"
+          >
+            <Plus className="h-6 w-6" />
+          </button>
         </div>
-      ) : (
-        <>
+        
+        {/* Filtre Butonları */}
+        {investments.length > 0 && (
           <div className="px-2">
             <div className="flex items-center justify-between space-x-1 p-1 bg-gray-200/50 dark:bg-apple-dark-card rounded-full">
               <SortButton sortKey="purchase_date" label="Tarih" />
@@ -119,7 +115,20 @@ export function Holdings({ onSelectInvestment, onAddInvestment, isBalanceVisible
               <SortButton sortKey="currentValue" label="Değer" />
             </div>
           </div>
+        )}
+      </div>
+      {/* ============================================================================== */}
 
+      {/* KAYAN İÇERİK */}
+      <div className="pt-2"> {/* Sabit başlığın altında boşluk bırakmak için */}
+        {investments.length === 0 ? (
+          <div className="text-center py-16 bg-apple-light-card/50 dark:bg-apple-dark-card rounded-2xl">
+            <h3 className="font-semibold text-apple-light-text-secondary dark:text-apple-dark-text-secondary mb-2">Henüz varlık eklemediniz</h3>
+            <p className="text-sm text-apple-light-text-secondary dark:text-apple-dark-text-secondary">
+                Başlamak için '+' butonuna tıklayarak ilk yatırımınızı girin.
+            </p>
+          </div>
+        ) : (
           <div className="space-y-3">
             {sortedInvestments.map((investment) => {
               const details = typeDetails[investment.type as Investment['type']];
@@ -184,8 +193,8 @@ export function Holdings({ onSelectInvestment, onAddInvestment, isBalanceVisible
               );
             })}
           </div>
-        </>
-      )}
+        )}
+      </div>
     </div>
   );
 }

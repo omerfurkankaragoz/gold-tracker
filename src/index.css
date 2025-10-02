@@ -3,7 +3,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ======================= GÜNCELLENEN BÖLÜM: Animasyonlar ======================= */
+/* ======================= YENİ EKLENEN BÖLÜM: Animasyonlar ======================= */
 @layer utilities {
   /* İkon şeridinin sürekli ve pürüzsüz bir şekilde yukarı kaymasını sağlayan animasyon */
   @keyframes scroll-up {
@@ -28,13 +28,17 @@
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
   }
 
+  /* ======================= DEĞİŞTİRİLEN BÖLÜM ======================= */
+  /* Arka plan renkleri, App.tsx'teki ana kapsayıcı ile eşleşecek şekilde güncellendi. */
   html, body {
-    @apply bg-white dark:bg-gray-900;
+    @apply bg-apple-light-bg dark:bg-apple-dark-bg;
     height: 100%;
     width: 100%;
     overflow: hidden;
     position: fixed;
+    overscroll-behavior: none; /* Sayfanın esnemesini engeller */
   }
+  /* ================================================================== */
 
   #root {
     width: 100%;

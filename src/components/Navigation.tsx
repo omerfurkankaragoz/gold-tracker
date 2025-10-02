@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, Wallet, AreaChart, User } from 'lucide-react';
+import { Home, Wallet, AreaChart, User, WalletMinimal, WalletMinimalIcon, TrendingUpDown, UserRoundCog, ChartCandlestick, Landmark, HandCoins, ChartSpline, CandlestickChart } from 'lucide-react';
 
 interface NavigationProps {
   activeTab: string;
@@ -7,21 +7,24 @@ interface NavigationProps {
 }
 
 const tabs = [
-  { id: 'dashboard', name: 'Anasayfa', icon: Home },
-  { id: 'holdings', name: 'Varlıklar', icon: Wallet },
-  { id: 'insights', name: 'Panelim', icon: AreaChart },
-  { id: 'profile', name: 'Profil', icon: User },
+  { id: 'dashboard', name: 'Piyasalar', icon: CandlestickChart },
+  { id: 'holdings', name: 'Varlıklarım', icon: WalletMinimal },
+  { id: 'insights', name: 'Panelim', icon: ChartSpline },
+  { id: 'profile', name: 'Ayarlar', icon: UserRoundCog },
 ];
 
 export function Navigation({ activeTab, onTabChange }: NavigationProps) {
   return (
     // ======================= GÜNCELLENEN BÖLÜM =======================
-    // Arka plan renkleri yeni Apple renk paletiyle güncellendi
+    // Arka plan renkleri yeni Apple renk paletiyle güncellendi ve alt boşluk eklendi.
     <div 
       className="fixed bottom-0 left-0 right-0 bg-apple-light-bg/80 dark:bg-apple-dark-card/80 backdrop-blur-lg border-t border-gray-200 dark:border-gray-700 z-50"
-      style={{ paddingTop: '0.75rem', paddingBottom: `calc(0.75rem` }}
     >
-      <div className="flex justify-around items-center max-w-md mx-auto">
+      <div 
+        className="flex justify-around items-center max-w-md mx-auto pt-3"
+        // Stil, güvenli alan boşluğunu (iPhone'lardaki alt çubuk gibi) içerecek şekilde güncellendi.
+        style={{ paddingBottom: `calc( env(safe-area-inset-bottom))` }}
+      >
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;

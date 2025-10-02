@@ -96,7 +96,7 @@ export function Profile() {
   // ====================================================================
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 pt-6"> {/* <- DEĞİŞİKLİK BURADA */}
       <div className="flex flex-col items-center text-center px-4">
         {avatarUrl ? (
           <img 

@@ -7,8 +7,6 @@ import { PortfolioChart } from './PortfolioChart';
 import { usePrices } from '../hooks/usePrices';
 import { AssetSummaryCard, SummaryData } from './AssetSummaryCard';
 
-
-
 type ChartDataPoint = {
   time: string;
   value: number;
@@ -104,8 +102,6 @@ export function Insights({ isBalanceVisible }: InsightsProps) {
   const periodChange = endValue - startValue;
   const periodChangePercent = startValue > 0 ? (periodChange / startValue) * 100 : 0;
   
-  // ======================= GÜNCELLENEN BÖLÜM: Tooltip Mantığı =======================
-  // Bu bölüm, gelen veriyi daha güvenli bir şekilde kontrol ederek hatayı giderir.
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length > 0 && payload[0].value) {
       const value = payload[0].value;
@@ -123,51 +119,59 @@ export function Insights({ isBalanceVisible }: InsightsProps) {
     }
     return null;
   };
-  // ====================================================================================
 
   return (
-    <div className="space-y-8">
-      <div className="px-2">
-        <p className="text-base font-medium text-apple-light-text-secondary dark:text-apple-dark-text-secondary">Toplam Varlık Değeri</p>
-        <p className="text-3xl font-bold tracking-tight text-apple-light-text-primary dark:text-apple-dark-text-primary mt-1">
-          {isBalanceVisible ? `₺${endValue.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}` : '₺******'}
-        </p>
-        {chartData.length > 1 && (
-          <div className={`flex items-center space-x-2 mt-1 font-semibold ${ periodChange >= 0 ? 'text-apple-green' : 'text-apple-red' }`}>
-            {isBalanceVisible ? (
-              <>
-                <TrendingUp className="h-5 w-5" />
-                <span>₺{Math.abs(periodChange).toLocaleString('tr-TR', {minimumFractionDigits: 2})}</span>
-                <span>({Math.abs(periodChangePercent).toFixed(2)}%)</span>
-              </>
-            ) : ( <span>******</span> )}
-          </div>
-        )}
+    <div>
+      {/* ======================= BAŞLANGIÇ: SABİT ÜST BÖLÜM ======================= */}
+      <div className="sticky top-0 z-10 bg-apple-light-bg dark:bg-apple-dark-bg pt-6 pb-4 border-b border-gray-200/80 dark:border-gray-800">
+        <div className="px-2">
+            <p className="text-base font-medium text-apple-light-text-secondary dark:text-apple-dark-text-secondary">Toplam Varlık Değeri</p>
+            <p className="text-3xl font-bold tracking-tight text-apple-light-text-primary dark:text-apple-dark-text-primary mt-1">
+            {isBalanceVisible ? `₺${endValue.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}` : '₺******'}
+            </p>
+            {chartData.length > 1 && (
+            <div className={`flex items-center space-x-2 mt-1 font-semibold ${ periodChange >= 0 ? 'text-apple-green' : 'text-apple-red' }`}>
+                {isBalanceVisible ? (
+                <>
+                    <TrendingUp className="h-5 w-5" />
+                    <span>₺{Math.abs(periodChange).toLocaleString('tr-TR', {minimumFractionDigits: 2})}</span>
+                    <span>({Math.abs(periodChangePercent).toFixed(2)}%)</span>
+                </>
+                ) : ( <span>******</span> )}
+            </div>
+            )}
+        </div>
       </div>
+      {/* ======================= BİTİŞ: SABİT ÜST BÖLÜM ======================= */}
 
-      <div>
-        <div className="h-64 w-full">
-          <ResponsiveContainer>
-            <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 10, bottom: 5 }}>
-              <defs><linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#0A84FF" stopOpacity={0.4}/><stop offset="95%" stopColor="#0A84FF" stopOpacity={0}/></linearGradient></defs>
-              <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'rgba(142, 142, 147, 0.3)', strokeWidth: 2, strokeDasharray: '3 3' }} />
-              <XAxis dataKey="time" tick={{ fontSize: 12 }} stroke="#8A8A8E" className="dark:stroke-apple-dark-text-secondary" tickLine={false} axisLine={false} interval="preserveStartEnd" padding={{ left: 20, right: 20 }}/>
-              <YAxis domain={yAxisDomain} hide={true} />
-              <Area type="monotone" dataKey="value" stroke="#0A84FF" strokeWidth={2.5} fill="url(#colorValue)" fillOpacity={1} connectNulls />
-            </AreaChart>
-          </ResponsiveContainer>
+
+      {/* ======================= BAŞLANGIÇ: KAYAN İÇERİK ======================= */}
+      <div className="space-y-8 pt-4">
+        <div>
+          <div className="h-64 w-full">
+            <ResponsiveContainer>
+              <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 10, bottom: 5 }}>
+                <defs><linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#0A84FF" stopOpacity={0.4}/><stop offset="95%" stopColor="#0A84FF" stopOpacity={0}/></linearGradient></defs>
+                <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'rgba(142, 142, 147, 0.3)', strokeWidth: 2, strokeDasharray: '3 3' }} />
+                <XAxis dataKey="time" tick={{ fontSize: 12 }} stroke="#8A8A8E" className="dark:stroke-apple-dark-text-secondary" tickLine={false} axisLine={false} interval="preserveStartEnd" padding={{ left: 20, right: 20 }}/>
+                <YAxis domain={yAxisDomain} hide={true} />
+                <Area type="monotone" dataKey="value" stroke="#0A84FF" strokeWidth={2.5} fill="url(#colorValue)" fillOpacity={1} connectNulls />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="flex items-center justify-between space-x-1 p-1 mt-4 bg-gray-200/50 dark:bg-apple-dark-card rounded-full">
+            {timeRanges.map(range => (
+              <button key={range.id} onClick={() => setActiveRange(range.id)} className={`flex-1 px-3 py-2 text-sm font-semibold rounded-full transition-all ${range.id === activeRange ? 'bg-apple-light-card dark:bg-gray-700 text-apple-blue shadow-md' : 'text-apple-light-text-secondary dark:text-apple-dark-text-secondary hover:bg-gray-200 dark:hover:bg-gray-700/50'}`}>
+                {range.label}
+              </button>
+            ))}
+          </div>
         </div>
-        <div className="flex items-center justify-between space-x-1 p-1 mt-4 bg-gray-200/50 dark:bg-apple-dark-card rounded-full">
-          {timeRanges.map(range => (
-            <button key={range.id} onClick={() => setActiveRange(range.id)} className={`flex-1 px-3 py-2 text-sm font-semibold rounded-full transition-all ${range.id === activeRange ? 'bg-apple-light-card dark:bg-gray-700 text-apple-blue shadow-md' : 'text-apple-light-text-secondary dark:text-apple-dark-text-secondary hover:bg-gray-200 dark:hover:bg-gray-700/50'}`}>
-              {range.label}
-            </button>
-          ))}
-        </div>
+        
+        <AssetSummaryCard summary={assetSummary} loading={isLoading} isBalanceVisible={isBalanceVisible} />
+        <PortfolioChart isBalanceVisible={isBalanceVisible} />
       </div>
-      
-      <AssetSummaryCard summary={assetSummary} loading={isLoading} isBalanceVisible={isBalanceVisible} />
-      <PortfolioChart isBalanceVisible={isBalanceVisible} />
+       {/* ======================= BİTİŞ: KAYAN İÇERİK ======================= */}
     </div>
   );
 }

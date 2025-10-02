@@ -115,9 +115,9 @@ function MainApp() {
   
   const isFullScreenPageOpen = !!selectedInvestmentId || addInvestmentState.isOpen;
 
-  return (
+ return (
     <div className="h-full w-full flex flex-col bg-apple-light-bg dark:bg-apple-dark-bg">
-      <main className="flex-grow overflow-y-auto px-4 py-6 pb-24">
+      <main className="flex-grow overflow-y-auto px-4 pb-24">
         {renderContent()}
       </main>
       {!isFullScreenPageOpen && (
