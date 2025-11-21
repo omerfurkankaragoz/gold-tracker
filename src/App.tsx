@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { Session } from '@supabase/supabase-js';
 import { supabase, Investment } from './lib/supabase';
 import { Dashboard } from './components/Dashboard';
@@ -43,7 +44,7 @@ function MainApp() {
     isOpen: boolean;
     initialType?: Investment['type'];
   }>({ isOpen: false });
-  
+
   // ======================= GÜNCELLENEN BÖLÜM 1: State'in Hafızadan Okunması =======================
   // isBalanceVisible state'i artık başlangıç değerini localStorage'dan okur.
   const [isBalanceVisible, setIsBalanceVisible] = useState<boolean>(() => {
@@ -72,13 +73,13 @@ function MainApp() {
 
   const handleGoToAddInvestment = (initialType?: Investment['type']) => {
     if (initialType) {
-        setActiveTab('dashboard');
+      setActiveTab('dashboard');
     } else {
-        setActiveTab('holdings');
+      setActiveTab('holdings');
     }
     setAddInvestmentState({ isOpen: true, initialType: initialType });
   };
-  
+
   const handleBackFromAdd = () => {
     setAddInvestmentState({ isOpen: false });
   };
@@ -87,41 +88,59 @@ function MainApp() {
     if (addInvestmentState.isOpen) {
       return <AddInvestmentPage onBack={handleBackFromAdd} initialSelectedType={addInvestmentState.initialType} isDirectAdd={!!addInvestmentState.initialType} />;
     }
-    
+
     if (selectedInvestmentId) {
       return <InvestmentDetail investmentId={selectedInvestmentId} onBack={handleBackToHoldings} />;
     }
 
     switch (activeTab) {
       case 'holdings':
-        return <Holdings 
-                  onSelectInvestment={handleSelectInvestment} 
-                  onAddInvestment={() => handleGoToAddInvestment()} 
-                  isBalanceVisible={isBalanceVisible}
-               />;
+        return <Holdings
+          onSelectInvestment={handleSelectInvestment}
+          onAddInvestment={() => handleGoToAddInvestment()}
+          isBalanceVisible={isBalanceVisible}
+        />;
       case 'insights':
         return <Insights isBalanceVisible={isBalanceVisible} />;
       case 'profile':
         return <Profile />;
       default:
-        return <Dashboard 
-                  onNavigate={setActiveTab} 
-                  onAddInvestment={handleGoToAddInvestment} 
-                  isBalanceVisible={isBalanceVisible}
-                  setIsBalanceVisible={setIsBalanceVisible}
-               />;
+        return <Dashboard
+          onNavigate={setActiveTab}
+          onAddInvestment={handleGoToAddInvestment}
+          isBalanceVisible={isBalanceVisible}
+          setIsBalanceVisible={setIsBalanceVisible}
+        />;
     }
   };
-  
+
   const isFullScreenPageOpen = !!selectedInvestmentId || addInvestmentState.isOpen;
 
- return (
+  // Determine a unique key for the current view to trigger animations
+  const pageKey = addInvestmentState.isOpen
+    ? 'add-investment'
+    : selectedInvestmentId
+      ? `investment-${selectedInvestmentId}`
+      : activeTab;
+
+  return (
     <div className="h-full w-full flex flex-col bg-apple-light-bg dark:bg-apple-dark-bg">
       <main className="flex-grow overflow-y-auto px-4 pb-24">
-        {renderContent()}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={pageKey}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+            className="h-full"
+          >
+            {renderContent()}
+          </motion.div>
+        </AnimatePresence>
       </main>
       {!isFullScreenPageOpen && (
-          <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
+        <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
       )}
     </div>
   );

@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { DollarSign, Euro, Coins, TrendingUp, Eye, EyeOff, Gem } from 'lucide-react';
 import { PriceCard } from './PriceCard';
 import { usePrices } from '../hooks/usePrices';
 import { useInvestmentsContext } from '../context/InvestmentsContext';
 import { Investment } from '../lib/supabase';
 import { Price } from '../hooks/usePrices';
+import { ListSkeleton } from './Skeleton';
 
 interface DashboardProps {
   onNavigate: (tab: string) => void;
@@ -13,8 +14,10 @@ interface DashboardProps {
   setIsBalanceVisible: (isVisible: boolean) => void;
 }
 
+
+
 export function Dashboard({ onNavigate, onAddInvestment, isBalanceVisible, setIsBalanceVisible }: DashboardProps) {
-  const { prices } = usePrices();
+  const { prices, loading } = usePrices();
   const { investments, totalPortfolioValue } = useInvestmentsContext();
 
   const handleCardClick = (type: Investment['type']) => {
@@ -27,7 +30,7 @@ export function Dashboard({ onNavigate, onAddInvestment, isBalanceVisible, setIs
 
   const priceCardsToShow = Object.entries(prices).filter(([key, p]) => key !== 'tl' && (p as Price).sellingPrice > 0);
 
-   return (
+  return (
     <div className="space-y-8 pt-6">
       <div
         onClick={() => onNavigate('insights')}
@@ -35,7 +38,7 @@ export function Dashboard({ onNavigate, onAddInvestment, isBalanceVisible, setIs
       >
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold">Toplam Varlık Değeri</h2>
-          <button 
+          <button
             onClick={(e) => { e.stopPropagation(); setIsBalanceVisible(!isBalanceVisible); }}
             className="p-1 rounded-full text-blue-200 hover:bg-white/20 transition-colors"
           >
@@ -64,34 +67,39 @@ export function Dashboard({ onNavigate, onAddInvestment, isBalanceVisible, setIs
         <div className="sticky top-0 z-10 bg-apple-light-bg dark:bg-apple-dark-bg py-3">
           <div className="flex items-baseline justify-between px-2">
             <h2 className="text-2xl font-bold tracking-tight text-apple-light-text-primary dark:text-apple-dark-text-primary">Piyasalar</h2>
-            
-            {/* ======================= DEĞİŞTİRİLEN BÖLÜM ======================= */}
-            {/* Metin hizalaması "text-left" yerine "text-center" olarak güncellendi. */}
+
             <div className="flex items-center space-x-5 pr-2">
               <span className="w-24 text-center text-sm font-semibold text-apple-light-text-secondary dark:text-apple-dark-text-secondary">Alış</span>
               <span className="w-24 text-center text-sm font-semibold text-apple-light-text-secondary dark:text-apple-dark-text-secondary">Satış</span>
             </div>
-            {/* ==================================================================== */}
 
           </div>
         </div>
 
         <div className="flex flex-col space-y-3 pt-2">
-          {priceCardsToShow.map(([type, price]) => {
-            const typedPrice = price as Price;
-            const getIcon = () => {
-              if (type === 'gumus') return Gem;
-              if (typedPrice.name.toLowerCase().includes('altın')) return Coins;
-              if (typedPrice.symbol === 'USD') return DollarSign;
-              return Euro;
-            };
-            const Icon = getIcon();
-            return (
-              <button key={type} onClick={() => handleCardClick(type as Investment['type'])} className="w-full">
-                <PriceCard price={typedPrice} icon={<Icon className="h-6 w-6 text-apple-blue" />} />
-              </button>
-            );
-          })}
+          {loading ? (
+            <ListSkeleton />
+          ) : (
+            priceCardsToShow.map(([type, price]) => {
+              const typedPrice = price as Price;
+              const getIcon = () => {
+                if (type === 'gumus') return Gem;
+                if (typedPrice.name.toLowerCase().includes('altın')) return Coins;
+                if (typedPrice.symbol === 'USD') return DollarSign;
+                return Euro;
+              };
+              const Icon = getIcon();
+
+              return (
+                <button key={type} onClick={() => handleCardClick(type as Investment['type'])} className="w-full">
+                  <PriceCard
+                    price={typedPrice}
+                    icon={<Icon className="h-6 w-6 text-apple-blue" />}
+                  />
+                </button>
+              );
+            })
+          )}
         </div>
       </div>
     </div>

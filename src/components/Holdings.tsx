@@ -1,15 +1,18 @@
 import React, { useState, useMemo } from 'react';
-import { Plus, Trash2, TrendingUp, TrendingDown, DollarSign, Euro, Coins, ChevronsUpDown, ChevronDown, ChevronUp, Gem, TurkishLiraIcon } from 'lucide-react';
+import { Plus, Trash2, TrendingUp, TrendingDown, DollarSign, Euro, Coins, ChevronsUpDown, ChevronDown, ChevronUp, Gem, TurkishLiraIcon, Wallet } from 'lucide-react';
 import { useInvestmentsContext } from '../context/InvestmentsContext';
 import { usePrices } from '../hooks/usePrices';
 import { format } from 'date-fns';
 import { tr } from 'date-fns/locale';
 import { Investment } from '../lib/supabase';
+import { ListSkeleton } from './Skeleton';
+import { SwipeableItem } from './SwipeableItem';
+import { EmptyState } from './EmptyState';
 
 export const typeDetails: Record<string, { icon: React.ElementType; name: string; unit: string }> = {
   usd: { icon: DollarSign, name: 'Dolar', unit: '$' },
   eur: { icon: Euro, name: 'Euro', unit: '€' },
-  tl: { icon:TurkishLiraIcon, name: 'Türk Lirası', unit: '₺' },
+  tl: { icon: TurkishLiraIcon, name: 'Türk Lirası', unit: '₺' },
   gumus: { icon: Gem, name: 'Gram Gümüş', unit: 'gr' },
   gold: { icon: Coins, name: 'Gram Altın', unit: 'gr' },
   quarter_gold: { icon: Coins, name: 'Çeyrek Altın', unit: 'adet' },
@@ -30,7 +33,7 @@ interface HoldingsProps {
 }
 
 export function Holdings({ onSelectInvestment, onAddInvestment, isBalanceVisible }: HoldingsProps) {
-  const { investments, deleteInvestment } = useInvestmentsContext();
+  const { investments, deleteInvestment, loading } = useInvestmentsContext();
   const { prices } = usePrices();
   const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: 'ascending' | 'descending' }>({
     key: 'purchase_date',
@@ -66,8 +69,7 @@ export function Holdings({ onSelectInvestment, onAddInvestment, isBalanceVisible
     setSortConfig({ key, direction });
   };
 
-  const handleDelete = async (e: React.MouseEvent, id: string) => {
-    e.stopPropagation();
+  const handleDelete = async (id: string) => {
     if (window.confirm('Bu yatırımı silmek istediğinizden emin misiniz?')) {
       await deleteInvestment(id);
     }
@@ -77,13 +79,12 @@ export function Holdings({ onSelectInvestment, onAddInvestment, isBalanceVisible
     const isActive = sortConfig.key === sortKey;
     const Icon = isActive ? (sortConfig.direction === 'ascending' ? ChevronUp : ChevronDown) : ChevronsUpDown;
     return (
-      <button 
+      <button
         onClick={() => requestSort(sortKey)}
-        className={`flex-1 flex items-center justify-center space-x-2 px-3 py-2 text-sm rounded-full transition-all duration-300 ${
-          isActive 
-            ? 'bg-apple-light-card dark:bg-gray-700 text-apple-blue font-bold shadow-md' 
-            : 'bg-transparent text-apple-light-text-secondary dark:text-apple-dark-text-secondary hover:bg-gray-200 dark:hover:bg-gray-700/50'
-        }`}
+        className={`flex-1 flex items-center justify-center space-x-2 px-3 py-2 text-sm rounded-full transition-all duration-300 ${isActive
+          ? 'bg-apple-light-card dark:bg-gray-700 text-apple-blue font-bold shadow-md'
+          : 'bg-transparent text-apple-light-text-secondary dark:text-apple-dark-text-secondary hover:bg-gray-200 dark:hover:bg-gray-700/50'
+          }`}
       >
         <Icon className="h-4 w-4" />
         <span>{label}</span>
@@ -105,7 +106,7 @@ export function Holdings({ onSelectInvestment, onAddInvestment, isBalanceVisible
             <Plus className="h-6 w-6" />
           </button>
         </div>
-        
+
         {/* Filtre Butonları */}
         {investments.length > 0 && (
           <div className="px-2">
@@ -121,13 +122,18 @@ export function Holdings({ onSelectInvestment, onAddInvestment, isBalanceVisible
 
       {/* KAYAN İÇERİK */}
       <div className="pt-2"> {/* Sabit başlığın altında boşluk bırakmak için */}
-        {investments.length === 0 ? (
-          <div className="text-center py-16 bg-apple-light-card/50 dark:bg-apple-dark-card rounded-2xl">
-            <h3 className="font-semibold text-apple-light-text-secondary dark:text-apple-dark-text-secondary mb-2">Henüz varlık eklemediniz</h3>
-            <p className="text-sm text-apple-light-text-secondary dark:text-apple-dark-text-secondary">
-                Başlamak için '+' butonuna tıklayarak ilk yatırımınızı girin.
-            </p>
-          </div>
+        {loading ? (
+          <ListSkeleton />
+        ) : investments.length === 0 ? (
+          <EmptyState
+            icon={Wallet}
+            title="Henüz varlık eklemediniz"
+            description="Portföyünüzü oluşturmaya başlamak için ilk yatırımınızı ekleyin."
+            action={{
+              label: "Yatırım Ekle",
+              onClick: onAddInvestment
+            }}
+          />
         ) : (
           <div className="space-y-3">
             {sortedInvestments.map((investment) => {
@@ -140,56 +146,54 @@ export function Holdings({ onSelectInvestment, onAddInvestment, isBalanceVisible
               const gainPercent = purchaseValue > 0 ? (gain / purchaseValue) * 100 : 0;
 
               return (
-                <button
-                  key={investment.id}
-                  onClick={() => onSelectInvestment(investment.id)}
-                  className="w-full text-left bg-apple-light-card dark:bg-apple-dark-card p-4 rounded-2xl space-y-4"
-                >
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center space-x-4">
-                      <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-full flex-shrink-0">
-                        <Icon className="h-6 w-6 text-apple-blue" />
+                <div key={investment.id} className="mb-3">
+                  <SwipeableItem
+                    onDelete={() => handleDelete(investment.id)}
+                    onClick={() => onSelectInvestment(investment.id)}
+                  >
+                    <div className="w-full text-left p-4 space-y-4">
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center space-x-4">
+                          <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-full flex-shrink-0">
+                            <Icon className="h-6 w-6 text-apple-blue" />
+                          </div>
+                          <div className="text-left">
+                            <p className="font-semibold text-base text-apple-light-text-primary dark:text-apple-dark-text-primary">{details.name}</p>
+                            <p className="text-sm text-apple-light-text-secondary dark:text-apple-dark-text-secondary">
+                              {investment.amount.toLocaleString('tr-TR', { maximumFractionDigits: 4 })} {details.unit}
+                            </p>
+                          </div>
+                        </div>
+                        {/* Delete button removed in favor of swipe action */}
                       </div>
-                      <div className="text-left">
-                        <p className="font-semibold text-base text-apple-light-text-primary dark:text-apple-dark-text-primary">{details.name}</p>
-                        <p className="text-sm text-apple-light-text-secondary dark:text-apple-dark-text-secondary">
-                          {investment.amount.toLocaleString('tr-TR', {maximumFractionDigits: 4})} {details.unit}
-                        </p>
-                      </div>
-                    </div>
-                    <button
-                      onClick={(e) => handleDelete(e, investment.id)}
-                      className="p-2 text-apple-light-text-secondary dark:text-apple-dark-text-secondary hover:text-apple-red dark:hover:text-apple-red rounded-lg transition-colors flex-shrink-0 ml-2 z-10 relative"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="text-left">
-                      <p className="text-sm text-apple-light-text-secondary dark:text-apple-dark-text-secondary">Anlık Değer</p>
-                      <p className="font-semibold text-apple-light-text-primary dark:text-apple-dark-text-primary mt-1">
-                        {isBalanceVisible ? `₺${currentValue.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}` : '******'}
-                      </p>
-                      <p className="text-xs text-apple-light-text-secondary/70 dark:text-apple-dark-text-secondary/70 mt-2">
-                        {format(new Date(investment.purchase_date), 'dd MMM yyyy', { locale: tr })}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm text-apple-light-text-secondary dark:text-apple-dark-text-secondary">Kar/Zarar</p>
-                      <div className={`font-semibold flex items-center justify-end space-x-1 mt-1 ${gain >= 0 ? 'text-apple-green' : 'text-apple-red'}`}>
-                        {isBalanceVisible ? (
-                          <>
-                            <span>₺{Math.abs(gain).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</span>
-                            <span className='ml-2'>({Math.abs(gainPercent).toFixed(2)}%)</span>
-                          </>
-                        ) : (
-                          <span>******</span>
-                        )}
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="text-left">
+                          <p className="text-sm text-apple-light-text-secondary dark:text-apple-dark-text-secondary">Anlık Değer</p>
+                          <p className="font-semibold text-apple-light-text-primary dark:text-apple-dark-text-primary mt-1">
+                            {isBalanceVisible ? `₺${currentValue.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}` : '******'}
+                          </p>
+                          <p className="text-xs text-apple-light-text-secondary/70 dark:text-apple-dark-text-secondary/70 mt-2">
+                            {format(new Date(investment.purchase_date), 'dd MMM yyyy', { locale: tr })}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm text-apple-light-text-secondary dark:text-apple-dark-text-secondary">Kar/Zarar</p>
+                          <div className={`font-semibold flex items-center justify-end space-x-1 mt-1 ${gain >= 0 ? 'text-apple-green' : 'text-apple-red'}`}>
+                            {isBalanceVisible ? (
+                              <>
+                                <span>₺{Math.abs(gain).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</span>
+                                <span className='ml-2'>({Math.abs(gainPercent).toFixed(2)}%)</span>
+                              </>
+                            ) : (
+                              <span>******</span>
+                            )}
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </button>
+                  </SwipeableItem>
+                </div>
               );
             })}
           </div>
