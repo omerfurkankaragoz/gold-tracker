@@ -5,14 +5,14 @@ import { format } from 'date-fns';
 import { tr } from 'date-fns/locale';
 import { TrendingUp, TrendingDown, History as HistoryIcon, ChevronRight } from 'lucide-react';
 import { EmptyState } from './EmptyState';
-import { SwipeableItem } from './SwipeableItem'; // EKLENDİ
+import { SwipeableItem } from './SwipeableItem';
 
 interface HistoryProps {
     onSelectSale: (id: string) => void;
 }
 
 export function History({ onSelectSale }: HistoryProps) {
-    const { sales, fetchSales, deleteSale } = useInvestmentsContext(); // deleteSale eklendi
+    const { sales, fetchSales, deleteSale } = useInvestmentsContext();
 
     useEffect(() => {
         fetchSales();
@@ -37,10 +37,16 @@ export function History({ onSelectSale }: HistoryProps) {
     }
 
     return (
-        <div className="pt-6 pb-24 px-4 space-y-4">
-            <h1 className="text-2xl font-bold tracking-tight text-apple-light-text-primary dark:text-apple-dark-text-primary px-2">Satışlarım</h1>
+        <div>
+            {/* BAŞLIK KISMI - Varlıklarım sayfasıyla uyumlu hale getirildi */}
+            <div className="sticky top-0 z-20 bg-apple-light-bg dark:bg-apple-dark-bg space-y-4 py-4">
+                <div className="flex items-center justify-between px-2">
+                    <h1 className="text-3xl font-bold tracking-tight text-apple-light-text-primary dark:text-apple-dark-text-primary">Satışlarım</h1>
+                </div>
+            </div>
 
-            <div className="space-y-3">
+            {/* LİSTE KISMI */}
+            <div className="pt-2 space-y-3">
                 {sales.map((sale) => {
                     const details = typeDetails[sale.type];
                     const totalSale = sale.amount * sale.sell_price;
@@ -53,27 +59,28 @@ export function History({ onSelectSale }: HistoryProps) {
                             <SwipeableItem
                                 onDelete={() => handleDelete(sale.id)}
                                 onClick={() => onSelectSale(sale.id)}
-                            // onSell vermiyoruz, çünkü burası zaten satış geçmişi
                             >
-                                <div className="w-full text-left p-4 space-y-3">
-                                    <div className="flex justify-between items-start mb-3">
-                                        <div className="flex items-center space-x-3">
-                                            <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded-full">
-                                                {details.icon && <details.icon className="w-5 h-5 text-apple-blue" />}
+                                {/* KART İÇERİĞİ - Boyutlar ve boşluklar Varlıklarım kartıyla eşitlendi */}
+                                <div className="w-full text-left p-4 space-y-4">
+                                    <div className="flex justify-between items-center">
+                                        <div className="flex items-center space-x-4">
+                                            <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-full flex-shrink-0">
+                                                {details.icon && <details.icon className="h-6 w-6 text-apple-blue" />}
                                             </div>
-                                            <div>
-                                                <p className="font-semibold text-apple-light-text-primary dark:text-apple-dark-text-primary">{details.name}</p>
-                                                <p className="text-xs text-gray-500">
+                                            <div className="text-left">
+                                                <p className="font-semibold text-base text-apple-light-text-primary dark:text-apple-dark-text-primary">{details.name}</p>
+                                                <p className="text-sm text-apple-light-text-secondary dark:text-apple-dark-text-secondary">
                                                     {format(new Date(sale.sold_at), 'dd MMM yyyy', { locale: tr })}
                                                 </p>
                                             </div>
                                         </div>
-                                        <div className="text-right flex items-center">
-                                            <div className="mr-2">
-                                                <p className="font-bold text-apple-light-text-primary dark:text-apple-dark-text-primary">
+
+                                        <div className="flex items-center text-right">
+                                            <div className="mr-3">
+                                                <p className="font-semibold text-base text-apple-light-text-primary dark:text-apple-dark-text-primary">
                                                     ₺{totalSale.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
                                                 </p>
-                                                <p className={`text-xs font-semibold flex items-center justify-end ${profit >= 0 ? 'text-apple-green' : 'text-apple-red'}`}>
+                                                <p className={`text-sm font-medium flex items-center justify-end ${profit >= 0 ? 'text-apple-green' : 'text-apple-red'}`}>
                                                     {profit >= 0 ? <TrendingUp className="w-3 h-3 mr-1" /> : <TrendingDown className="w-3 h-3 mr-1" />}
                                                     %{Math.abs(profitPercent).toFixed(1)}
                                                 </p>
@@ -82,18 +89,18 @@ export function History({ onSelectSale }: HistoryProps) {
                                         </div>
                                     </div>
 
-                                    <div className="grid grid-cols-2 gap-4 text-sm pt-3 border-t border-gray-100 dark:border-gray-800">
-                                        <div>
-                                            <p className="text-gray-500 text-xs">Miktar</p>
-                                            <p className="font-medium text-apple-light-text-primary dark:text-apple-dark-text-primary">
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="text-left">
+                                            <p className="text-sm text-apple-light-text-secondary dark:text-apple-dark-text-secondary">Miktar</p>
+                                            <p className="font-semibold text-apple-light-text-primary dark:text-apple-dark-text-primary mt-1">
                                                 {sale.amount} {details.unit}
                                             </p>
                                         </div>
                                         <div className="text-right">
-                                            <p className="text-gray-500 text-xs">Gerçekleşen Kâr/Zarar</p>
-                                            <p className={`font-medium ${profit >= 0 ? 'text-apple-green' : 'text-apple-red'}`}>
+                                            <p className="text-sm text-apple-light-text-secondary dark:text-apple-dark-text-secondary">Gerçekleşen Kâr/Zarar</p>
+                                            <div className={`font-semibold mt-1 ${profit >= 0 ? 'text-apple-green' : 'text-apple-red'}`}>
                                                 {profit >= 0 ? '+' : ''}₺{profit.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
-                                            </p>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
