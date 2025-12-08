@@ -41,7 +41,7 @@ export function SwipeableItem({ children, onDelete, onSell, onClick }: Swipeable
                 {onSell && (
                     <button
                         onClick={(e) => { e.stopPropagation(); onSell(); controls.start({ x: 0 }); }}
-                        className="w-[70px] bg-apple-green flex items-center justify-center text-white"
+                        className="w-[70px] bg-apple-blue flex items-center justify-center text-white"
                     >
                         <Banknote className="h-6 w-6" />
                     </button>
