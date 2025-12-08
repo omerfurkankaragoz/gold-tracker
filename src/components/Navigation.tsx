@@ -1,5 +1,5 @@
 import React from 'react';
-import { WalletMinimal, UserRoundCog, ChartSpline, CandlestickChart, History, BanknoteX, Banknote } from 'lucide-react';
+import { WalletMinimal, UserRoundCog, ChartSpline, CandlestickChart, Banknote } from 'lucide-react';
 
 interface NavigationProps {
   activeTab: string;

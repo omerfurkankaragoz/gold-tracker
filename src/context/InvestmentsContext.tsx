@@ -11,6 +11,7 @@ interface IInvestmentsContext {
   addInvestment: (investment: Omit<Investment, 'id' | 'created_at' | 'updated_at' | 'user_id'>) => Promise<{ data: Investment | null; error: any; }>;
   deleteInvestment: (id: string) => Promise<{ error: any; }>;
   sellInvestment: (id: string, sellPrice: number, amountToSell: number, saleDate?: string) => Promise<{ error: any; }>;
+  deleteSale: (id: string) => Promise<{ error: any; }>; // <-- YENİ EKLENDİ
   fetchSales: () => Promise<void>;
   refetch: () => void;
 }
@@ -124,6 +125,18 @@ export const InvestmentsProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const deleteSale = async (id: string) => {
+    if (!user) throw new Error("Kullanıcı giriş yapmamış.");
+    try {
+      const { error } = await supabase.from('sales').delete().eq('id', id).eq('user_id', user.id);
+      if (error) throw error;
+      setSales(prev => prev.filter(s => s.id !== id));
+      return { error: null };
+    } catch (error) {
+      return { error };
+    }
+  };
+
   const sellInvestment = async (id: string, sellPrice: number, amountToSell: number, saleDate: string = new Date().toISOString().split('T')[0]) => {
     if (!user) throw new Error("Kullanıcı yok");
 
@@ -131,20 +144,18 @@ export const InvestmentsProvider = ({ children }: { children: ReactNode }) => {
     if (!investment) return { error: "Yatırım bulunamadı" };
 
     try {
-      // 1. Satış kaydını oluştur (sold_at artık sadece tarih)
       const { error: saleError } = await supabase.from('sales').insert([{
         user_id: user.id,
         type: investment.type,
         amount: amountToSell,
         buy_price: investment.purchase_price,
         sell_price: sellPrice,
-        sold_at: saleDate, // YYYY-MM-DD formatında gelir
+        sold_at: saleDate,
         purchase_date: investment.purchase_date
       }]);
 
       if (saleError) throw saleError;
 
-      // 2. Mevcut yatırımı güncelle veya sil
       if (amountToSell >= investment.amount) {
         await deleteInvestment(id);
       } else {
@@ -178,6 +189,7 @@ export const InvestmentsProvider = ({ children }: { children: ReactNode }) => {
     addInvestment,
     deleteInvestment,
     sellInvestment,
+    deleteSale, // <-- DIŞARIYA AKTARILDI
     fetchSales,
     refetch: () => user ? fetchInvestments(user) : undefined,
   };
