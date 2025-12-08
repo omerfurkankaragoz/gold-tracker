@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Plus, Trash2, TrendingUp, TrendingDown, DollarSign, Euro, Coins, ChevronsUpDown, ChevronDown, ChevronUp, Gem, TurkishLiraIcon, Wallet } from 'lucide-react';
+import { Plus, ChevronDown, ChevronUp, ChevronsUpDown, DollarSign, Euro, Coins, Gem, TurkishLiraIcon, Wallet } from 'lucide-react';
 import { useInvestmentsContext } from '../context/InvestmentsContext';
 import { usePrices } from '../hooks/usePrices';
 import { format } from 'date-fns';
@@ -8,6 +8,7 @@ import { Investment } from '../lib/supabase';
 import { ListSkeleton } from './Skeleton';
 import { SwipeableItem } from './SwipeableItem';
 import { EmptyState } from './EmptyState';
+import { SellModal } from './SellModal';
 
 export const typeDetails: Record<string, { icon: React.ElementType; name: string; unit: string }> = {
   usd: { icon: DollarSign, name: 'Dolar', unit: '$' },
@@ -33,12 +34,13 @@ interface HoldingsProps {
 }
 
 export function Holdings({ onSelectInvestment, onAddInvestment, isBalanceVisible }: HoldingsProps) {
-  const { investments, deleteInvestment, loading } = useInvestmentsContext();
+  const { investments, deleteInvestment, sellInvestment, loading } = useInvestmentsContext();
   const { prices } = usePrices();
   const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: 'ascending' | 'descending' }>({
     key: 'purchase_date',
     direction: 'descending',
   });
+  const [sellingInvestment, setSellingInvestment] = useState<Investment | null>(null);
 
   const sortedInvestments = useMemo(() => {
     let sortableItems = [...investments];
@@ -75,6 +77,17 @@ export function Holdings({ onSelectInvestment, onAddInvestment, isBalanceVisible
     }
   };
 
+  const handleSellClick = (investment: Investment) => {
+    setSellingInvestment(investment);
+  };
+
+  const handleConfirmSell = async (price: number, amount: number, date: string) => {
+    if (sellingInvestment) {
+      await sellInvestment(sellingInvestment.id, price, amount, date);
+      setSellingInvestment(null);
+    }
+  };
+
   const SortButton = ({ sortKey, label }: { sortKey: SortKey; label: string }) => {
     const isActive = sortConfig.key === sortKey;
     const Icon = isActive ? (sortConfig.direction === 'ascending' ? ChevronUp : ChevronDown) : ChevronsUpDown;
@@ -94,9 +107,7 @@ export function Holdings({ onSelectInvestment, onAddInvestment, isBalanceVisible
 
   return (
     <div>
-      {/* ======================= SABİT ÜST BÖLÜM (NİHAİ ÇÖZÜM) ======================= */}
       <div className="sticky top-0 z-20 bg-apple-light-bg dark:bg-apple-dark-bg space-y-4 py-4">
-        {/* Başlık ve Ekle Butonu */}
         <div className="flex items-center justify-between px-2">
           <h1 className="text-3xl font-bold tracking-tight text-apple-light-text-primary dark:text-apple-dark-text-primary">Varlıklarım</h1>
           <button
@@ -107,7 +118,6 @@ export function Holdings({ onSelectInvestment, onAddInvestment, isBalanceVisible
           </button>
         </div>
 
-        {/* Filtre Butonları */}
         {investments.length > 0 && (
           <div className="px-2">
             <div className="flex items-center justify-between space-x-1 p-1 bg-gray-200/50 dark:bg-apple-dark-card rounded-full">
@@ -118,10 +128,8 @@ export function Holdings({ onSelectInvestment, onAddInvestment, isBalanceVisible
           </div>
         )}
       </div>
-      {/* ============================================================================== */}
 
-      {/* KAYAN İÇERİK */}
-      <div className="pt-2"> {/* Sabit başlığın altında boşluk bırakmak için */}
+      <div className="pt-2">
         {loading ? (
           <ListSkeleton />
         ) : investments.length === 0 ? (
@@ -149,6 +157,7 @@ export function Holdings({ onSelectInvestment, onAddInvestment, isBalanceVisible
                 <div key={investment.id} className="mb-3">
                   <SwipeableItem
                     onDelete={() => handleDelete(investment.id)}
+                    onSell={() => handleSellClick(investment)}
                     onClick={() => onSelectInvestment(investment.id)}
                   >
                     <div className="w-full text-left p-4 space-y-4">
@@ -164,7 +173,6 @@ export function Holdings({ onSelectInvestment, onAddInvestment, isBalanceVisible
                             </p>
                           </div>
                         </div>
-                        {/* Delete button removed in favor of swipe action */}
                       </div>
 
                       <div className="grid grid-cols-2 gap-4">
@@ -199,6 +207,13 @@ export function Holdings({ onSelectInvestment, onAddInvestment, isBalanceVisible
           </div>
         )}
       </div>
+
+      <SellModal
+        isOpen={!!sellingInvestment}
+        investment={sellingInvestment}
+        onClose={() => setSellingInvestment(null)}
+        onConfirm={handleConfirmSell}
+      />
     </div>
   );
 }

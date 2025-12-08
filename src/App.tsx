@@ -10,6 +10,8 @@ import { Profile } from './components/Profile';
 import { InvestmentDetail } from './components/InvestmentDetail';
 import { AddInvestmentPage } from './components/AddInvestmentPage';
 import { Navigation } from './components/Navigation';
+import { History } from './components/History';
+import { HistoryDetail } from './components/HistoryDetail';
 
 function App() {
   const [session, setSession] = useState<Session | null>(null);
@@ -40,27 +42,20 @@ function App() {
 function MainApp() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [selectedInvestmentId, setSelectedInvestmentId] = useState<string | null>(null);
+  const [selectedSaleId, setSelectedSaleId] = useState<string | null>(null);
   const [addInvestmentState, setAddInvestmentState] = useState<{
     isOpen: boolean;
     initialType?: Investment['type'];
   }>({ isOpen: false });
 
-  // ======================= GÜNCELLENEN BÖLÜM 1: State'in Hafızadan Okunması =======================
-  // isBalanceVisible state'i artık başlangıç değerini localStorage'dan okur.
   const [isBalanceVisible, setIsBalanceVisible] = useState<boolean>(() => {
     const savedState = localStorage.getItem('isBalanceVisible');
-    // Eğer kayıtlı bir durum varsa onu kullan (string'i boolean'a çevirerek).
-    // Eğer kayıt yoksa, varsayılan olarak 'true' (görünür) başla.
     return savedState !== null ? JSON.parse(savedState) : true;
   });
 
-  // ======================= GÜNCELLENEN BÖLÜM 2: State Değişikliğinin Kaydedilmesi =======================
-  // isBalanceVisible state'i her değiştiğinde bu fonksiyon çalışır.
   useEffect(() => {
-    // Yeni durumu string formatında localStorage'a kaydeder.
     localStorage.setItem('isBalanceVisible', JSON.stringify(isBalanceVisible));
   }, [isBalanceVisible]);
-  // ===============================================================================================
 
   const handleSelectInvestment = (id: string) => {
     setActiveTab('holdings');
@@ -69,6 +64,14 @@ function MainApp() {
 
   const handleBackToHoldings = () => {
     setSelectedInvestmentId(null);
+  };
+
+  const handleSelectSale = (id: string) => {
+    setSelectedSaleId(id);
+  };
+
+  const handleBackToHistory = () => {
+    setSelectedSaleId(null);
   };
 
   const handleGoToAddInvestment = (initialType?: Investment['type']) => {
@@ -93,6 +96,10 @@ function MainApp() {
       return <InvestmentDetail investmentId={selectedInvestmentId} onBack={handleBackToHoldings} />;
     }
 
+    if (selectedSaleId) {
+      return <HistoryDetail saleId={selectedSaleId} onBack={handleBackToHistory} />;
+    }
+
     switch (activeTab) {
       case 'holdings':
         return <Holdings
@@ -102,6 +109,8 @@ function MainApp() {
         />;
       case 'insights':
         return <Insights isBalanceVisible={isBalanceVisible} />;
+      case 'history':
+        return <History onSelectSale={handleSelectSale} />;
       case 'profile':
         return <Profile />;
       default:
@@ -114,17 +123,19 @@ function MainApp() {
     }
   };
 
-  const isFullScreenPageOpen = !!selectedInvestmentId || addInvestmentState.isOpen;
+  const isFullScreenPageOpen = !!selectedInvestmentId || !!selectedSaleId || addInvestmentState.isOpen;
 
-  // Determine a unique key for the current view to trigger animations
   const pageKey = addInvestmentState.isOpen
     ? 'add-investment'
     : selectedInvestmentId
       ? `investment-${selectedInvestmentId}`
-      : activeTab;
+      : selectedSaleId
+        ? `sale-${selectedSaleId}`
+        : activeTab;
 
   return (
     <div className="h-full w-full flex flex-col bg-apple-light-bg dark:bg-apple-dark-bg">
+      {/* DEĞİŞİKLİK 1: pb-24 -> pb-40 (Daha fazla alt boşluk) */}
       <main className="flex-grow overflow-y-auto px-4 pb-24">
         <AnimatePresence mode="wait">
           <motion.div
@@ -133,7 +144,9 @@ function MainApp() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
-            className="h-full"
+            // DEĞİŞİKLİK 2: "h-full" sınıfı kaldırıldı, sadece "w-full" bırakıldı.
+            // Bu sayede içerik uzadıkça kapsayıcı da uzayacak ve padding işleyecek.
+            className="w-full"
           >
             {renderContent()}
           </motion.div>

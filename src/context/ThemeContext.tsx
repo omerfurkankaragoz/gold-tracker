@@ -21,17 +21,28 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     root.classList.add(theme);
     localStorage.setItem('theme', theme);
 
-    // ======================= GÜNCELLENEN BÖLÜM =======================
-    // Çentik (status bar) rengini yeni Apple renk paletiyle güncelliyoruz
+    // 1. theme-color meta etiketini güncelle (Tarayıcı arayüzü rengi)
     const themeColorMeta = document.querySelector('meta[name="theme-color"]');
     if (themeColorMeta) {
       if (theme === 'dark') {
-        themeColorMeta.setAttribute('content', '#000000'); // apple-dark-bg
+        themeColorMeta.setAttribute('content', '#000000'); // Koyu tema arka planı
       } else {
-        themeColorMeta.setAttribute('content', '#F2F2F7'); // apple-light-bg
+        themeColorMeta.setAttribute('content', '#F2F2F7'); // Açık tema arka planı
       }
     }
-    // ========================================================
+
+    // 2. apple-mobile-web-app-status-bar-style etiketini güncelle (iPhone status bar metin rengi)
+    const statusBarMeta = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
+    if (statusBarMeta) {
+      if (theme === 'dark') {
+        // Koyu modda: 'black-translucent' veya 'black' kullanarak metnin BEYAZ olmasını sağlarız.
+        statusBarMeta.setAttribute('content', 'black-translucent');
+      } else {
+        // Açık modda: 'default' kullanarak metnin SİYAH olmasını sağlarız.
+        // theme-color etiketi sayesinde arka plan #F2F2F7 olur.
+        statusBarMeta.setAttribute('content', 'default');
+      }
+    }
 
   }, [theme]);
 

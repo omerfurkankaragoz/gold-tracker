@@ -5,7 +5,6 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-// Investment tipine 'gumus' ekleniyor.
 export type Investment = {
   id: string;
   type: 'gold' | 'usd' | 'eur' | 'tl' | 'gumus' | 'quarter_gold' | 'half_gold' | 'full_gold' | 'cumhuriyet_gold' | 'ata_gold' | 'ayar_14_gold' | 'ayar_18_gold' | 'ayar_22_bilezik';
@@ -14,4 +13,15 @@ export type Investment = {
   purchase_date: string;
   created_at: string;
   updated_at: string;
+  user_id?: string;
+};
+
+export type Sale = {
+  id: string;
+  type: Investment['type'];
+  amount: number;
+  buy_price: number;
+  sell_price: number;
+  sold_at: string;
+  purchase_date: string; // <-- YENİ EKLENDİ
 };
