@@ -110,7 +110,7 @@ function MainApp() {
       case 'insights':
         return <Insights isBalanceVisible={isBalanceVisible} />;
       case 'history':
-        return <History onSelectSale={handleSelectSale} />;
+        return <History onSelectSale={handleSelectSale} isBalanceVisible={isBalanceVisible} />;
       case 'profile':
         return <Profile />;
       default:
@@ -135,14 +135,17 @@ function MainApp() {
 
   return (
     <div className="h-full w-full flex flex-col bg-apple-light-bg dark:bg-apple-dark-bg">
-      {/* DEĞİŞİKLİK 1: pb-24 -> pb-40 (Daha fazla alt boşluk) */}
-      <main className="flex-grow overflow-y-auto px-4 pb-24">
+      {/* DEĞİŞİKLİK 1: Fixed bottom padding conflict using calc() - pb-safe was overriding pb-40 */}
+      <main
+        className="flex-grow overflow-y-auto px-4"
+        style={{ paddingBottom: '3rem' }}
+      >
         <AnimatePresence mode="wait">
           <motion.div
             key={pageKey}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             // DEĞİŞİKLİK 2: "h-full" sınıfı kaldırıldı, sadece "w-full" bırakıldı.
             // Bu sayede içerik uzadıkça kapsayıcı da uzayacak ve padding işleyecek.
@@ -152,6 +155,7 @@ function MainApp() {
           </motion.div>
         </AnimatePresence>
       </main>
+      <div className="fixed bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-apple-light-bg/80 via-apple-light-bg/20 to-transparent dark:from-apple-dark-bg/80 dark:via-apple-dark-bg/20 dark:to-transparent backdrop-blur-[2px] z-40 pointer-events-none" />
       {!isFullScreenPageOpen && (
         <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
       )}

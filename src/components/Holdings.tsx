@@ -106,8 +106,8 @@ export function Holdings({ onSelectInvestment, onAddInvestment, isBalanceVisible
   };
 
   return (
-    <div>
-      <div className="sticky top-0 z-20 bg-apple-light-bg dark:bg-apple-dark-bg space-y-4 py-4">
+    <div className="pt-6">
+      <div className="sticky top-0 z-20 bg-apple-light-bg dark:bg-apple-dark-bg space-y-4 py-4 pt-safe">
         <div className="flex items-center justify-between px-2">
           <h1 className="text-3xl font-bold tracking-tight text-apple-light-text-primary dark:text-apple-dark-text-primary">Varlıklarım</h1>
           <button

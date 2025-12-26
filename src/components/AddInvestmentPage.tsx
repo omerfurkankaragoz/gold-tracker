@@ -38,7 +38,7 @@ export function AddInvestmentPage({ onBack, initialSelectedType, isDirectAdd = f
   const { prices } = usePrices();
 
   const getFractionDigits = (type: Investment['type']) => (type === 'usd' || type === 'eur' ? 2 : 4);
-  
+
   const updatePurchasePrice = (type: Investment['type']) => {
     if (type === 'tl') {
       setPurchasePrice('1');
@@ -65,7 +65,7 @@ export function AddInvestmentPage({ onBack, initialSelectedType, isDirectAdd = f
   }, [selectedType]);
 
   const selectedInvestment = useMemo(() => investmentTypes.find(inv => inv.id === selectedType), [selectedType]);
-  
+
   const filteredInvestmentTypes = useMemo(() => {
     if (!searchQuery) return investmentTypes;
     return investmentTypes.filter(type =>
@@ -96,29 +96,32 @@ export function AddInvestmentPage({ onBack, initialSelectedType, isDirectAdd = f
   };
 
   return (
-    <div className="flex flex-col h-full animate-fade-in text-apple-light-text-primary dark:text-apple-dark-text-primary">
-      <div className="relative flex items-center justify-center p-2 mb-4">
-        <button onClick={onBack} className="absolute left-0 p-2 bg-gray-200/50 dark:bg-apple-dark-card rounded-full transition-transform active:scale-90">
-          <ChevronLeft className="w-6 h-6" />
+    <div className="flex flex-col h-full animate-fade-in text-apple-light-text-primary dark:text-apple-dark-text-primary px-4 pt-6">
+      <div className="relative flex items-center justify-center mb-6">
+        <button
+          onClick={onBack}
+          className="absolute left-0 p-2 bg-gray-200/50 dark:bg-apple-dark-card rounded-full transition-transform active:scale-90"
+        >
+          <ChevronLeft className="w-6 h-6 text-apple-light-text-primary dark:text-apple-dark-text-primary" />
         </button>
-        <h1 className="text-xl font-semibold">Varlık Ekle</h1>
+        <h1 className="text-xl font-bold tracking-tight">Varlık Ekle</h1>
       </div>
 
-      <div className={`flex-1 overflow-y-auto px-2 space-y-6 transition-all duration-300 ${totalCost > 0 ? 'pb-40' : 'pb-8'}`}>
+      <div className={`flex-1 overflow-y-auto space-y-8 transition-all duration-300 -mx-4 px-4 ${totalCost > 0 ? 'pb-40' : 'pb-8'} no-scrollbar`}>
         {!isDirectAdd && (
           <div className="space-y-4">
-             <h2 className="text-lg font-semibold text-apple-light-text-secondary dark:text-apple-dark-text-secondary px-2">Varlık Türü</h2>
-            <div className="relative px-2">
-              <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-apple-light-text-secondary dark:text-apple-dark-text-secondary" />
+            <h2 className="text-sm font-semibold uppercase text-apple-light-text-secondary dark:text-apple-dark-text-secondary tracking-wider ml-1">Varlık Türü</h2>
+            <div className="relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-apple-light-text-secondary dark:text-apple-dark-text-secondary" />
               <input
                 type="text"
                 placeholder="Varlık Ara..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 text-base border-none rounded-xl bg-gray-200/50 dark:bg-apple-dark-card placeholder-apple-light-text-secondary dark:placeholder-apple-dark-text-secondary focus:ring-2 focus:ring-apple-blue"
+                className="w-full pl-11 pr-4 py-3.5 text-base border-none rounded-2xl bg-gray-100 dark:bg-white/10 placeholder-apple-light-text-secondary dark:placeholder-apple-dark-text-secondary focus:ring-2 focus:ring-apple-blue transition-shadow shadow-sm"
               />
             </div>
-            <div className="grid grid-cols-3 gap-2 px-2">
+            <div className="grid grid-cols-3 gap-3">
               {filteredInvestmentTypes.map((type) => {
                 const isSelected = selectedType === type.id;
                 const Icon = type.icon;
@@ -127,19 +130,17 @@ export function AddInvestmentPage({ onBack, initialSelectedType, isDirectAdd = f
                     key={type.id}
                     type="button"
                     onClick={() => setSelectedType(type.id as Investment['type'])}
-                    className={`p-3 rounded-xl text-center transition-all flex flex-col items-center justify-center space-y-2 h-24 ${
-                      isSelected
-                        ? 'bg-apple-blue text-white'
-                        : 'bg-apple-light-card dark:bg-apple-dark-card hover:bg-gray-200/50 dark:hover:bg-gray-800'
-                    }`}
+                    className={`p-3 rounded-2xl text-center transition-all flex flex-col items-center justify-center space-y-2 h-28 border ${isSelected
+                      ? 'bg-apple-blue text-white border-apple-blue shadow-lg scale-[1.02]'
+                      : 'bg-white dark:bg-white/5 border-transparent hover:bg-gray-50 dark:hover:bg-white/10'
+                      }`}
                   >
                     <div className={`p-3 rounded-full transition-colors ${isSelected ? 'bg-white/20' : 'bg-gray-100 dark:bg-gray-800'}`}>
                       <Icon className={`h-6 w-6 transition-colors ${isSelected ? 'text-white' : 'text-apple-blue'}`} />
                     </div>
                     <span
-                      className={`font-semibold text-xs transition-colors ${
-                        isSelected ? 'text-white' : 'text-apple-light-text-primary dark:text-apple-dark-text-primary'
-                      }`}
+                      className={`font-semibold text-xs transition-colors line-clamp-2 ${isSelected ? 'text-white' : 'text-apple-light-text-primary dark:text-apple-dark-text-primary'
+                        }`}
                     >
                       {type.name.replace(' Altını', '')}
                     </span>
@@ -151,60 +152,59 @@ export function AddInvestmentPage({ onBack, initialSelectedType, isDirectAdd = f
         )}
 
         <div className="space-y-4">
-           <h2 className="text-lg font-semibold text-apple-light-text-secondary dark:text-apple-dark-text-secondary px-2">İşlem Detayları</h2>
-           <div className="bg-apple-light-card dark:bg-apple-dark-card rounded-2xl p-4 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-apple-light-text-secondary dark:text-apple-dark-text-secondary mb-1">
-                  Miktar ({selectedInvestment?.unit})
-                </label>
-                <input
-                  type="tel"
-                  inputMode="decimal"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  className="w-full p-3 bg-apple-light-bg dark:bg-apple-dark-bg border-none rounded-lg text-base focus:ring-2 focus:ring-apple-blue"
-                  placeholder="10"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-apple-light-text-secondary dark:text-apple-dark-text-secondary mb-1">
-                  Alış Fiyatı (₺)
-                </label>
-                <input
-                  type="tel"
-                  inputMode="decimal"
-                  value={purchasePrice}
-                  onChange={(e) => setPurchasePrice(e.target.value)}
-                  disabled={selectedType === 'tl'}
-                  className="w-full p-3 bg-apple-light-bg dark:bg-apple-dark-bg border-none rounded-lg text-base disabled:opacity-50 focus:ring-2 focus:ring-apple-blue"
-                  placeholder="Fiyat"
-                  required
-                />
-              </div>
-                <div>
-                <label className="block text-sm font-medium text-apple-light-text-secondary dark:text-apple-dark-text-secondary mb-1">Alış Tarihi</label>
+          <h2 className="text-sm font-semibold uppercase text-apple-light-text-secondary dark:text-apple-dark-text-secondary tracking-wider ml-1">İşlem Detayları</h2>
+          <div className="glass-card p-2 space-y-1">
+            <div className="relative group">
+              <label className="absolute left-4 top-2 text-[10px] font-bold text-apple-light-text-tertiary dark:text-apple-dark-text-tertiary uppercase tracking-wider">
+                Miktar ({selectedInvestment?.unit})
+              </label>
+              <input
+                type="number"
+                inputMode="decimal"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                className="w-full pt-6 pb-2 px-4 bg-transparent border-none rounded-xl text-lg font-semibold focus:ring-0 focus:bg-gray-50 dark:focus:bg-white/5 transition-colors"
+                placeholder="0"
+                required
+              />
+            </div>
+            <div className="h-px bg-gray-100 dark:bg-white/5 mx-4" />
+            <div className="relative group">
+              <label className="absolute left-4 top-2 text-[10px] font-bold text-apple-light-text-tertiary dark:text-apple-dark-text-tertiary uppercase tracking-wider">
+                Alış Fiyatı (₺)
+              </label>
+              <input
+                type="number"
+                inputMode="decimal"
+                value={purchasePrice}
+                onChange={(e) => setPurchasePrice(e.target.value)}
+                disabled={selectedType === 'tl'}
+                className="w-full pt-6 pb-2 px-4 bg-transparent border-none rounded-xl text-lg font-semibold disabled:opacity-50 focus:ring-0 focus:bg-gray-50 dark:focus:bg-white/5 transition-colors"
+                placeholder="0.00"
+                required
+              />
+            </div>
+            <div className="h-px bg-gray-100 dark:bg-white/5 mx-4" />
+            <div className="relative group">
+              <label className="absolute left-4 top-2 text-[10px] font-bold text-apple-light-text-tertiary dark:text-apple-dark-text-tertiary uppercase tracking-wider">Alış Tarihi</label>
               <input
                 type="date"
                 value={purchaseDate}
                 onChange={(e) => setPurchaseDate(e.target.value)}
                 max={today}
-                className="block w-full box-border p-3 bg-apple-light-bg dark:bg-apple-dark-bg border-none rounded-lg text-base text-gray-900 dark:text-gray-100 focus:ring-2 dark:focus:ring-apple-blue focus:focus:ring-apple-blue appearance-none"
+                className="block w-full pt-6 pb-2 px-4 bg-transparent border-none rounded-xl text-lg font-medium text-gray-900 dark:text-gray-100 focus:ring-0 focus:bg-gray-50 dark:focus:bg-white/5 transition-colors appearance-none"
                 required
               />
             </div>
-           </div>
+          </div>
         </div>
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-apple-light-bg/80 dark:bg-apple-dark-card/80 backdrop-blur-sm border-t border-gray-200/50 dark:border-gray-700/50">
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-apple-light-bg/90 dark:bg-apple-dark-bg/90 backdrop-blur-xl border-t border-gray-200/50 dark:border-white/10 pb-8">
         {totalCost > 0 && (
-          <div className="flex items-center justify-between bg-gray-200/50 dark:bg-apple-dark-card p-3 rounded-xl mb-3">
-            <div className="flex items-center space-x-2">
-              <Info className="w-5 h-5" />
-              <span className="font-semibold text-sm">Toplam Maliyet</span>
-            </div>
-            <span className="font-bold text-base">
+          <div className="flex items-center justify-between mb-4 px-2">
+            <span className="text-sm font-medium text-apple-light-text-secondary dark:text-apple-dark-text-secondary">Toplam Maliyet</span>
+            <span className="text-xl font-bold text-apple-light-text-primary dark:text-apple-dark-text-primary">
               ₺{totalCost.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </span>
           </div>
@@ -213,14 +213,14 @@ export function AddInvestmentPage({ onBack, initialSelectedType, isDirectAdd = f
           type="submit"
           onClick={handleSubmit}
           disabled={loading || !amount || !purchasePrice}
-          className="w-full p-4 bg-apple-blue text-white font-bold text-lg rounded-xl hover:opacity-90 disabled:opacity-50 flex items-center justify-center space-x-2 transition-all active:scale-95"
+          className="w-full py-4 bg-apple-blue text-white font-bold text-lg rounded-2xl shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:shadow-none disabled:scale-100 transition-all flex items-center justify-center space-x-2"
         >
           {loading ? (
-            <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
           ) : (
             <>
-              <Plus className="w-6 h-6" />
-              <span>Varlığı Ekle</span>
+              <Plus className="w-6 h-6" strokeWidth={3} />
+              <span>Varlık Ekle</span>
             </>
           )}
         </button>

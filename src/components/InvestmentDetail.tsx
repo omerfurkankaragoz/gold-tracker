@@ -42,7 +42,7 @@ export function InvestmentDetail({ investmentId, onBack }: InvestmentDetailProps
   ];
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-6 animate-fade-in pt-6">
       <div className="relative flex items-center justify-center p-2">
         <button onClick={onBack} className="absolute left-0 p-2 bg-gray-200/50 dark:bg-apple-dark-card rounded-full transition-transform active:scale-90">
           <ChevronLeft className="w-6 h-6 text-apple-light-text-primary dark:text-apple-dark-text-primary" />
@@ -63,7 +63,7 @@ export function InvestmentDetail({ investmentId, onBack }: InvestmentDetailProps
           </div>
         </div>
       </div>
-      
+
       <div className="space-y-4">
         <div className="bg-apple-light-card dark:bg-apple-dark-card rounded-2xl p-4">
           <p className="text-sm font-medium text-apple-light-text-secondary dark:text-apple-dark-text-secondary">Anlık Değer</p>
@@ -83,7 +83,7 @@ export function InvestmentDetail({ investmentId, onBack }: InvestmentDetailProps
           </p>
         </div>
       </div>
-      
+
       <div className="bg-apple-light-card dark:bg-apple-dark-card rounded-2xl">
         <ul className="divide-y divide-gray-200/50 dark:divide-gray-700">
           {detailItems.map(item => {

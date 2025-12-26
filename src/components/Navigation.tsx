@@ -1,5 +1,5 @@
 import React from 'react';
-import { WalletMinimal, UserRoundCog, ChartSpline, CandlestickChart, Banknote } from 'lucide-react';
+import { Wallet, Settings, LayoutGrid, TrendingUp, History } from 'lucide-react';
 
 interface NavigationProps {
   activeTab: string;
@@ -7,21 +7,18 @@ interface NavigationProps {
 }
 
 const tabs = [
-  { id: 'dashboard', name: 'Piyasalar', icon: CandlestickChart },
-  { id: 'holdings', name: 'Varlıklarım', icon: WalletMinimal },
-  { id: 'insights', name: 'Panelim', icon: ChartSpline },
-  { id: 'history', name: 'Satışlarım', icon: Banknote },
-  { id: 'profile', name: 'Ayarlar', icon: UserRoundCog },
+  { id: 'dashboard', name: 'Piyasalar', icon: TrendingUp },
+  { id: 'holdings', name: 'Varlıklarım', icon: Wallet },
+  { id: 'insights', name: 'Panelim', icon: LayoutGrid },
+  { id: 'history', name: 'Satışlarım', icon: History },
+  { id: 'profile', name: 'Ayarlar', icon: Settings },
 ];
 
 export function Navigation({ activeTab, onTabChange }: NavigationProps) {
   return (
-    <div
-      className="fixed bottom-0 left-0 right-0 bg-apple-light-bg/80 dark:bg-apple-dark-card/80 backdrop-blur-lg border-t border-gray-200 dark:border-gray-700 z-50"
-    >
+    <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-[90%] md:max-w-md">
       <div
-        className="flex justify-around items-center max-w-md mx-auto pt-3"
-        style={{ paddingBottom: `calc( env(safe-area-inset-bottom))` }}
+        className="glass-float rounded-full px-1 py-2 flex justify-around items-center"
       >
         {tabs.map((tab) => {
           const Icon = tab.icon;
@@ -31,13 +28,17 @@ export function Navigation({ activeTab, onTabChange }: NavigationProps) {
             <button
               key={tab.id}
               onClick={() => onTabChange(tab.id)}
-              className={`flex flex-col items-center justify-center space-y-1 transition-colors w-16 h-12 ${isActive
+              className={`relative flex flex-col items-center justify-center w-16 h-14 rounded-full transition-all duration-300 ${isActive
                 ? 'text-apple-blue'
                 : 'text-apple-light-text-secondary dark:text-apple-dark-text-secondary hover:text-apple-light-text-primary dark:hover:text-apple-dark-text-primary'
                 }`}
             >
-              <Icon className="h-6 w-6" strokeWidth={isActive ? 2.5 : 2} />
-              <span className="text-[10px] font-medium">
+              <Icon
+                className={`transition-transform duration-300 mb-0.5 ${isActive ? 'scale-110' : 'scale-100'}`}
+                size={22}
+                strokeWidth={isActive ? 2.5 : 2}
+              />
+              <span className={`text-[10px] font-medium transition-colors ${isActive ? 'text-apple-blue' : ''}`}>
                 {tab.name}
               </span>
             </button>

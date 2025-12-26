@@ -9,9 +9,10 @@ import { SwipeableItem } from './SwipeableItem';
 
 interface HistoryProps {
     onSelectSale: (id: string) => void;
+    isBalanceVisible: boolean;
 }
 
-export function History({ onSelectSale }: HistoryProps) {
+export function History({ onSelectSale, isBalanceVisible }: HistoryProps) {
     const { sales, fetchSales, deleteSale } = useInvestmentsContext();
 
     useEffect(() => {
@@ -37,9 +38,9 @@ export function History({ onSelectSale }: HistoryProps) {
     }
 
     return (
-        <div>
+        <div className="pt-6">
             {/* BAŞLIK KISMI - Varlıklarım sayfasıyla uyumlu hale getirildi */}
-            <div className="sticky top-0 z-20 bg-apple-light-bg dark:bg-apple-dark-bg space-y-4 py-4">
+            <div className="sticky top-0 z-20 bg-apple-light-bg dark:bg-apple-dark-bg space-y-4 py-4 pt-safe">
                 <div className="flex items-center justify-between px-2">
                     <h1 className="text-3xl font-bold tracking-tight text-apple-light-text-primary dark:text-apple-dark-text-primary">Satışlarım</h1>
                 </div>
@@ -78,12 +79,18 @@ export function History({ onSelectSale }: HistoryProps) {
                                         <div className="flex items-center text-right">
                                             <div className="mr-3">
                                                 <p className="font-semibold text-base text-apple-light-text-primary dark:text-apple-dark-text-primary">
-                                                    ₺{totalSale.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                                                    {isBalanceVisible ? `₺${totalSale.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}` : '******'}
                                                 </p>
-                                                <p className={`text-sm font-medium flex items-center justify-end ${profit >= 0 ? 'text-apple-green' : 'text-apple-red'}`}>
-                                                    {profit >= 0 ? <TrendingUp className="w-3 h-3 mr-1" /> : <TrendingDown className="w-3 h-3 mr-1" />}
-                                                    %{Math.abs(profitPercent).toFixed(1)}
-                                                </p>
+                                                <div className={`text-sm font-medium flex items-center justify-end ${profit >= 0 ? 'text-apple-green' : 'text-apple-red'}`}>
+                                                    {isBalanceVisible ? (
+                                                        <>
+                                                            {profit >= 0 ? <TrendingUp className="w-3 h-3 mr-1" /> : <TrendingDown className="w-3 h-3 mr-1" />}
+                                                            %{Math.abs(profitPercent).toFixed(1)}
+                                                        </>
+                                                    ) : (
+                                                        <span>******</span>
+                                                    )}
+                                                </div>
                                             </div>
                                             <ChevronRight className="w-5 h-5 text-gray-400" />
                                         </div>
@@ -99,7 +106,13 @@ export function History({ onSelectSale }: HistoryProps) {
                                         <div className="text-right">
                                             <p className="text-sm text-apple-light-text-secondary dark:text-apple-dark-text-secondary">Gerçekleşen Kâr/Zarar</p>
                                             <div className={`font-semibold mt-1 ${profit >= 0 ? 'text-apple-green' : 'text-apple-red'}`}>
-                                                {profit >= 0 ? '+' : ''}₺{profit.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                                                {isBalanceVisible ? (
+                                                    <>
+                                                        {profit >= 0 ? '+' : ''}₺{profit.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                                                    </>
+                                                ) : (
+                                                    '******'
+                                                )}
                                             </div>
                                         </div>
                                     </div>
