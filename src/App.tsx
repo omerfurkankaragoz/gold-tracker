@@ -138,7 +138,7 @@ function MainApp() {
       {/* DEĞİŞİKLİK 1: Fixed bottom padding conflict using calc() - pb-safe was overriding pb-40 */}
       <main
         className="flex-grow overflow-y-auto px-4"
-        style={{ paddingBottom: '3rem' }}
+        style={{ paddingBottom: '7rem' }}
       >
         <AnimatePresence mode="wait">
           <motion.div
