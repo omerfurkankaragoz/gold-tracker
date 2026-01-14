@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useInvestmentsContext } from '../context/InvestmentsContext';
 import { typeDetails } from './Holdings';
 import { format } from 'date-fns';
@@ -6,6 +6,7 @@ import { tr } from 'date-fns/locale';
 import { TrendingUp, TrendingDown, History as HistoryIcon, ChevronRight } from 'lucide-react';
 import { EmptyState } from './EmptyState';
 import { SwipeableItem } from './SwipeableItem';
+import { ConfirmModal } from './ConfirmModal';
 
 interface HistoryProps {
     onSelectSale: (id: string) => void;
@@ -14,14 +15,23 @@ interface HistoryProps {
 
 export function History({ onSelectSale, isBalanceVisible }: HistoryProps) {
     const { sales, fetchSales, deleteSale } = useInvestmentsContext();
+    const [confirmModal, setConfirmModal] = useState<{ isOpen: boolean; id: string | null }>({
+        isOpen: false,
+        id: null
+    });
 
     useEffect(() => {
         fetchSales();
     }, [fetchSales]);
 
-    const handleDelete = async (id: string) => {
-        if (window.confirm('Bu satış kaydını silmek istediğinizden emin misiniz?')) {
-            await deleteSale(id);
+    const handleDeleteClick = (id: string) => {
+        setConfirmModal({ isOpen: true, id });
+    };
+
+    const handleConfirmDelete = async () => {
+        if (confirmModal.id) {
+            await deleteSale(confirmModal.id);
+            setConfirmModal({ isOpen: false, id: null });
         }
     };
 
@@ -58,8 +68,9 @@ export function History({ onSelectSale, isBalanceVisible }: HistoryProps) {
                     return (
                         <div key={sale.id} className="mb-3">
                             <SwipeableItem
-                                onDelete={() => handleDelete(sale.id)}
+                                onDelete={() => handleDeleteClick(sale.id)}
                                 onClick={() => onSelectSale(sale.id)}
+                                className="bg-apple-light-card dark:bg-apple-dark-card"
                             >
                                 {/* KART İÇERİĞİ - Boyutlar ve boşluklar Varlıklarım kartıyla eşitlendi */}
                                 <div className="w-full text-left p-4 space-y-4">
@@ -122,6 +133,17 @@ export function History({ onSelectSale, isBalanceVisible }: HistoryProps) {
                     );
                 })}
             </div>
+
+            {/* Confirm Modal */}
+            <ConfirmModal
+                isOpen={confirmModal.isOpen}
+                onClose={() => setConfirmModal({ isOpen: false, id: null })}
+                onConfirm={handleConfirmDelete}
+                title="Satış Kaydını Sil"
+                message="Bu satış kaydını silmek istediğinizden emin misiniz? Bu işlem geri alınamaz."
+                confirmText="Sil"
+                cancelText="İptal"
+            />
         </div>
     );
 }

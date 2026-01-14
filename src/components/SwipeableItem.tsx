@@ -1,34 +1,44 @@
 import React from 'react';
-import { motion, useMotionValue, useTransform, PanInfo, useAnimation } from 'framer-motion';
-import { Trash2, Banknote } from 'lucide-react';
+import { motion, useMotionValue, PanInfo, useAnimation } from 'framer-motion';
+import { Trash2, Banknote, Pencil } from 'lucide-react';
 
 interface SwipeableItemProps {
     children: React.ReactNode;
-    onDelete: () => void;
-    onSell?: () => void; // ARTIK OPSİYONEL
+    onDelete?: () => void;
+    onSell?: () => void;
+    onEdit?: () => void;
     onClick?: () => void;
+    className?: string; // Opsiyonel className prop'u
 }
 
-export function SwipeableItem({ children, onDelete, onSell, onClick }: SwipeableItemProps) {
+export function SwipeableItem({ children, onDelete, onSell, onEdit, onClick, className }: SwipeableItemProps) {
     const x = useMotionValue(0);
     const controls = useAnimation();
 
-    // Eğer onSell yoksa sadece silme butonu gösterileceği için genişlik 70px, varsa 140px
-    const actionWidth = onSell ? 140 : 70;
+    // Buton sayısına göre genişlik hesapla
+    const buttonCount = [onSell, onDelete, onEdit].filter(Boolean).length;
+    const actionWidth = buttonCount * 70;
     const dragLimit = -actionWidth;
-    const triggerThreshold = dragLimit / 2; // Yarıya kadar çekilince tetiklensin
+    const triggerThreshold = dragLimit / 2;
 
     const handleDragEnd = async (_: any, info: PanInfo) => {
         const offset = info.offset.x;
 
-        // Eğer kullanıcı yeterince sola kaydırdıysa menüyü açık tut
         if (offset < triggerThreshold) {
             controls.start({ x: dragLimit });
         } else {
-            // Değilse kapat
             controls.start({ x: 0 });
         }
     };
+
+    // Default card background class
+    const defaultBgClass = "bg-apple-light-card dark:bg-apple-dark-card";
+    const bgClass = className || defaultBgClass;
+
+    // Hiç aksiyon yoksa sadece children döndür
+    if (buttonCount === 0) {
+        return <div className={`rounded-2xl ${className || ''}`}>{children}</div>;
+    }
 
     return (
         <div className="relative overflow-hidden rounded-2xl group">
@@ -37,7 +47,17 @@ export function SwipeableItem({ children, onDelete, onSell, onClick }: Swipeable
                 className="absolute inset-y-0 right-0 flex"
                 style={{ width: `${actionWidth}px` }}
             >
-                {/* Sat Butonu (Yeşil) - Sadece onSell varsa göster */}
+                {/* Düzenle Butonu (Turuncu) */}
+                {onEdit && (
+                    <button
+                        onClick={(e) => { e.stopPropagation(); onEdit(); controls.start({ x: 0 }); }}
+                        className="w-[70px] bg-orange-500 flex items-center justify-center text-white"
+                    >
+                        <Pencil className="h-6 w-6" />
+                    </button>
+                )}
+
+                {/* Sat Butonu (Mavi) */}
                 {onSell && (
                     <button
                         onClick={(e) => { e.stopPropagation(); onSell(); controls.start({ x: 0 }); }}
@@ -47,13 +67,15 @@ export function SwipeableItem({ children, onDelete, onSell, onClick }: Swipeable
                     </button>
                 )}
 
-                {/* Sil Butonu (Kırmızı) - Tek buton ise köşeler tam yuvarlak, değilse sağ taraf yuvarlak */}
-                <button
-                    onClick={(e) => { e.stopPropagation(); onDelete(); controls.start({ x: 0 }); }}
-                    className={`w-[70px] bg-apple-red flex items-center justify-center text-white ${onSell ? 'rounded-r-2xl' : 'rounded-2xl'}`}
-                >
-                    <Trash2 className="h-6 w-6" />
-                </button>
+                {/* Sil Butonu (Kırmızı) */}
+                {onDelete && (
+                    <button
+                        onClick={(e) => { e.stopPropagation(); onDelete(); controls.start({ x: 0 }); }}
+                        className="w-[70px] bg-apple-red flex items-center justify-center text-white rounded-r-2xl"
+                    >
+                        <Trash2 className="h-6 w-6" />
+                    </button>
+                )}
             </div>
 
             {/* Ön Plan İçeriği */}
@@ -65,7 +87,7 @@ export function SwipeableItem({ children, onDelete, onSell, onClick }: Swipeable
                 dragElastic={0.1}
                 onDragEnd={handleDragEnd}
                 onClick={onClick}
-                className="relative bg-apple-light-card dark:bg-apple-dark-card z-10"
+                className={`relative z-10 ${bgClass}`}
                 whileTap={{ cursor: "grabbing" }}
             >
                 {children}

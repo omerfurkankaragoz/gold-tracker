@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
-import { TrendingUp, Loader, BarChart2 } from 'lucide-react';
+import { TrendingUp, CircleUser } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useInvestmentsContext } from '../context/InvestmentsContext';
 import { PortfolioChart } from './PortfolioChart';
@@ -19,9 +19,10 @@ const timeRanges: { id: TimeRange; label: string }[] = [
 
 interface InsightsProps {
   isBalanceVisible: boolean;
+  onNavigate: (tab: string) => void;
 }
 
-export function Insights({ isBalanceVisible }: InsightsProps) {
+export function Insights({ isBalanceVisible, onNavigate }: InsightsProps) {
   const { investments, totalPortfolioValue, loading: contextLoading } = useInvestmentsContext();
   const { prices, loading: pricesLoading } = usePrices();
   const [historyData, setHistoryData] = useState<ChartDataPoint[]>([]);
@@ -123,7 +124,16 @@ export function Insights({ isBalanceVisible }: InsightsProps) {
   return (
     <div>
       {/* ======================= BAŞLANGIÇ: SABİT ÜST BÖLÜM ======================= */}
-      <div className="sticky top-0 z-10 bg-apple-light-bg dark:bg-apple-dark-bg pt-6 pb-4 border-b border-gray-200/80 dark:border-gray-800">
+      <div className="sticky top-0 z-10 bg-apple-light-bg dark:bg-apple-dark-bg space-y-4 py-4 pt-safe border-b border-gray-200/80 dark:border-gray-800">
+        <div className="flex items-center justify-between px-2">
+          <h1 className="text-3xl font-bold tracking-tight text-apple-light-text-primary dark:text-apple-dark-text-primary">Panelim</h1>
+          <button
+            onClick={() => onNavigate('profile')}
+            className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+          >
+            <CircleUser className="w-6 h-6 text-apple-light-text-primary dark:text-apple-dark-text-primary" />
+          </button>
+        </div>
         <div className="px-2">
           <p className="text-base font-medium text-apple-light-text-secondary dark:text-apple-dark-text-secondary">Toplam Varlık Değeri</p>
           <p className="text-3xl font-bold tracking-tight text-apple-light-text-primary dark:text-apple-dark-text-primary mt-1">

@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Session } from '@supabase/supabase-js';
 import { supabase, Investment } from './lib/supabase';
 import { Dashboard } from './components/Dashboard';
-import { Holdings } from './components/Holdings';
+import { PortfolioList } from './components/PortfolioList';
 import { Insights } from './components/Insights';
 import { Auth } from './components/Auth';
 import { Profile } from './components/Profile';
@@ -46,6 +46,7 @@ function MainApp() {
   const [addInvestmentState, setAddInvestmentState] = useState<{
     isOpen: boolean;
     initialType?: Investment['type'];
+    initialPortfolioId?: string;
   }>({ isOpen: false });
 
   const [isBalanceVisible, setIsBalanceVisible] = useState<boolean>(() => {
@@ -58,11 +59,10 @@ function MainApp() {
   }, [isBalanceVisible]);
 
   const handleSelectInvestment = (id: string) => {
-    setActiveTab('holdings');
     setSelectedInvestmentId(id);
   };
 
-  const handleBackToHoldings = () => {
+  const handleBackToList = () => {
     setSelectedInvestmentId(null);
   };
 
@@ -74,13 +74,8 @@ function MainApp() {
     setSelectedSaleId(null);
   };
 
-  const handleGoToAddInvestment = (initialType?: Investment['type']) => {
-    if (initialType) {
-      setActiveTab('dashboard');
-    } else {
-      setActiveTab('holdings');
-    }
-    setAddInvestmentState({ isOpen: true, initialType: initialType });
+  const handleGoToAddInvestment = (initialPortfolioId?: string, initialType?: Investment['type']) => {
+    setAddInvestmentState({ isOpen: true, initialType, initialPortfolioId });
   };
 
   const handleBackFromAdd = () => {
@@ -88,38 +83,52 @@ function MainApp() {
   };
 
   const renderContent = () => {
+    // Add Investment Page
     if (addInvestmentState.isOpen) {
-      return <AddInvestmentPage onBack={handleBackFromAdd} initialSelectedType={addInvestmentState.initialType} isDirectAdd={!!addInvestmentState.initialType} />;
+      return (
+        <AddInvestmentPage
+          onBack={handleBackFromAdd}
+          initialSelectedType={addInvestmentState.initialType}
+          initialPortfolioId={addInvestmentState.initialPortfolioId}
+          isDirectAdd={!!addInvestmentState.initialType}
+        />
+      );
     }
 
+    // Investment Detail
     if (selectedInvestmentId) {
-      return <InvestmentDetail investmentId={selectedInvestmentId} onBack={handleBackToHoldings} />;
+      return <InvestmentDetail investmentId={selectedInvestmentId} onBack={handleBackToList} />;
     }
 
+    // Sale Detail
     if (selectedSaleId) {
       return <HistoryDetail saleId={selectedSaleId} onBack={handleBackToHistory} />;
     }
 
     switch (activeTab) {
-      case 'holdings':
-        return <Holdings
-          onSelectInvestment={handleSelectInvestment}
-          onAddInvestment={() => handleGoToAddInvestment()}
-          isBalanceVisible={isBalanceVisible}
-        />;
+      case 'portfolios':
+        return (
+          <PortfolioList
+            onSelectInvestment={handleSelectInvestment}
+            onAddInvestment={(portfolioId) => handleGoToAddInvestment(portfolioId)}
+            isBalanceVisible={isBalanceVisible}
+          />
+        );
       case 'insights':
-        return <Insights isBalanceVisible={isBalanceVisible} />;
+        return <Insights isBalanceVisible={isBalanceVisible} onNavigate={setActiveTab} />;
       case 'history':
         return <History onSelectSale={handleSelectSale} isBalanceVisible={isBalanceVisible} />;
       case 'profile':
         return <Profile />;
       default:
-        return <Dashboard
-          onNavigate={setActiveTab}
-          onAddInvestment={handleGoToAddInvestment}
-          isBalanceVisible={isBalanceVisible}
-          setIsBalanceVisible={setIsBalanceVisible}
-        />;
+        return (
+          <Dashboard
+            onNavigate={setActiveTab}
+            onAddInvestment={(type) => handleGoToAddInvestment(undefined, type)}
+            isBalanceVisible={isBalanceVisible}
+            setIsBalanceVisible={setIsBalanceVisible}
+          />
+        );
     }
   };
 
@@ -135,7 +144,6 @@ function MainApp() {
 
   return (
     <div className="h-full w-full flex flex-col bg-apple-light-bg dark:bg-apple-dark-bg">
-      {/* DEĞİŞİKLİK 1: Fixed bottom padding conflict using calc() - pb-safe was overriding pb-40 */}
       <main
         className="flex-grow overflow-y-auto px-4"
         style={{ paddingBottom: '7rem' }}
@@ -147,8 +155,6 @@ function MainApp() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            // DEĞİŞİKLİK 2: "h-full" sınıfı kaldırıldı, sadece "w-full" bırakıldı.
-            // Bu sayede içerik uzadıkça kapsayıcı da uzayacak ve padding işleyecek.
             className="w-full"
           >
             {renderContent()}

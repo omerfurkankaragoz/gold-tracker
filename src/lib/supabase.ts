@@ -5,6 +5,16 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
+export type Portfolio = {
+  id: string;
+  user_id: string;
+  name: string;
+  icon: string;
+  color: string;
+  created_at: string;
+  updated_at: string;
+};
+
 export type Investment = {
   id: string;
   type: 'gold' | 'usd' | 'eur' | 'tl' | 'gumus' | 'quarter_gold' | 'half_gold' | 'full_gold' | 'cumhuriyet_gold' | 'ata_gold' | 'ayar_14_gold' | 'ayar_18_gold' | 'ayar_22_bilezik';
@@ -14,6 +24,7 @@ export type Investment = {
   created_at: string;
   updated_at: string;
   user_id?: string;
+  portfolio_id?: string;
 };
 
 export type Sale = {
@@ -23,5 +34,5 @@ export type Sale = {
   buy_price: number;
   sell_price: number;
   sold_at: string;
-  purchase_date: string; // <-- YENİ EKLENDİ
+  purchase_date: string;
 };

@@ -1,5 +1,4 @@
-import React from 'react';
-import { Wallet, Settings, LayoutGrid, TrendingUp, History } from 'lucide-react';
+import { LayoutGrid, TrendingUp, History, Wallet } from 'lucide-react';
 
 interface NavigationProps {
   activeTab: string;
@@ -8,10 +7,9 @@ interface NavigationProps {
 
 const tabs = [
   { id: 'dashboard', name: 'Piyasalar', icon: TrendingUp },
-  { id: 'holdings', name: 'Varlıklarım', icon: Wallet },
+  { id: 'portfolios', name: 'Varlıklarım', icon: Wallet },
   { id: 'insights', name: 'Panelim', icon: LayoutGrid },
   { id: 'history', name: 'Satışlarım', icon: History },
-  { id: 'profile', name: 'Ayarlar', icon: Settings },
 ];
 
 export function Navigation({ activeTab, onTabChange }: NavigationProps) {

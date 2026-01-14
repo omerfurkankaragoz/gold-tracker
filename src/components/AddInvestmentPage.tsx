@@ -1,12 +1,16 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { ChevronLeft, Search, DollarSign, Euro, Coins, Plus, Info, Gem, TurkishLira } from 'lucide-react';
+import { useState, useMemo, useEffect } from 'react';
+import { ChevronLeft, Search, DollarSign, Euro, Coins, Plus, Gem, TurkishLira } from 'lucide-react';
 import { useInvestmentsContext } from '../context/InvestmentsContext';
 import { usePrices } from '../hooks/usePrices';
 import { Investment } from '../lib/supabase';
+import { PortfolioSelector } from './PortfolioSelector';
+
+const LAST_PORTFOLIO_KEY = 'last_used_portfolio_id';
 
 interface AddInvestmentPageProps {
   onBack: () => void;
   initialSelectedType?: Investment['type'];
+  initialPortfolioId?: string;
   isDirectAdd?: boolean;
 }
 
@@ -25,12 +29,23 @@ const investmentTypes = [
   { id: 'ayar_18_gold', name: '18 Ayar Altın', symbol: '18-K', icon: Coins, unit: 'gr' },
 ];
 
-export function AddInvestmentPage({ onBack, initialSelectedType, isDirectAdd = false }: AddInvestmentPageProps) {
+export function AddInvestmentPage({ onBack, initialSelectedType, initialPortfolioId, isDirectAdd = false }: AddInvestmentPageProps) {
   const [selectedType, setSelectedType] = useState<Investment['type']>(initialSelectedType || 'gold');
   const [searchQuery, setSearchQuery] = useState('');
   const [amount, setAmount] = useState('');
   const [purchasePrice, setPurchasePrice] = useState('');
   const [loading, setLoading] = useState(false);
+  // Son kullanılan listeyi localStorage'dan yükle
+  const getInitialPortfolioId = () => {
+    if (initialPortfolioId) return initialPortfolioId;
+    try {
+      return localStorage.getItem(LAST_PORTFOLIO_KEY) || undefined;
+    } catch {
+      return undefined;
+    }
+  };
+
+  const [selectedPortfolioId, setSelectedPortfolioId] = useState<string | undefined>(getInitialPortfolioId);
   const today = new Date().toISOString().split('T')[0];
   const [purchaseDate, setPurchaseDate] = useState(today);
 
@@ -86,7 +101,16 @@ export function AddInvestmentPage({ onBack, initialSelectedType, isDirectAdd = f
         amount: parseFloat(amount),
         purchase_price: parseFloat(purchasePrice.replace(',', '.')),
         purchase_date: new Date(purchaseDate).toISOString(),
+        portfolio_id: selectedPortfolioId,
       } as Omit<Investment, 'id' | 'created_at' | 'updated_at' | 'user_id'>);
+
+      // Son kullanılan listeyi kaydet
+      if (selectedPortfolioId) {
+        localStorage.setItem(LAST_PORTFOLIO_KEY, selectedPortfolioId);
+      } else {
+        localStorage.removeItem(LAST_PORTFOLIO_KEY);
+      }
+
       onBack();
     } catch (error) {
       console.error('Yatırım eklenirken hata:', error);
@@ -197,6 +221,15 @@ export function AddInvestmentPage({ onBack, initialSelectedType, isDirectAdd = f
               />
             </div>
           </div>
+        </div>
+
+        {/* Portfolio Selection */}
+        <div className="space-y-4">
+          <h2 className="text-sm font-semibold uppercase text-apple-light-text-secondary dark:text-apple-dark-text-secondary tracking-wider ml-1">Liste</h2>
+          <PortfolioSelector
+            selectedPortfolioId={selectedPortfolioId}
+            onSelect={setSelectedPortfolioId}
+          />
         </div>
       </div>
 
