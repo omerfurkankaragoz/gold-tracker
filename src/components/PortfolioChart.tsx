@@ -19,7 +19,7 @@ interface PortfolioChartProps {
 }
 
 export function PortfolioChart({ isBalanceVisible }: PortfolioChartProps) {
-// ====================================================================================
+  // ====================================================================================
   const { investments, totalPortfolioValue } = useInvestmentsContext();
   const { prices } = usePrices();
 
@@ -75,8 +75,8 @@ export function PortfolioChart({ isBalanceVisible }: PortfolioChartProps) {
       <div className="bg-apple-light-card dark:bg-apple-dark-card rounded-2xl p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
           <div className="h-48 w-full">
-            <ResponsiveContainer>
-              <PieChart>
+            <ResponsiveContainer style={{ outline: 'none' }}>
+              <PieChart tabIndex={-1} style={{ outline: 'none' }}>
                 <Pie data={chartData} cx="50%" cy="50%" innerRadius={50} outerRadius={70} paddingAngle={2} dataKey="value" nameKey="name">
                   {chartData.map((entry) => <Cell key={`cell-${entry.name}`} fill={entry.color} stroke={entry.color} />)}
                 </Pie>

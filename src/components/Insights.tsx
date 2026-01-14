@@ -84,11 +84,11 @@ export function Insights({ isBalanceVisible }: InsightsProps) {
     const max = Math.max(...values);
     const delta = max - min;
     if (delta === 0) {
-      const padding = Math.max(100, min * 0.01); 
+      const padding = Math.max(100, min * 0.01);
       return [min - padding, max + padding];
     }
-    const padding = delta * 0.01; 
-    const domainMin = Math.max(0, min - padding); 
+    const padding = delta * 0.01;
+    const domainMin = Math.max(0, min - padding);
     const domainMax = max + padding;
     return [domainMin, domainMax];
   }, [chartData]);
@@ -101,7 +101,7 @@ export function Insights({ isBalanceVisible }: InsightsProps) {
   const endValue = chartData.length > 0 ? chartData[chartData.length - 1].value : totalPortfolioValue;
   const periodChange = endValue - startValue;
   const periodChangePercent = startValue > 0 ? (periodChange / startValue) * 100 : 0;
-  
+
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length > 0 && payload[0].value) {
       const value = payload[0].value;
@@ -109,8 +109,8 @@ export function Insights({ isBalanceVisible }: InsightsProps) {
         <div className="bg-black/70 dark:bg-apple-dark-card/70 backdrop-blur-sm text-white p-2 px-3 rounded-lg shadow-lg">
           <p className="text-xs font-semibold">{label}</p>
           <p className="font-bold text-base text-white">
-            {isBalanceVisible 
-              ? `₺${Number(value).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}` 
+            {isBalanceVisible
+              ? `₺${Number(value).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`
               : '₺******'
             }
           </p>
@@ -125,21 +125,21 @@ export function Insights({ isBalanceVisible }: InsightsProps) {
       {/* ======================= BAŞLANGIÇ: SABİT ÜST BÖLÜM ======================= */}
       <div className="sticky top-0 z-10 bg-apple-light-bg dark:bg-apple-dark-bg pt-6 pb-4 border-b border-gray-200/80 dark:border-gray-800">
         <div className="px-2">
-            <p className="text-base font-medium text-apple-light-text-secondary dark:text-apple-dark-text-secondary">Toplam Varlık Değeri</p>
-            <p className="text-3xl font-bold tracking-tight text-apple-light-text-primary dark:text-apple-dark-text-primary mt-1">
+          <p className="text-base font-medium text-apple-light-text-secondary dark:text-apple-dark-text-secondary">Toplam Varlık Değeri</p>
+          <p className="text-3xl font-bold tracking-tight text-apple-light-text-primary dark:text-apple-dark-text-primary mt-1">
             {isBalanceVisible ? `₺${endValue.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}` : '₺******'}
-            </p>
-            {chartData.length > 1 && (
-            <div className={`flex items-center space-x-2 mt-1 font-semibold ${ periodChange >= 0 ? 'text-apple-green' : 'text-apple-red' }`}>
-                {isBalanceVisible ? (
+          </p>
+          {chartData.length > 1 && (
+            <div className={`flex items-center space-x-2 mt-1 font-semibold ${periodChange >= 0 ? 'text-apple-green' : 'text-apple-red'}`}>
+              {isBalanceVisible ? (
                 <>
-                    <TrendingUp className="h-5 w-5" />
-                    <span>₺{Math.abs(periodChange).toLocaleString('tr-TR', {minimumFractionDigits: 2})}</span>
-                    <span>({Math.abs(periodChangePercent).toFixed(2)}%)</span>
+                  <TrendingUp className="h-5 w-5" />
+                  <span>₺{Math.abs(periodChange).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</span>
+                  <span>({Math.abs(periodChangePercent).toFixed(2)}%)</span>
                 </>
-                ) : ( <span>******</span> )}
+              ) : (<span>******</span>)}
             </div>
-            )}
+          )}
         </div>
       </div>
       {/* ======================= BİTİŞ: SABİT ÜST BÖLÜM ======================= */}
@@ -149,11 +149,11 @@ export function Insights({ isBalanceVisible }: InsightsProps) {
       <div className="space-y-8 pt-4">
         <div>
           <div className="h-64 w-full">
-            <ResponsiveContainer>
-              <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 10, bottom: 5 }}>
-                <defs><linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#0A84FF" stopOpacity={0.4}/><stop offset="95%" stopColor="#0A84FF" stopOpacity={0}/></linearGradient></defs>
+            <ResponsiveContainer style={{ outline: 'none' }}>
+              <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 10, bottom: 5 }} tabIndex={-1} style={{ outline: 'none' }}>
+                <defs><linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#0A84FF" stopOpacity={0.4} /><stop offset="95%" stopColor="#0A84FF" stopOpacity={0} /></linearGradient></defs>
                 <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'rgba(142, 142, 147, 0.3)', strokeWidth: 2, strokeDasharray: '3 3' }} />
-                <XAxis dataKey="time" tick={{ fontSize: 12 }} stroke="#8A8A8E" className="dark:stroke-apple-dark-text-secondary" tickLine={false} axisLine={false} interval="preserveStartEnd" padding={{ left: 20, right: 20 }}/>
+                <XAxis dataKey="time" tick={{ fontSize: 12 }} stroke="#8A8A8E" className="dark:stroke-apple-dark-text-secondary" tickLine={false} axisLine={false} interval="preserveStartEnd" padding={{ left: 20, right: 20 }} />
                 <YAxis domain={yAxisDomain} hide={true} />
                 <Area type="monotone" dataKey="value" stroke="#0A84FF" strokeWidth={2.5} fill="url(#colorValue)" fillOpacity={1} connectNulls />
               </AreaChart>
@@ -167,11 +167,11 @@ export function Insights({ isBalanceVisible }: InsightsProps) {
             ))}
           </div>
         </div>
-        
+
         <AssetSummaryCard summary={assetSummary} loading={isLoading} isBalanceVisible={isBalanceVisible} />
         <PortfolioChart isBalanceVisible={isBalanceVisible} />
       </div>
-       {/* ======================= BİTİŞ: KAYAN İÇERİK ======================= */}
+      {/* ======================= BİTİŞ: KAYAN İÇERİK ======================= */}
     </div>
   );
 }

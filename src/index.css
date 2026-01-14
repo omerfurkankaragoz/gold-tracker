@@ -3,6 +3,69 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ===== iOS Native Foundation ===== */
+html,
+body {
+  overscroll-behavior-y: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* Prevent iOS zoom on input focus */
+  touch-action: manipulation;
+  /* Remove tap highlight on iOS */
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ===== Remove focus outlines on charts (mobile native feel) ===== */
+.recharts-wrapper,
+.recharts-surface,
+.recharts-wrapper *,
+.recharts-pie,
+.recharts-pie-sector,
+.recharts-sector,
+.recharts-layer,
+.recharts-area,
+.recharts-curve,
+svg,
+svg * {
+  outline: none !important;
+  outline-width: 0 !important;
+  outline-style: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+  -webkit-touch-callout: none !important;
+  box-shadow: none !important;
+}
+
+/* Force remove focus states on all chart elements */
+.recharts-wrapper:focus,
+.recharts-wrapper:focus-visible,
+.recharts-wrapper:active,
+.recharts-surface:focus,
+.recharts-surface:focus-visible,
+.recharts-surface:active,
+svg:focus,
+svg:focus-visible,
+svg:active,
+svg *:focus,
+svg *:focus-visible,
+svg *:active,
+[tabindex]:focus,
+[tabindex]:focus-visible {
+  outline: none !important;
+  outline-width: 0 !important;
+  box-shadow: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+/* iOS Safari specific - remove focus ring on SVG with tabindex */
+svg[tabindex],
+svg[tabindex="0"],
+.recharts-surface[tabindex],
+path[tabindex],
+g[tabindex] {
+  outline: none !important;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0) !important;
+}
+
 /* ======================= YENİ EKLENEN BÖLÜM: Animasyonlar ======================= */
 @layer utilities {
 
@@ -40,6 +103,9 @@
 @layer base {
   html {
     -webkit-tap-highlight-color: transparent;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
   }
 
   body {
@@ -49,11 +115,18 @@
     width: 100%;
     overflow: hidden;
     position: fixed;
-    /* Prevent pull-to-refresh on mobile */
     overscroll-behavior-y: none;
+    -webkit-user-select: none;
+    user-select: none;
+    touch-action: manipulation;
   }
 
-  /* ================================================================== */
+  /* Allow text selection only in input fields */
+  input,
+  textarea {
+    -webkit-user-select: text;
+    user-select: text;
+  }
 
   #root {
     width: 100%;
