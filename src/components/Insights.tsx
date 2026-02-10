@@ -122,41 +122,44 @@ export function Insights({ isBalanceVisible, onNavigate }: InsightsProps) {
   };
 
   return (
-    <div>
+    <div className="pt-6">
       {/* ======================= BAŞLANGIÇ: SABİT ÜST BÖLÜM ======================= */}
-      <div className="sticky top-0 z-10 bg-apple-light-bg dark:bg-apple-dark-bg space-y-4 py-4 pt-safe border-b border-gray-200/80 dark:border-gray-800">
+      {/* ======================= BAŞLANGIÇ: SABİT ÜST BÖLÜM ======================= */}
+      <div className="sticky top-0 z-20 bg-apple-light-bg dark:bg-apple-dark-bg py-4 pt-safe">
         <div className="flex items-center justify-between px-2">
-          <h1 className="text-3xl font-bold tracking-tight text-apple-light-text-primary dark:text-apple-dark-text-primary">Panelim</h1>
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight text-apple-light-text-primary dark:text-apple-dark-text-primary">Panelim</h1>
+          </div>
           <button
             onClick={() => onNavigate('profile')}
-            className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
           >
-            <CircleUser className="w-6 h-6 text-apple-light-text-primary dark:text-apple-dark-text-primary" />
+            <CircleUser className="w-9 h-9 text-apple-light-text-primary dark:text-apple-dark-text-primary" strokeWidth={1.5} />
           </button>
-        </div>
-        <div className="px-2">
-          <p className="text-base font-medium text-apple-light-text-secondary dark:text-apple-dark-text-secondary">Toplam Varlık Değeri</p>
-          <p className="text-3xl font-bold tracking-tight text-apple-light-text-primary dark:text-apple-dark-text-primary mt-1">
-            {isBalanceVisible ? `₺${endValue.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}` : '₺******'}
-          </p>
-          {chartData.length > 1 && (
-            <div className={`flex items-center space-x-2 mt-1 font-semibold ${periodChange >= 0 ? 'text-apple-green' : 'text-apple-red'}`}>
-              {isBalanceVisible ? (
-                <>
-                  <TrendingUp className="h-5 w-5" />
-                  <span>₺{Math.abs(periodChange).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</span>
-                  <span>({Math.abs(periodChangePercent).toFixed(2)}%)</span>
-                </>
-              ) : (<span>******</span>)}
-            </div>
-          )}
         </div>
       </div>
       {/* ======================= BİTİŞ: SABİT ÜST BÖLÜM ======================= */}
 
+      <div className="px-2 pt-2 pb-4">
+        <p className="text-base font-medium text-apple-light-text-secondary dark:text-apple-dark-text-secondary">Toplam Varlık Değeri</p>
+        <p className="text-3xl font-bold tracking-tight text-apple-light-text-primary dark:text-apple-dark-text-primary mt-1">
+          {isBalanceVisible ? `₺${endValue.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}` : '₺******'}
+        </p>
+        {chartData.length > 1 && (
+          <div className={`flex items-center space-x-2 mt-1 font-semibold ${periodChange >= 0 ? 'text-apple-green' : 'text-apple-red'}`}>
+            {isBalanceVisible ? (
+              <>
+                <TrendingUp className="h-5 w-5" />
+                <span>₺{Math.abs(periodChange).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</span>
+                <span>({Math.abs(periodChangePercent).toFixed(2)}%)</span>
+              </>
+            ) : (<span>******</span>)}
+          </div>
+        )}
+      </div>
 
       {/* ======================= BAŞLANGIÇ: KAYAN İÇERİK ======================= */}
-      <div className="space-y-8 pt-4">
+      <div className="space-y-8 pt-2">
         <div>
           <div className="h-64 w-full">
             <ResponsiveContainer style={{ outline: 'none' }}>
