@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useCallback } from 'react';
+import { useState, useMemo, useEffect, useCallback, memo } from 'react';
 import { Folder, FolderPlus, Plus, X } from 'lucide-react';
 import { usePortfoliosContext } from '../context/PortfoliosContext';
 import { useInvestmentsContext } from '../context/InvestmentsContext';
@@ -29,6 +29,84 @@ const getCollapsedSections = (): Record<string, boolean> => {
 const setCollapsedSections = (sections: Record<string, boolean>) => {
     localStorage.setItem(COLLAPSED_STORAGE_KEY, JSON.stringify(sections));
 };
+
+interface PortfolioInvestmentCardProps {
+    investment: Investment;
+    prices: Record<string, any>;
+    isBalanceVisible: boolean;
+    onDelete: (investment: Investment) => void;
+    onSell: (investment: Investment) => void;
+    onSelect: (id: string) => void;
+}
+
+const PortfolioInvestmentCard = memo(function PortfolioInvestmentCard({
+    investment,
+    prices,
+    isBalanceVisible,
+    onDelete,
+    onSell,
+    onSelect
+}: PortfolioInvestmentCardProps) {
+    const details = typeDetails[investment.type as Investment['type']];
+    if (!details) return null;
+    
+    const Icon = details.icon;
+    const currentPrice = prices[investment.type]?.sellingPrice || 0;
+    const currentValue = investment.amount * currentPrice;
+    const purchaseValue = investment.amount * investment.purchase_price;
+    const gain = currentValue - purchaseValue;
+    const gainPercent = purchaseValue > 0 ? (gain / purchaseValue) * 100 : 0;
+
+    return (
+        <div className="mb-3">
+            <SwipeableItem
+                onDelete={() => onDelete(investment)}
+                onSell={() => onSell(investment)}
+                onClick={() => onSelect(investment.id)}
+            >
+                <div className="w-full text-left p-4 space-y-4">
+                    <div className="flex justify-between items-center">
+                        <div className="flex items-center space-x-4">
+                            <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-full flex-shrink-0">
+                                <Icon className="h-6 w-6 text-apple-blue" />
+                            </div>
+                            <div className="text-left">
+                                <p className="font-semibold text-base text-apple-light-text-primary dark:text-apple-dark-text-primary">{details.name}</p>
+                                <p className="text-sm text-apple-light-text-secondary dark:text-apple-dark-text-secondary">
+                                    {investment.amount.toLocaleString('tr-TR', { maximumFractionDigits: 4 })} {details.unit}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="text-left">
+                            <p className="text-sm text-apple-light-text-secondary dark:text-apple-dark-text-secondary">Anlık Değer</p>
+                            <p className="font-semibold text-apple-light-text-primary dark:text-apple-dark-text-primary mt-1">
+                                {isBalanceVisible ? `₺${currentValue.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}` : '******'}
+                            </p>
+                            <p className="text-xs text-apple-light-text-secondary/70 dark:text-apple-dark-text-secondary/70 mt-2">
+                                {format(new Date(investment.purchase_date), 'dd MMM yyyy', { locale: tr })}
+                            </p>
+                        </div>
+                        <div className="text-right">
+                            <p className="text-sm text-apple-light-text-secondary dark:text-apple-dark-text-secondary">Kar/Zarar</p>
+                            <div className={`font-semibold flex items-center justify-end space-x-1 mt-1 ${gain >= 0 ? 'text-apple-green' : 'text-apple-red'}`}>
+                                {isBalanceVisible ? (
+                                    <>
+                                        <span>₺{Math.abs(gain).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</span>
+                                        <span className='ml-2'>({Math.abs(gainPercent).toFixed(2)}%)</span>
+                                    </>
+                                ) : (
+                                    <span>******</span>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </SwipeableItem>
+        </div>
+    );
+});
 
 interface PortfolioListProps {
     onSelectInvestment: (id: string) => void;
@@ -165,67 +243,6 @@ export function PortfolioList({ onSelectInvestment, onAddInvestment, isBalanceVi
         }
     }, [sellModalInvestment, sellInvestment]);
 
-    const renderInvestmentCard = useCallback((investment: Investment) => {
-        const details = typeDetails[investment.type as Investment['type']];
-        if (!details) return null;
-        const Icon = details.icon;
-        const currentPrice = prices[investment.type]?.sellingPrice || 0;
-        const currentValue = investment.amount * currentPrice;
-        const purchaseValue = investment.amount * investment.purchase_price;
-        const gain = currentValue - purchaseValue;
-        const gainPercent = purchaseValue > 0 ? (gain / purchaseValue) * 100 : 0;
-
-        return (
-            <div key={investment.id} className="mb-3">
-                <SwipeableItem
-                    onDelete={() => handleDeleteInvestment(investment)}
-                    onSell={() => handleSellInvestment(investment)}
-                    onClick={() => onSelectInvestment(investment.id)}
-                >
-                    <div className="w-full text-left p-4 space-y-4">
-                        <div className="flex justify-between items-center">
-                            <div className="flex items-center space-x-4">
-                                <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-full flex-shrink-0">
-                                    <Icon className="h-6 w-6 text-apple-blue" />
-                                </div>
-                                <div className="text-left">
-                                    <p className="font-semibold text-base text-apple-light-text-primary dark:text-apple-dark-text-primary">{details.name}</p>
-                                    <p className="text-sm text-apple-light-text-secondary dark:text-apple-dark-text-secondary">
-                                        {investment.amount.toLocaleString('tr-TR', { maximumFractionDigits: 4 })} {details.unit}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="text-left">
-                                <p className="text-sm text-apple-light-text-secondary dark:text-apple-dark-text-secondary">Anlık Değer</p>
-                                <p className="font-semibold text-apple-light-text-primary dark:text-apple-dark-text-primary mt-1">
-                                    {isBalanceVisible ? `₺${currentValue.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}` : '******'}
-                                </p>
-                                <p className="text-xs text-apple-light-text-secondary/70 dark:text-apple-dark-text-secondary/70 mt-2">
-                                    {format(new Date(investment.purchase_date), 'dd MMM yyyy', { locale: tr })}
-                                </p>
-                            </div>
-                            <div className="text-right">
-                                <p className="text-sm text-apple-light-text-secondary dark:text-apple-dark-text-secondary">Kar/Zarar</p>
-                                <div className={`font-semibold flex items-center justify-end space-x-1 mt-1 ${gain >= 0 ? 'text-apple-green' : 'text-apple-red'}`}>
-                                    {isBalanceVisible ? (
-                                        <>
-                                            <span>₺{Math.abs(gain).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</span>
-                                            <span className='ml-2'>({Math.abs(gainPercent).toFixed(2)}%)</span>
-                                        </>
-                                    ) : (
-                                        <span>******</span>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </SwipeableItem>
-            </div>
-        );
-    }, [prices, isBalanceVisible, handleDeleteInvestment, handleSellInvestment, onSelectInvestment]);
-
     const renderPortfolioHeader = useCallback((
         key: string,
         name: string,
@@ -286,12 +303,22 @@ export function PortfolioList({ onSelectInvestment, onAddInvestment, isBalanceVi
                 {/* Investments */}
                 {!isCollapsed && (
                     <div className="mt-2">
-                        {data.investments.map(inv => renderInvestmentCard(inv))}
+                        {data.investments.map(inv => (
+                            <PortfolioInvestmentCard
+                                key={inv.id}
+                                investment={inv}
+                                prices={prices}
+                                isBalanceVisible={isBalanceVisible}
+                                onDelete={handleDeleteInvestment}
+                                onSell={handleSellInvestment}
+                                onSelect={onSelectInvestment}
+                            />
+                        ))}
                     </div>
                 )}
             </div>
         );
-    }, [collapsedSections, renderPortfolioHeader, renderInvestmentCard]);
+    }, [collapsedSections, prices, isBalanceVisible, renderPortfolioHeader, handleDeleteInvestment, handleSellInvestment, onSelectInvestment]);
 
     const renderEmptyPortfolio = useCallback((portfolio: Portfolio) => {
         return (
