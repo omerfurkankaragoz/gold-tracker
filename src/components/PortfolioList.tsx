@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { Folder, FolderPlus, Plus, X } from 'lucide-react';
 import { usePortfoliosContext } from '../context/PortfoliosContext';
 import { useInvestmentsContext } from '../context/InvestmentsContext';
@@ -100,11 +100,11 @@ export function PortfolioList({ onSelectInvestment, onAddInvestment, isBalanceVi
         return portfolios.filter(p => !portfolioIdsWithInvestments.has(p.id));
     }, [portfolios, investments]);
 
-    const toggleSection = (key: string) => {
+    const toggleSection = useCallback((key: string) => {
         setCollapsedSectionsState(prev => ({ ...prev, [key]: !prev[key] }));
-    };
+    }, []);
 
-    const handleAddPortfolio = async () => {
+    const handleAddPortfolio = useCallback(async () => {
         if (!newPortfolioName.trim()) return;
         await addPortfolio({
             name: newPortfolioName.trim(),
@@ -114,15 +114,15 @@ export function PortfolioList({ onSelectInvestment, onAddInvestment, isBalanceVi
         setNewPortfolioName('');
         setSelectedColor(PORTFOLIO_COLORS[0]);
         setIsAddModalOpen(false);
-    };
+    }, [newPortfolioName, selectedColor, addPortfolio]);
 
-    const handleEditPortfolio = (portfolio: Portfolio) => {
+    const handleEditPortfolio = useCallback((portfolio: Portfolio) => {
         setEditingPortfolio(portfolio);
         setEditName(portfolio.name);
         setEditColor(portfolio.color);
-    };
+    }, []);
 
-    const handleSaveEdit = async () => {
+    const handleSaveEdit = useCallback(async () => {
         if (!editingPortfolio || !editName.trim()) return;
         await updatePortfolio(editingPortfolio.id, {
             name: editName.trim(),
@@ -131,20 +131,20 @@ export function PortfolioList({ onSelectInvestment, onAddInvestment, isBalanceVi
         setEditingPortfolio(null);
         setEditName('');
         setEditColor('');
-    };
+    }, [editingPortfolio, editName, editColor, updatePortfolio]);
 
-    const handleDeleteEmptyPortfolio = (portfolioId: string, portfolioName: string) => {
+    const handleDeleteEmptyPortfolio = useCallback((portfolioId: string, portfolioName: string) => {
         setConfirmModal({
             isOpen: true,
             title: 'Listeyi Sil',
             message: `"${portfolioName}" listesini silmek istediğinizden emin misiniz?`,
             onConfirm: () => deletePortfolio(portfolioId),
         });
-    };
+    }, [deletePortfolio]);
 
 
 
-    const handleDeleteInvestment = (investment: Investment) => {
+    const handleDeleteInvestment = useCallback((investment: Investment) => {
         const details = typeDetails[investment.type as Investment['type']];
         setConfirmModal({
             isOpen: true,
@@ -152,20 +152,20 @@ export function PortfolioList({ onSelectInvestment, onAddInvestment, isBalanceVi
             message: `${details?.name || investment.type} varlığını silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.`,
             onConfirm: () => deleteInvestment(investment.id),
         });
-    };
+    }, [deleteInvestment]);
 
-    const handleSellInvestment = (investment: Investment) => {
+    const handleSellInvestment = useCallback((investment: Investment) => {
         setSellModalInvestment(investment);
-    };
+    }, []);
 
-    const handleSellConfirm = async (sellPrice: number, amountToSell: number, saleDate?: string) => {
+    const handleSellConfirm = useCallback(async (sellPrice: number, amountToSell: number, saleDate?: string) => {
         if (sellModalInvestment) {
             await sellInvestment(sellModalInvestment.id, sellPrice, amountToSell, saleDate);
             setSellModalInvestment(null);
         }
-    };
+    }, [sellModalInvestment, sellInvestment]);
 
-    const renderInvestmentCard = (investment: Investment) => {
+    const renderInvestmentCard = useCallback((investment: Investment) => {
         const details = typeDetails[investment.type as Investment['type']];
         if (!details) return null;
         const Icon = details.icon;
@@ -224,9 +224,9 @@ export function PortfolioList({ onSelectInvestment, onAddInvestment, isBalanceVi
                 </SwipeableItem>
             </div>
         );
-    };
+    }, [prices, isBalanceVisible, handleDeleteInvestment, handleSellInvestment, onSelectInvestment]);
 
-    const renderPortfolioHeader = (
+    const renderPortfolioHeader = useCallback((
         key: string,
         name: string,
         color: string,
@@ -269,9 +269,9 @@ export function PortfolioList({ onSelectInvestment, onAddInvestment, isBalanceVi
                 {headerContent}
             </SwipeableItem>
         );
-    };
+    }, [toggleSection, isBalanceVisible, handleEditPortfolio]);
 
-    const renderSection = (key: string, data: { portfolio: Portfolio | null; investments: Investment[]; totalValue: number }) => {
+    const renderSection = useCallback((key: string, data: { portfolio: Portfolio | null; investments: Investment[]; totalValue: number }) => {
         const isUncategorized = key === 'uncategorized';
         const isCollapsed = collapsedSections[key] === true;
         const name = isUncategorized ? 'Varlıklarım' : data.portfolio?.name || 'Liste';
@@ -291,9 +291,9 @@ export function PortfolioList({ onSelectInvestment, onAddInvestment, isBalanceVi
                 )}
             </div>
         );
-    };
+    }, [collapsedSections, renderPortfolioHeader, renderInvestmentCard]);
 
-    const renderEmptyPortfolio = (portfolio: Portfolio) => {
+    const renderEmptyPortfolio = useCallback((portfolio: Portfolio) => {
         return (
             <div key={portfolio.id} className="mb-2">
                 <SwipeableItem
@@ -317,7 +317,7 @@ export function PortfolioList({ onSelectInvestment, onAddInvestment, isBalanceVi
                 </SwipeableItem>
             </div>
         );
-    };
+    }, [handleEditPortfolio, handleDeleteEmptyPortfolio]);
 
     return (
         <div className="pt-6">

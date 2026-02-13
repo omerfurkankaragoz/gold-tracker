@@ -61,7 +61,7 @@ export const PortfoliosProvider = ({ children }: { children: ReactNode }) => {
         }
     }, [user, fetchPortfolios]);
 
-    const addPortfolio = async (portfolio: Omit<Portfolio, 'id' | 'created_at' | 'updated_at' | 'user_id'>) => {
+    const addPortfolio = useCallback(async (portfolio: Omit<Portfolio, 'id' | 'created_at' | 'updated_at' | 'user_id'>) => {
         if (!user) throw new Error("Kullanıcı giriş yapmamış.");
         try {
             const portfolioWithUser = { ...portfolio, user_id: user.id };
@@ -81,9 +81,9 @@ export const PortfoliosProvider = ({ children }: { children: ReactNode }) => {
         } catch (error) {
             return { data: null, error };
         }
-    };
+    }, [user]);
 
-    const updatePortfolio = async (id: string, updates: Partial<Portfolio>) => {
+    const updatePortfolio = useCallback(async (id: string, updates: Partial<Portfolio>) => {
         if (!user) throw new Error("Kullanıcı giriş yapmamış.");
         try {
             const { error } = await supabase
@@ -101,9 +101,9 @@ export const PortfoliosProvider = ({ children }: { children: ReactNode }) => {
         } catch (error) {
             return { error };
         }
-    };
+    }, [user]);
 
-    const deletePortfolio = async (id: string) => {
+    const deletePortfolio = useCallback(async (id: string) => {
         if (!user) throw new Error("Kullanıcı giriş yapmamış.");
         try {
             const { error } = await supabase
@@ -119,7 +119,7 @@ export const PortfoliosProvider = ({ children }: { children: ReactNode }) => {
         } catch (error) {
             return { error };
         }
-    };
+    }, [user]);
 
     const getPortfolioValue = useCallback((portfolioId: string, investments: Investment[]) => {
         const portfolioInvestments = portfolioId === 'all'
@@ -132,15 +132,19 @@ export const PortfoliosProvider = ({ children }: { children: ReactNode }) => {
         }, 0);
     }, [prices]);
 
-    const value = {
+    const refetch = useCallback(() => {
+        if (user) fetchPortfolios(user);
+    }, [user, fetchPortfolios]);
+
+    const value = useMemo(() => ({
         portfolios,
         loading,
         addPortfolio,
         updatePortfolio,
         deletePortfolio,
         getPortfolioValue,
-        refetch: () => user ? fetchPortfolios(user) : undefined,
-    };
+        refetch,
+    }), [portfolios, loading, addPortfolio, updatePortfolio, deletePortfolio, getPortfolioValue, refetch]);
 
     return (
         <PortfoliosContext.Provider value={value}>

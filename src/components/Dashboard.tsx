@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { DollarSign, Euro, Coins, TrendingUp, Eye, EyeOff, Gem } from 'lucide-react';
 import { PriceCard } from './PriceCard';
 import { usePrices } from '../hooks/usePrices';
@@ -20,15 +20,29 @@ export function Dashboard({ onNavigate, onAddInvestment, isBalanceVisible, setIs
   const { prices, loading } = usePrices();
   const { investments, totalPortfolioValue } = useInvestmentsContext();
 
-  const handleCardClick = (type: Investment['type']) => {
+  const handleCardClick = useCallback((type: Investment['type']) => {
     onAddInvestment(type);
-  };
+  }, [onAddInvestment]);
 
-  const totalInvested = investments.reduce((total, inv) => total + (inv.amount * inv.purchase_price), 0);
-  const totalGain = totalPortfolioValue - totalInvested;
-  const totalGainPercent = totalInvested > 0 ? (totalGain / totalInvested) * 100 : 0;
+  const totalInvested = useMemo(() => 
+    investments.reduce((total, inv) => total + (inv.amount * inv.purchase_price), 0),
+    [investments]
+  );
 
-  const priceCardsToShow = Object.entries(prices).filter(([key, p]) => key !== 'tl' && (p as Price).sellingPrice > 0);
+  const totalGain = useMemo(() => 
+    totalPortfolioValue - totalInvested,
+    [totalPortfolioValue, totalInvested]
+  );
+
+  const totalGainPercent = useMemo(() => 
+    totalInvested > 0 ? (totalGain / totalInvested) * 100 : 0,
+    [totalGain, totalInvested]
+  );
+
+  const priceCardsToShow = useMemo(() => 
+    Object.entries(prices).filter(([key, p]) => key !== 'tl' && (p as Price).sellingPrice > 0),
+    [prices]
+  );
 
   return (
     <div className="space-y-8 pt-6">
