@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Price } from '../hooks/usePrices';
 
 interface PriceCardProps {
@@ -6,7 +6,7 @@ interface PriceCardProps {
   icon?: React.ReactNode;
 }
 
-export function PriceCard({ price, icon }: PriceCardProps) {
+export const PriceCard = memo(function PriceCard({ price, icon }: PriceCardProps) {
   const isCurrency = price.symbol === 'USD' || price.symbol === 'EUR';
   const fractionDigits = isCurrency ? 2 : 4;
 
@@ -32,4 +32,4 @@ export function PriceCard({ price, icon }: PriceCardProps) {
       </div>
     </div>
   );
-}
+});

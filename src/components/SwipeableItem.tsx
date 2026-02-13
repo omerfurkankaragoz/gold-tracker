@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo, useCallback } from 'react';
 import { motion, useMotionValue, PanInfo, useAnimation } from 'framer-motion';
 import { Trash2, Banknote, Pencil } from 'lucide-react';
 
@@ -11,7 +11,7 @@ interface SwipeableItemProps {
     className?: string; // Opsiyonel className prop'u
 }
 
-export function SwipeableItem({ children, onDelete, onSell, onEdit, onClick, className }: SwipeableItemProps) {
+export const SwipeableItem = memo(function SwipeableItem({ children, onDelete, onSell, onEdit, onClick, className }: SwipeableItemProps) {
     const x = useMotionValue(0);
     const controls = useAnimation();
 
@@ -21,7 +21,7 @@ export function SwipeableItem({ children, onDelete, onSell, onEdit, onClick, cla
     const dragLimit = -actionWidth;
     const triggerThreshold = dragLimit / 2;
 
-    const handleDragEnd = async (_: any, info: PanInfo) => {
+    const handleDragEnd = useCallback(async (_: unknown, info: PanInfo) => {
         const offset = info.offset.x;
 
         if (offset < triggerThreshold) {
@@ -29,7 +29,7 @@ export function SwipeableItem({ children, onDelete, onSell, onEdit, onClick, cla
         } else {
             controls.start({ x: 0 });
         }
-    };
+    }, [triggerThreshold, dragLimit, controls]);
 
     // Default card background class
     const defaultBgClass = "bg-apple-light-card dark:bg-apple-dark-card";
@@ -94,4 +94,4 @@ export function SwipeableItem({ children, onDelete, onSell, onEdit, onClick, cla
             </motion.div>
         </div>
     );
-}
+});
