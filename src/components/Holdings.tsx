@@ -120,8 +120,7 @@ export function Holdings({ onSelectInvestment, onAddInvestment, isBalanceVisible
   const [sellingInvestment, setSellingInvestment] = useState<Investment | null>(null);
 
   const sortedInvestments = useMemo(() => {
-    const sortableItems = [...investments];
-    sortableItems.sort((a, b) => {
+    return [...investments].sort((a, b) => {
       let aValue: string | number, bValue: string | number;
       if (sortConfig.key === 'name') {
         aValue = typeDetails[a.type].name;
@@ -137,7 +136,6 @@ export function Holdings({ onSelectInvestment, onAddInvestment, isBalanceVisible
       if (aValue > bValue) return sortConfig.direction === 'ascending' ? 1 : -1;
       return 0;
     });
-    return sortableItems;
   }, [investments, prices, sortConfig]);
 
   const requestSort = useCallback((key: SortKey) => {

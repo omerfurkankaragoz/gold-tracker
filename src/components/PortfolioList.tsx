@@ -318,7 +318,7 @@ export function PortfolioList({ onSelectInvestment, onAddInvestment, isBalanceVi
                 )}
             </div>
         );
-    }, [collapsedSections, prices, isBalanceVisible, renderPortfolioHeader, handleDeleteInvestment, handleSellInvestment, onSelectInvestment]);
+    }, [collapsedSections, prices, isBalanceVisible, handleDeleteInvestment, handleSellInvestment, onSelectInvestment, toggleSection, handleEditPortfolio]);
 
     const renderEmptyPortfolio = useCallback((portfolio: Portfolio) => {
         return (
