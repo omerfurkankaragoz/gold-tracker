@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback, memo } from 'react';
 import { Folder, FolderPlus, Plus, X } from 'lucide-react';
 import { usePortfoliosContext } from '../context/PortfoliosContext';
 import { useInvestmentsContext } from '../context/InvestmentsContext';
@@ -29,6 +29,84 @@ const getCollapsedSections = (): Record<string, boolean> => {
 const setCollapsedSections = (sections: Record<string, boolean>) => {
     localStorage.setItem(COLLAPSED_STORAGE_KEY, JSON.stringify(sections));
 };
+
+interface PortfolioInvestmentCardProps {
+    investment: Investment;
+    prices: Record<string, any>;
+    isBalanceVisible: boolean;
+    onDelete: (investment: Investment) => void;
+    onSell: (investment: Investment) => void;
+    onSelect: (id: string) => void;
+}
+
+const PortfolioInvestmentCard = memo(function PortfolioInvestmentCard({
+    investment,
+    prices,
+    isBalanceVisible,
+    onDelete,
+    onSell,
+    onSelect
+}: PortfolioInvestmentCardProps) {
+    const details = typeDetails[investment.type as Investment['type']];
+    if (!details) return null;
+    
+    const Icon = details.icon;
+    const currentPrice = prices[investment.type]?.sellingPrice || 0;
+    const currentValue = investment.amount * currentPrice;
+    const purchaseValue = investment.amount * investment.purchase_price;
+    const gain = currentValue - purchaseValue;
+    const gainPercent = purchaseValue > 0 ? (gain / purchaseValue) * 100 : 0;
+
+    return (
+        <div className="mb-3">
+            <SwipeableItem
+                onDelete={() => onDelete(investment)}
+                onSell={() => onSell(investment)}
+                onClick={() => onSelect(investment.id)}
+            >
+                <div className="w-full text-left p-4 space-y-4">
+                    <div className="flex justify-between items-center">
+                        <div className="flex items-center space-x-4">
+                            <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-full flex-shrink-0">
+                                <Icon className="h-6 w-6 text-apple-blue" />
+                            </div>
+                            <div className="text-left">
+                                <p className="font-semibold text-base text-apple-light-text-primary dark:text-apple-dark-text-primary">{details.name}</p>
+                                <p className="text-sm text-apple-light-text-secondary dark:text-apple-dark-text-secondary">
+                                    {investment.amount.toLocaleString('tr-TR', { maximumFractionDigits: 4 })} {details.unit}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="text-left">
+                            <p className="text-sm text-apple-light-text-secondary dark:text-apple-dark-text-secondary">Anlık Değer</p>
+                            <p className="font-semibold text-apple-light-text-primary dark:text-apple-dark-text-primary mt-1">
+                                {isBalanceVisible ? `₺${currentValue.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}` : '******'}
+                            </p>
+                            <p className="text-xs text-apple-light-text-secondary/70 dark:text-apple-dark-text-secondary/70 mt-2">
+                                {format(new Date(investment.purchase_date), 'dd MMM yyyy', { locale: tr })}
+                            </p>
+                        </div>
+                        <div className="text-right">
+                            <p className="text-sm text-apple-light-text-secondary dark:text-apple-dark-text-secondary">Kar/Zarar</p>
+                            <div className={`font-semibold flex items-center justify-end space-x-1 mt-1 ${gain >= 0 ? 'text-apple-green' : 'text-apple-red'}`}>
+                                {isBalanceVisible ? (
+                                    <>
+                                        <span>₺{Math.abs(gain).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</span>
+                                        <span className='ml-2'>({Math.abs(gainPercent).toFixed(2)}%)</span>
+                                    </>
+                                ) : (
+                                    <span>******</span>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </SwipeableItem>
+        </div>
+    );
+});
 
 interface PortfolioListProps {
     onSelectInvestment: (id: string) => void;
@@ -100,11 +178,11 @@ export function PortfolioList({ onSelectInvestment, onAddInvestment, isBalanceVi
         return portfolios.filter(p => !portfolioIdsWithInvestments.has(p.id));
     }, [portfolios, investments]);
 
-    const toggleSection = (key: string) => {
+    const toggleSection = useCallback((key: string) => {
         setCollapsedSectionsState(prev => ({ ...prev, [key]: !prev[key] }));
-    };
+    }, []);
 
-    const handleAddPortfolio = async () => {
+    const handleAddPortfolio = useCallback(async () => {
         if (!newPortfolioName.trim()) return;
         await addPortfolio({
             name: newPortfolioName.trim(),
@@ -114,15 +192,15 @@ export function PortfolioList({ onSelectInvestment, onAddInvestment, isBalanceVi
         setNewPortfolioName('');
         setSelectedColor(PORTFOLIO_COLORS[0]);
         setIsAddModalOpen(false);
-    };
+    }, [newPortfolioName, selectedColor, addPortfolio]);
 
-    const handleEditPortfolio = (portfolio: Portfolio) => {
+    const handleEditPortfolio = useCallback((portfolio: Portfolio) => {
         setEditingPortfolio(portfolio);
         setEditName(portfolio.name);
         setEditColor(portfolio.color);
-    };
+    }, []);
 
-    const handleSaveEdit = async () => {
+    const handleSaveEdit = useCallback(async () => {
         if (!editingPortfolio || !editName.trim()) return;
         await updatePortfolio(editingPortfolio.id, {
             name: editName.trim(),
@@ -131,20 +209,20 @@ export function PortfolioList({ onSelectInvestment, onAddInvestment, isBalanceVi
         setEditingPortfolio(null);
         setEditName('');
         setEditColor('');
-    };
+    }, [editingPortfolio, editName, editColor, updatePortfolio]);
 
-    const handleDeleteEmptyPortfolio = (portfolioId: string, portfolioName: string) => {
+    const handleDeleteEmptyPortfolio = useCallback((portfolioId: string, portfolioName: string) => {
         setConfirmModal({
             isOpen: true,
             title: 'Listeyi Sil',
             message: `"${portfolioName}" listesini silmek istediğinizden emin misiniz?`,
             onConfirm: () => deletePortfolio(portfolioId),
         });
-    };
+    }, [deletePortfolio]);
 
 
 
-    const handleDeleteInvestment = (investment: Investment) => {
+    const handleDeleteInvestment = useCallback((investment: Investment) => {
         const details = typeDetails[investment.type as Investment['type']];
         setConfirmModal({
             isOpen: true,
@@ -152,81 +230,20 @@ export function PortfolioList({ onSelectInvestment, onAddInvestment, isBalanceVi
             message: `${details?.name || investment.type} varlığını silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.`,
             onConfirm: () => deleteInvestment(investment.id),
         });
-    };
+    }, [deleteInvestment]);
 
-    const handleSellInvestment = (investment: Investment) => {
+    const handleSellInvestment = useCallback((investment: Investment) => {
         setSellModalInvestment(investment);
-    };
+    }, []);
 
-    const handleSellConfirm = async (sellPrice: number, amountToSell: number, saleDate?: string) => {
+    const handleSellConfirm = useCallback(async (sellPrice: number, amountToSell: number, saleDate?: string) => {
         if (sellModalInvestment) {
             await sellInvestment(sellModalInvestment.id, sellPrice, amountToSell, saleDate);
             setSellModalInvestment(null);
         }
-    };
+    }, [sellModalInvestment, sellInvestment]);
 
-    const renderInvestmentCard = (investment: Investment) => {
-        const details = typeDetails[investment.type as Investment['type']];
-        if (!details) return null;
-        const Icon = details.icon;
-        const currentPrice = prices[investment.type]?.sellingPrice || 0;
-        const currentValue = investment.amount * currentPrice;
-        const purchaseValue = investment.amount * investment.purchase_price;
-        const gain = currentValue - purchaseValue;
-        const gainPercent = purchaseValue > 0 ? (gain / purchaseValue) * 100 : 0;
-
-        return (
-            <div key={investment.id} className="mb-3">
-                <SwipeableItem
-                    onDelete={() => handleDeleteInvestment(investment)}
-                    onSell={() => handleSellInvestment(investment)}
-                    onClick={() => onSelectInvestment(investment.id)}
-                >
-                    <div className="w-full text-left p-4 space-y-4">
-                        <div className="flex justify-between items-center">
-                            <div className="flex items-center space-x-4">
-                                <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-full flex-shrink-0">
-                                    <Icon className="h-6 w-6 text-apple-blue" />
-                                </div>
-                                <div className="text-left">
-                                    <p className="font-semibold text-base text-apple-light-text-primary dark:text-apple-dark-text-primary">{details.name}</p>
-                                    <p className="text-sm text-apple-light-text-secondary dark:text-apple-dark-text-secondary">
-                                        {investment.amount.toLocaleString('tr-TR', { maximumFractionDigits: 4 })} {details.unit}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="text-left">
-                                <p className="text-sm text-apple-light-text-secondary dark:text-apple-dark-text-secondary">Anlık Değer</p>
-                                <p className="font-semibold text-apple-light-text-primary dark:text-apple-dark-text-primary mt-1">
-                                    {isBalanceVisible ? `₺${currentValue.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}` : '******'}
-                                </p>
-                                <p className="text-xs text-apple-light-text-secondary/70 dark:text-apple-dark-text-secondary/70 mt-2">
-                                    {format(new Date(investment.purchase_date), 'dd MMM yyyy', { locale: tr })}
-                                </p>
-                            </div>
-                            <div className="text-right">
-                                <p className="text-sm text-apple-light-text-secondary dark:text-apple-dark-text-secondary">Kar/Zarar</p>
-                                <div className={`font-semibold flex items-center justify-end space-x-1 mt-1 ${gain >= 0 ? 'text-apple-green' : 'text-apple-red'}`}>
-                                    {isBalanceVisible ? (
-                                        <>
-                                            <span>₺{Math.abs(gain).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</span>
-                                            <span className='ml-2'>({Math.abs(gainPercent).toFixed(2)}%)</span>
-                                        </>
-                                    ) : (
-                                        <span>******</span>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </SwipeableItem>
-            </div>
-        );
-    };
-
-    const renderPortfolioHeader = (
+    const renderPortfolioHeader = useCallback((
         key: string,
         name: string,
         color: string,
@@ -269,9 +286,9 @@ export function PortfolioList({ onSelectInvestment, onAddInvestment, isBalanceVi
                 {headerContent}
             </SwipeableItem>
         );
-    };
+    }, [toggleSection, isBalanceVisible, handleEditPortfolio]);
 
-    const renderSection = (key: string, data: { portfolio: Portfolio | null; investments: Investment[]; totalValue: number }) => {
+    const renderSection = useCallback((key: string, data: { portfolio: Portfolio | null; investments: Investment[]; totalValue: number }) => {
         const isUncategorized = key === 'uncategorized';
         const isCollapsed = collapsedSections[key] === true;
         const name = isUncategorized ? 'Varlıklarım' : data.portfolio?.name || 'Liste';
@@ -286,14 +303,24 @@ export function PortfolioList({ onSelectInvestment, onAddInvestment, isBalanceVi
                 {/* Investments */}
                 {!isCollapsed && (
                     <div className="mt-2">
-                        {data.investments.map(inv => renderInvestmentCard(inv))}
+                        {data.investments.map(inv => (
+                            <PortfolioInvestmentCard
+                                key={inv.id}
+                                investment={inv}
+                                prices={prices}
+                                isBalanceVisible={isBalanceVisible}
+                                onDelete={handleDeleteInvestment}
+                                onSell={handleSellInvestment}
+                                onSelect={onSelectInvestment}
+                            />
+                        ))}
                     </div>
                 )}
             </div>
         );
-    };
+    }, [collapsedSections, prices, isBalanceVisible, handleDeleteInvestment, handleSellInvestment, onSelectInvestment, toggleSection, handleEditPortfolio]);
 
-    const renderEmptyPortfolio = (portfolio: Portfolio) => {
+    const renderEmptyPortfolio = useCallback((portfolio: Portfolio) => {
         return (
             <div key={portfolio.id} className="mb-2">
                 <SwipeableItem
@@ -317,7 +344,7 @@ export function PortfolioList({ onSelectInvestment, onAddInvestment, isBalanceVi
                 </SwipeableItem>
             </div>
         );
-    };
+    }, [handleEditPortfolio, handleDeleteEmptyPortfolio]);
 
     return (
         <div className="pt-6">

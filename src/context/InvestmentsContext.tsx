@@ -91,7 +91,7 @@ export const InvestmentsProvider = ({ children }: { children: ReactNode }) => {
     }, 0);
   }, [investments, prices]);
 
-  const addInvestment = async (investment: Omit<Investment, 'id' | 'created_at' | 'updated_at' | 'user_id'>) => {
+  const addInvestment = useCallback(async (investment: Omit<Investment, 'id' | 'created_at' | 'updated_at' | 'user_id'>) => {
     if (!user) throw new Error("Kullanıcı giriş yapmamış.");
     try {
       const investmentWithUser = { ...investment, user_id: user.id };
@@ -111,9 +111,9 @@ export const InvestmentsProvider = ({ children }: { children: ReactNode }) => {
     } catch (error) {
       return { data: null, error };
     }
-  };
+  }, [user]);
 
-  const deleteInvestment = async (id: string) => {
+  const deleteInvestment = useCallback(async (id: string) => {
     if (!user) throw new Error("Kullanıcı giriş yapmamış.");
     try {
       const { error } = await supabase.from('investments').delete().eq('id', id).eq('user_id', user.id);
@@ -123,9 +123,9 @@ export const InvestmentsProvider = ({ children }: { children: ReactNode }) => {
     } catch (error) {
       return { error };
     }
-  };
+  }, [user]);
 
-  const deleteSale = async (id: string) => {
+  const deleteSale = useCallback(async (id: string) => {
     if (!user) throw new Error("Kullanıcı giriş yapmamış.");
     try {
       const { error } = await supabase.from('sales').delete().eq('id', id).eq('user_id', user.id);
@@ -135,9 +135,9 @@ export const InvestmentsProvider = ({ children }: { children: ReactNode }) => {
     } catch (error) {
       return { error };
     }
-  };
+  }, [user]);
 
-  const sellInvestment = async (id: string, sellPrice: number, amountToSell: number, saleDate: string = new Date().toISOString().split('T')[0]) => {
+  const sellInvestment = useCallback(async (id: string, sellPrice: number, amountToSell: number, saleDate: string = new Date().toISOString().split('T')[0]) => {
     if (!user) throw new Error("Kullanıcı yok");
 
     const investment = investments.find(inv => inv.id === id);
@@ -179,9 +179,13 @@ export const InvestmentsProvider = ({ children }: { children: ReactNode }) => {
       console.error("Satış hatası:", error);
       return { error };
     }
-  };
+  }, [user, investments, fetchSales, deleteInvestment]);
 
-  const value = {
+  const refetch = useCallback(() => {
+    if (user) fetchInvestments(user);
+  }, [user, fetchInvestments]);
+
+  const value = useMemo(() => ({
     investments,
     sales,
     loading,
@@ -189,10 +193,10 @@ export const InvestmentsProvider = ({ children }: { children: ReactNode }) => {
     addInvestment,
     deleteInvestment,
     sellInvestment,
-    deleteSale, // <-- DIŞARIYA AKTARILDI
+    deleteSale,
     fetchSales,
-    refetch: () => user ? fetchInvestments(user) : undefined,
-  };
+    refetch,
+  }), [investments, sales, loading, totalPortfolioValue, addInvestment, deleteInvestment, sellInvestment, deleteSale, fetchSales, refetch]);
 
   return (
     <InvestmentsContext.Provider value={value}>
